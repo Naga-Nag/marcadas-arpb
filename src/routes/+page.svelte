@@ -1,6 +1,5 @@
 <script lang="ts">
 	export let data;
-	import { downloadCSV } from '$lib/utils';
 	import DlCsv from '$lib/components/DlCsv.svelte';
 	// Guardamos los registros originales
 	let originalData = data.records;
@@ -27,7 +26,7 @@
 		class="search-input"
 	/>
 
-	<div class="">
+	<div>
 		<table>
 			<thead class="font:bold">
 				<tr>
