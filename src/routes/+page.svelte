@@ -1,7 +1,7 @@
 <script lang="ts">
 	export let data;
 	import { downloadCSV } from '$lib/utils';
-
+	import DlCsv from '$lib/components/DlCsv.svelte';
 	// Guardamos los registros originales
 	let originalData = data.records;
 	// Variable para almacenar el texto de búsqueda
@@ -15,9 +15,10 @@
 	);
 </script>
 
-<main class="font-family:Comfortaa bg:rgb(51,87,155) r:12 p:12|15|20 ">
-	<h1 class="text:center">Presentismo - {data.hostname}</h1>
-
+<main class="font-family:Comfortaa bg:rgb(51,87,155) r:12 p:12|15|20">
+	<h1 class="text:center bg:white r:10 p:10 w:fit-content">
+		Presentismo - {data.hostname}
+	</h1>
 	<!-- Campo de búsqueda -->
 	<input
 		type="text"
@@ -50,10 +51,7 @@
 			</tbody>
 		</table>
 	</div>
-	<button
-		class="r:10 p:10 mt:12 bg:beryl font:white font:bold"
-		on:click={() => downloadCSV(data.records)}>Descargar CSV</button
-	>
+	<DlCsv data={data.records} />
 </main>
 
 <style>

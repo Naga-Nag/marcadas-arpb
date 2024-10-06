@@ -1,3 +1,4 @@
+import { getDepartamentoHost } from '$lib/utils';
 import sql from 'mssql';
 
 const sqlConfig = {
@@ -20,7 +21,11 @@ async function fetchPresentismoData() {
   try {
     await sql.connect(sqlConfig);
 
-    const result = await sql.query('SELECT * FROM Presentismo');
+    var result = await sql.query('SELECT * FROM Presentismo WHERE Departamento = \'' + getDepartamentoHost() + '\'');
+
+    if (getDepartamentoHost() === 'PEAP') {
+        result = await sql.query('SELECT * FROM Presentismo');
+    }
 
     // Handle potential circular references or complex data structures
     const sanitizedData = JSON.parse(JSON.stringify(result.recordset));
