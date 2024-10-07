@@ -33,6 +33,6 @@ export function downloadCSV(data: Array<any>) {
 
 export function getDepartamentoHost() {
     const hostname = os.hostname();
-    /* return hostname; */
-    return 'PEAP';
+    return hostname.substring(0, 4);
+    /* return 'PEAP'; */
 }

@@ -3,9 +3,9 @@
 	import DlCsv from '$lib/components/DlCsv.svelte';
 	// Guardamos los registros originales
 	let originalData = data.records;
-	// Variable para almacenar el texto de búsqueda
+	// Variable para almacenar el texto de busqueda
 	let searchText = '';
-	// Computamos los datos filtrados en función del texto de búsqueda
+	// Computamos los datos filtrados en función del texto de busqueda
 	$: filteredData = originalData.filter(
 		(persona: { Nombre: string; Departamento: string; MR: number }) =>
 			persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -18,7 +18,7 @@
 	<h1 class="text:center bg:white r:10 p:10 w:fit-content">
 		Presentismo - {data.hostname}
 	</h1>
-	<!-- Campo de búsqueda -->
+	<!-- Campo de busqueda -->
 	<input
 		type="text"
 		placeholder="Buscar por nombre, departamento o MR"
