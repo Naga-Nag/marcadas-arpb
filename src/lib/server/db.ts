@@ -17,14 +17,17 @@ const sqlConfig = {
   }
 };
 
-async function fetchPresentismoData() {
+
+export async function fetchMarcadaDelDia(fecha: Date) {
   try {
     await sql.connect(sqlConfig);
-
-    var result = await sql.query('SELECT * FROM Presentismo WHERE Departamento = \'' + getDepartamentoHost() + '\'');
+    /* if (Bun.env.build === 'dev') {
+      fecha = new Date('2023-09-25');
+    } */
+    var result = await sql.query("USE " + Bun.env.DB + ";" + "SELECT * FROM dbo.MarcadaDelDia('" + getDepartamentoHost() + " ', '" + fecha.toISOString().substring(0, 10) + "');");
 
     if (getDepartamentoHost() === 'PEAP') {
-        result = await sql.query('SELECT * FROM Presentismo');
+      result = await sql.query("USE " + Bun.env.DB + ";" + "SELECT * FROM MarcadaDelDiaPEAP('" + fecha.toISOString().substring(0, 10) + "');");
     }
 
     // Handle potential circular references or complex data structures
@@ -36,4 +39,12 @@ async function fetchPresentismoData() {
   }
 }
 
-export default fetchPresentismoData;
+export async function getDepartamentos() {
+  try {
+    var result = await sql.query("USE " + Bun.env.DB + ";" + "SELECT DeptName FROM Dept WHERE DeptName != 'ARPB';");
+    return result.recordset;
+  } catch (err) {
+    console.error('Error fetching data:', err);
+    return [];
+  }
+}
