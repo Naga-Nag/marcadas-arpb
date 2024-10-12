@@ -54,20 +54,19 @@
 	}
 
 	function filterAusentes() {
-        return data.records.filter(
-            (persona: { Entrada: any; Salida: any }) => !persona.Entrada || !persona.Salida
-        );
-    }
+		return data.records.filter(
+			(persona: { Entrada: any; Salida: any }) => !persona.Entrada || !persona.Salida
+		);
+	}
 </script>
 
-<main class="font-family:Comfortaa bg:rgb(51,87,155) r:12 p:12|15|20">
+<main class="main">
 	<h1 class="text:center bg:white r:10 p:10 w:fit-content">
 		Presentismo - {data.hostname}
 	</h1>
 
 	<!-- Tabs de departamentos -->
 	{#if data.hostname === 'PEAP'}
-	<DlCsv data={filterAusentes()} placeholder="Descargar Todos los Ausentes" />
 		<div class="d:flex mb:10 mt:10">
 			{#each departamentos as departamento}
 				<button
@@ -86,16 +85,22 @@
 		type="text"
 		placeholder="Buscar por nombre o MR"
 		bind:value={searchText}
-		class="mb:10 p:8 w:99% b:1|solid|#ccc r:4"
+		class="b:1|solid|#ccc mb:10 p:8 w:99% r:4"
 	/>
 
-	<!-- DatePicker para seleccionar la fecha -->
-	<input
-		type="date"
-		value={data.fechaMarcada}
-		on:change={onDateChange}
-		class="date-picker b:1px|solid|#ccc w:99% p:8 mb:10 r:15 w:fit-content"
-	/>
+	<!-- DatePicker y Botones para exportar datos -->
+	<div class="d:flex">
+		<input
+			type="date"
+			value={data.fechaMarcada}
+			on:change={onDateChange}
+			class="b:1|solid|#ccc mb:10 p:8 mr:10 w:99% r:15 w:fit-content"
+		/>
+		<DlCsv data={filteredData} placeholder="Descargar Vista CSV" />
+		{#if data.hostname === 'PEAP'}
+			<DlCsv data={filterAusentes()} placeholder="Descargar Todos los Ausentes" />
+		{/if}
+	</div>
 
 	<!-- Tabla de datos filtrados -->
 	<div>
@@ -159,10 +164,6 @@
 				{/each}
 			</tbody>
 		</table>
-	</div>
-
-	<div class="d:flex">
-		<DlCsv data={filteredData} placeholder="Descargar Vista CSV"  className="mt:15" />
 	</div>
 </main>
 

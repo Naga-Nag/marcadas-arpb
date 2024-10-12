@@ -6,7 +6,7 @@
 </script>
 
 <main>
-    <button class="btn r:10 p:10 bg:beryl font:white font:bold {className}"
+    <button class="btn r:10 p:10 bg:beryl bg:fade-50:hover font:white font:bold cursor:pointer {className}"
 		on:click={() => downloadCSV(data)}>
         {placeholder}
 	</button>
