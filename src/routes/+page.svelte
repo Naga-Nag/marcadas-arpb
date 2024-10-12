@@ -44,7 +44,7 @@
 					persona.MR.toString().includes(searchText))
 		)
 
-		.map((persona) => ({
+		.map((persona: { Entrada: string; Salida: string }) => ({
 			...persona,
 			Estado: getEstado(persona)
 		}))
@@ -84,9 +84,12 @@
 </script>
 
 <main class="main">
-	<h1 class="text:center bg:white r:10 p:10 w:fit-content">
-		Presentismo - {data.hostname}
-	</h1>
+	<div class="d:flex">
+		<h1 class="text:center bg:white r:10 p:10 w:fit-content">
+			Presentismo - {data.hostname}
+		</h1>
+		<a href="/aut">👻</a>
+	</div>
 
 	<!-- Tabs de departamentos -->
 	{#if data.hostname === 'PEAP'}
@@ -127,7 +130,9 @@
 	</div>
 
 	<!-- Tabla de datos filtrados -->
-	<div>
+	{#if data.error}
+		<p>Hubo un error al cargar los datos: {data.error}</p>
+	{:else}
 		<table class="w:100% border:collapse">
 			<thead>
 				<tr>
@@ -202,7 +207,7 @@
 				{/each}
 			</tbody>
 		</table>
-	</div>
+	{/if}
 </main>
 
 <style>
