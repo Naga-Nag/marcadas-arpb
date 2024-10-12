@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ url }) => {
     const departamentos = await getDepartamentos();
 
     return {
-        fechaHoy: fecha,
+        fechaMarcada: fecha,
         records,
         departamentos,
         hostname: getDepartamentoHost(), // Ajusta este valor según lo que necesites

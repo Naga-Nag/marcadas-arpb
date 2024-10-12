@@ -1,5 +1,5 @@
-<script>
-    import '@master/css';
+<script lang="ts">
+    import '$lib/master.css';
 </script>
 
 <slot></slot>

@@ -22,12 +22,12 @@ export function downloadCSV(data: Array<any>) {
     })
   ).join("\n");
 
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+  const blob = new Blob([csvContent], { type: 'application/excel;' });
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href
     = url;
-  link.download = 'marcada.csv';
+  link.download = 'marcada.xls';
   link.click();
 }
 
