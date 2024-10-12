@@ -2,6 +2,9 @@
     import '$lib/master.css';
 </script>
 
+<head>
+    <title>Presentismo</title>
+</head>
 <slot></slot>
 
 <style>
