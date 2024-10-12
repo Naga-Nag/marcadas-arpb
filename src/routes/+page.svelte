@@ -23,6 +23,18 @@
 		}
 	}
 
+	function getEstado(persona: { Entrada: any; Salida: any }) {
+		if (persona.Entrada && persona.Salida) {
+			return 'Completa';
+		} else if (persona.Entrada && !persona.Salida) {
+			return 'Falta salida';
+		} else if (!persona.Entrada && persona.Salida) {
+			return 'Falta entrada';
+		} else {
+			return 'No marcada';
+		}
+	}
+
 	// Computamos los datos filtrados en función del departamento seleccionado, el texto de búsqueda y la ordenación
 	$: filteredData = data.records
 		.filter(
@@ -31,15 +43,18 @@
 				(persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
 					persona.MR.toString().includes(searchText))
 		)
+
+		.map((persona) => ({
+			...persona,
+			Estado: getEstado(persona)
+		}))
 		.sort((a: { [x: string]: any }, b: { [x: string]: any }) => {
 			const valA = a[sortColumn as keyof typeof a];
 			const valB = b[sortColumn as keyof typeof b];
 
 			if (typeof valA === 'string' && typeof valB === 'string') {
-				// Comparación de strings
 				return sortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
 			} else if (typeof valA === 'number' && typeof valB === 'number') {
-				// Comparación de números
 				return sortDirection === 'asc' ? valA - valB : valB - valA;
 			}
 			return 0;
@@ -56,6 +71,14 @@
 	function filterAusentes() {
 		return data.records.filter(
 			(persona: { Entrada: any; Salida: any }) => !persona.Entrada || !persona.Salida
+		);
+	}
+
+	function filterAusentesDepartamento() {
+		return data.records.filter(
+			(persona: { Departamento: string; Entrada: any; Salida: any }) =>
+				persona.Departamento === selectedDepartamento.DeptName &&
+				(!persona.Entrada || !persona.Salida)
 		);
 	}
 </script>
@@ -96,7 +119,8 @@
 			on:change={onDateChange}
 			class="b:1|solid|#ccc mb:10 p:8 mr:10 w:99% r:15 w:fit-content"
 		/>
-		<DlCsv data={filteredData} placeholder="Descargar Vista CSV" />
+		<DlCsv data={filteredData} placeholder="Descargar Vista" />
+		<DlCsv data={filterAusentesDepartamento()} placeholder="Descargar Ausentes del Departamento" />
 		{#if data.hostname === 'PEAP'}
 			<DlCsv data={filterAusentes()} placeholder="Descargar Todos los Ausentes" />
 		{/if}
@@ -132,7 +156,21 @@
 					<th>Departamento</th>
 					<th>Salida</th>
 					<th>Entrada</th>
-					<th>Estado</th>
+					<th>
+						Estado
+						<button
+							on:click={() => sortDataBy('Estado')}
+							class={sortDirection === 'asc' && sortColumn === 'Estado' ? 'active' : ''}
+						>
+							△
+						</button>
+						<button
+							on:click={() => sortDataBy('Estado')}
+							class={sortDirection === 'desc' && sortColumn === 'Estado' ? 'active' : ''}
+						>
+							▽
+						</button>
+					</th>
 				</tr>
 			</thead>
 			<tbody class="bg:white overflow:scroll-y">
