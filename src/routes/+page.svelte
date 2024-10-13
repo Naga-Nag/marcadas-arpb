@@ -4,6 +4,7 @@
 
 	// Variables para búsqueda y departamentos
 	let searchText = '';
+	
 	let departamentos = data.departamentos.sort((a, b) => a.DeptName.localeCompare(b.DeptName));
 	let selectedDepartamento = departamentos[0];
 	
@@ -37,28 +38,38 @@
 
 	// Computamos los datos filtrados en función del departamento seleccionado, el texto de búsqueda y la ordenación
 	$: filteredData = data.records
-		.filter(
-			(persona: { Nombre: string; Departamento: string; MR: number }) =>
-				persona.Departamento === selectedDepartamento.DeptName &&
-				(persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
-					persona.MR.toString().includes(searchText))
-		)
+    .filter((persona: { Nombre: string; Departamento: string; MR: number }) => {
+        // Si el hostname es PEAP, filtramos por departamento, si no, ignoramos el departamento
+        if (data.hostname === 'PEAP') {
+            return (
+                persona.Departamento === selectedDepartamento.DeptName &&
+                (persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
+                    persona.MR.toString().includes(searchText))
+            );
+        } else {
+            // Si no es PEAP, solo filtramos por el texto de búsqueda
+            return (
+                persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
+                persona.MR.toString().includes(searchText)
+            );
+        }
+    })
+    .map((persona: { Entrada: string; Salida: string }) => ({
+        ...persona,
+        Estado: getEstado(persona)
+    }))
+    .sort((a: { [x: string]: any }, b: { [x: string]: any }) => {
+        const valA = a[sortColumn as keyof typeof a];
+        const valB = b[sortColumn as keyof typeof b];
 
-		.map((persona: { Entrada: string; Salida: string }) => ({
-			...persona,
-			Estado: getEstado(persona)
-		}))
-		.sort((a: { [x: string]: any }, b: { [x: string]: any }) => {
-			const valA = a[sortColumn as keyof typeof a];
-			const valB = b[sortColumn as keyof typeof b];
+        if (typeof valA === 'string' && typeof valB === 'string') {
+            return sortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        } else if (typeof valA === 'number' && typeof valB === 'number') {
+            return sortDirection === 'asc' ? valA - valB : valB - valA;
+        }
+        return 0;
+    });
 
-			if (typeof valA === 'string' && typeof valB === 'string') {
-				return sortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-			} else if (typeof valA === 'number' && typeof valB === 'number') {
-				return sortDirection === 'asc' ? valA - valB : valB - valA;
-			}
-			return 0;
-		});
 
 	// Redirige cuando se selecciona una nueva fecha
 	function onDateChange(event: Event) {
