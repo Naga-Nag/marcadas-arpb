@@ -4,7 +4,7 @@
 
 <body class="box">
 	<div class="d:flex flex:col justify-content:center align-items:center h:100% w:100%">
-		<div class="z:1">
+		<div class="z:1 outline:4|solid|black">
 			<QRCode data="https://github.com/Naga-Nag" />
 		</div>
 		<img src="/github.svg" alt="" class="width:40 height:40 mt:20 z:0" />
@@ -35,8 +35,8 @@
 	.box {
 		background-color: #006699;
 		margin: 0 auto;
-		width: 1000px;
-		height: 600px;
+		width: 1500px;
+		height: 900px;
 		position: relative;
 		box-shadow: inset 0 0 20px #155;
 		border-radius: 20px;
@@ -55,17 +55,17 @@
 			15px 15px 2px rgba(0, 0, 0, 0.04);
 		position: absolute;
 		-webkit-animation:
-			moveX 2s linear 0s infinite alternate,
-			moveY 3.4s linear 0s infinite alternate;
+			moveX 4s linear 0s infinite alternate,
+			moveY 6.8s linear 0s infinite alternate;
 		-moz-animation:
-			moveX 2s linear 0s infinite alternate,
-			moveY 3.4s linear 0s infinite alternate;
+			moveX 4s linear 0s infinite alternate,
+			moveY 6.8s linear 0s infinite alternate;
 		-o-animation:
-			moveX 2s linear 0s infinite alternate,
-			moveY 3.4s linear 0s infinite alternate;
+			moveX 4s linear 0s infinite alternate,
+			moveY 6.8s linear 0s infinite alternate;
 		animation:
-			moveX 2s linear 0s infinite alternate,
-			moveY 3.4s linear 0s infinite alternate;
+			moveX 4s linear 0s infinite alternate,
+			moveY 6.8s linear 0s infinite alternate;
 	}
 
 	@-webkit-keyframes moveX {
@@ -73,7 +73,7 @@
 			left: 0;
 		}
 		to {
-			left: 960px;
+			left: 1440px;
 		}
 	}
 	@-moz-keyframes moveX {
@@ -81,7 +81,7 @@
 			left: 0;
 		}
 		to {
-			left: 960px;
+			left: 1440px;
 		}
 	}
 	@-o-keyframes moveX {
@@ -89,7 +89,7 @@
 			left: 0;
 		}
 		to {
-			left: 960px;
+			left: 1440px;
 		}
 	}
 	@keyframes moveX {
@@ -97,7 +97,7 @@
 			left: 0;
 		}
 		to {
-			left: 960px;
+			left: 1440px;
 		}
 	}
 
@@ -106,7 +106,7 @@
 			top: 0;
 		}
 		to {
-			top: 560px;
+			top: 840px;
 		}
 	}
 	@-moz-keyframes moveY {
@@ -114,7 +114,7 @@
 			top: 0;
 		}
 		to {
-			top: 560px;
+			top: 840px;
 		}
 	}
 	@-o-keyframes moveY {
@@ -122,7 +122,7 @@
 			top: 0;
 		}
 		to {
-			top: 560px;
+			top: 840px;
 		}
 	}
 	@keyframes moveY {
@@ -130,7 +130,7 @@
 			top: 0;
 		}
 		to {
-			top: 560px;
+			top: 840px;
 		}
 	}
 </style>
