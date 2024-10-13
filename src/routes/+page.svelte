@@ -99,7 +99,7 @@
 		<h1 class="text:center bg:white r:10 p:10 w:fit-content">
 			Presentismo - {data.hostname}
 		</h1>
-		<a href="/aut" class="">👻</a>
+		<a href="/aut" class="font-size:9">👻</a>
 	</div>
 
 	<!-- Tabs de departamentos -->
