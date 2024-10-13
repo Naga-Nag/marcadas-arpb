@@ -6,7 +6,7 @@
 	let searchText = '';
 	let departamentos = data.departamentos.sort((a, b) => a.DeptName.localeCompare(b.DeptName));
 	let selectedDepartamento = departamentos[0];
-
+	
 	// Variables de ordenación
 	let sortColumn = 'Nombre'; // Columna por la que ordenar
 	let sortDirection = 'asc'; // Direccion de la ordenación: 'asc' o 'desc'
@@ -84,11 +84,11 @@
 </script>
 
 <main class="main">
-	<div class="d:flex">
+	<div class="d:flex flex:row justify-content:space-between">
 		<h1 class="text:center bg:white r:10 p:10 w:fit-content">
 			Presentismo - {data.hostname}
 		</h1>
-		<a href="/aut">👻</a>
+		<a href="/aut" class="">👻</a>
 	</div>
 
 	<!-- Tabs de departamentos -->
