@@ -1,34 +1,32 @@
 import os from 'os';
-export function downloadCSV(data: Array<any>) {
+import * as XLSX from 'xlsx';
+
+export function downloadExcel(data: Array<any>) {
   if (!Array.isArray(data) || data.length === 0) {
-    console.warn("No hay datos para exportar a CSV");
+    console.warn("No hay datos para exportar a Excel");
     return;
   }
 
-  const headers = Object.keys(data[0]);
-  const csvContent = [headers.join(",")].concat(
-    data.map(item => {
-      return headers.map(key => {
-        const value = item[key];
-        if (typeof value === "object") {
-          if (Array.isArray(value)) {
-            return value.map(nestedItem => JSON.stringify(nestedItem)).join(",");
-          } else {
-            return JSON.stringify(value);
-          }
-        }
-        return value;
-      }).join(",");
-    })
-  ).join("\n");
+  // Crear una hoja de cálculo a partir de los datos
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Datos");
 
-  const blob = new Blob([csvContent], { type: 'application/excel;' });
+  // Crear un archivo Excel
+  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+  // Crear un blob para descargar
+  const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
   const url = window.URL.createObjectURL(blob);
+
+  // Crear un enlace y simular un clic para descargar el archivo
   const link = document.createElement('a');
-  link.href
-    = url;
+  link.href = url;
   link.download = 'marcada.xls';
   link.click();
+
+  // Liberar el objeto URL
+  window.URL.revokeObjectURL(url);
 }
 
 export function getDepartamentoHost() {
