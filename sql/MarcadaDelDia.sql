@@ -1,5 +1,4 @@
-CREATE FUNCTION MarcadaDelDia(@Departamento VARCHAR(50), @FechaHoy DATE) 
-RETURNS @Resultado TABLE 
+CREATE FUNCTION MarcadaDelDia(@Departamento VARCHAR(50), @FechaHoy DATE) RETURNS @Resultado TABLE 
 (
     MR INT,
     Nombre VARCHAR(100),
@@ -9,14 +8,12 @@ RETURNS @Resultado TABLE
 )
 AS
 BEGIN
-    DECLARE @FechaAyer AS DATE = DATEADD(DAY, -1, @FechaHoy)
-
     INSERT INTO @Resultado
     SELECT
         ui.UserCode,
         ui.Name,
         d.DeptName,
-        MAX(CASE WHEN DATEPART(HOUR, ci.CheckTime) >= 00 AND (CAST(ci.CheckTime AS DATE) = @FechaAyer) THEN ci.CheckTime END) AS Salida,
+        MAX(CASE WHEN DATEPART(HOUR, ci.CheckTime) >= 00 AND (CAST(ci.CheckTime AS DATE) = @FechaHoy) THEN ci.CheckTime END) AS Salida,
         MIN(CASE WHEN DATEPART(HOUR, ci.CheckTime) <= 12 AND (CAST(ci.CheckTime AS DATE) = @FechaHoy) THEN ci.CheckTime END) AS Entrada
     FROM
         dbo.Userinfo ui
