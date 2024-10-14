@@ -113,7 +113,7 @@
 			<div class="d:flex mb:10 mt:10">
 				{#each departamentos as departamento}
 					<button
-						class="btn"
+						class="btn ml:5"
 						on:click={() => (selectedDepartamento = departamento)}
 						class:selected={selectedDepartamento === departamento}
 					>
