@@ -174,8 +174,8 @@
 							>
 						</th>
 						<th>Departamento</th>
-						<th>Salida</th>
 						<th>Entrada</th>
+						<th>Salida</th>
 						<th>
 							Estado
 							<button
@@ -205,8 +205,8 @@
 							<td>{persona.MR}</td>
 							<td>{persona.Nombre}</td>
 							<td>{persona.Departamento}</td>
-							<td>{persona.Salida ? persona.Salida.toString().padStart(5, '0') : ''}</td>
 							<td>{persona.Entrada ? persona.Entrada.toString().padStart(5, '0') : ''}</td>
+							<td>{persona.Salida ? persona.Salida.toString().padStart(5, '0') : ''}</td>
 							<td>
 								{#if persona.Entrada && persona.Salida}
 									Ok
