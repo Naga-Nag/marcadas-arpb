@@ -6,7 +6,12 @@
 	let searchText = '';
 
 	let departamentos = data.departamentos.sort((a, b) => a.DeptName.localeCompare(b.DeptName));
-	let selectedDepartamento = departamentos[0];
+	let selectedDepartamento: { DeptName: string };
+
+	// Buscar el departamento que coincida con el hostname
+	if (data.hostname) {
+		selectedDepartamento = departamentos.find((depto) => depto.DeptName === data.hostname);
+	}
 
 	// Variables de ordenación
 	let sortColumn = 'Nombre'; // Columna por la que ordenar
@@ -85,11 +90,12 @@
 	}
 
 	function filterAusentesDepartamento() {
-		return data.records.filter(
+		let datos = data.records.filter(
 			(persona: { Departamento: string; Entrada: any; Salida: any }) =>
 				persona.Departamento === selectedDepartamento.DeptName &&
 				(!persona.Entrada || !persona.Salida)
 		);
+		return datos;
 	}
 </script>
 
