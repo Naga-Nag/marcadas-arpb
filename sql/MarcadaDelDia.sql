@@ -1,6 +1,7 @@
 CREATE FUNCTION MarcadaDelDia(@Departamento VARCHAR(50), @FechaHoy DATE) 
 RETURNS @Resultado TABLE 
 (
+	UID INT,
     MR INT,
     Nombre VARCHAR(100),
     Departamento VARCHAR(100),
@@ -11,6 +12,7 @@ AS
 BEGIN
     INSERT INTO @Resultado
     SELECT
+    	ui.Userid,
         ui.UserCode,
         ui.Name,
         d.DeptName,
@@ -23,7 +25,6 @@ BEGIN
     WHERE
         d.DeptName = @Departamento
     GROUP BY
-        ui.UserCode, ui.Name, d.DeptName
-
+        ui.Userid, ui.UserCode, ui.Name, d.DeptName
     RETURN
 END
