@@ -31,7 +31,7 @@ export function downloadExcel(data: Array<any>) {
 
 export function getDepartamentoHost() {
   if (Bun.env.build === 'dev') {
-    return 'PEAP';
+    return 'TAAP';
   } else {
     const hostname = os.hostname();
     return hostname.substring(0, 4);
@@ -48,4 +48,16 @@ export function formatTime(dateString: string) {
   const minutes = date.getUTCMinutes().toString().padStart(2, '0');
   /* return `${day}/${month}/${year} ${hours}:${minutes}`; */
   return `${hours}:${minutes}`
+}
+
+export function getEstado(persona: { Entrada: any; Salida: any }) {
+  if (persona.Entrada && persona.Salida) {
+    return 'Completa';
+  } else if (persona.Entrada && !persona.Salida) {
+    return 'Falta salida';
+  } else if (!persona.Entrada && persona.Salida) {
+    return 'Falta entrada';
+  } else {
+    return 'No marcada';
+  }
 }

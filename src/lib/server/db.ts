@@ -25,10 +25,11 @@ export async function fetchMarcadaDelDia(fecha: Date) {
       fecha = new Date('2023-09-25');
     } */
 
-    var result = await sql.query("USE " + Bun.env.DB + ";" + "SELECT * FROM dbo.MarcadaDelDia('" + getDepartamentoHost() + "', '" + fecha.toISOString().substring(0, 10) + "');");
-
     if (getDepartamentoHost() === 'PEAP') {
-      result = await sql.query("USE " + Bun.env.DB + ";" + "SELECT * FROM MarcadaDelDiaPEAP('" + fecha.toISOString().substring(0, 10) + "');");
+      var result = await sql.query("USE " + Bun.env.DB + ";" + "SELECT * FROM MarcadaDelDiaPEAP('" + fecha.toISOString().substring(0, 10) + "');");
+    }
+    else {
+      result = await sql.query("USE " + Bun.env.DB + ";" + "SELECT * FROM dbo.MarcadaDelDia('" + getDepartamentoHost() + "', '" + fecha.toISOString().substring(0, 10) + "');");
     }
 
     // Handle potential circular references or complex data structures

@@ -4,20 +4,9 @@
     export let sortDataBy;
     export let sortColumn;
     export let sortDirection;
-    import { formatTime } from '$lib/utils.js';
-  
-    // Función para obtener el estado de la persona
-    function getEstado(persona: { Entrada: any; Salida: any }) {
-      if (persona.Entrada && persona.Salida) {
-        return 'Completa';
-      } else if (persona.Entrada && !persona.Salida) {
-        return 'Falta salida';
-      } else if (!persona.Entrada && persona.Salida) {
-        return 'Falta entrada';
-      } else {
-        return 'No marcada';
-      }
-    }
+
+    import { formatTime, getEstado } from '$lib/utils.js';
+
   </script>
   
   {#if data.error}

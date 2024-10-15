@@ -3,6 +3,7 @@
 	import DlCsv from '$lib/components/DlCsv.svelte';
 	import TabsDepartamento from '$lib/components/TabsDepartamento.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
+	import { getEstado } from '$lib/utils.js';
 	// Variables para búsqueda y departamentos
 	let searchText = '';
 
@@ -27,18 +28,6 @@
 			// Si cambiamos de columna, ponemos dirección ascendente por defecto
 			sortColumn = column;
 			sortDirection = 'asc';
-		}
-	}
-
-	function getEstado(persona: { Entrada: any; Salida: any }) {
-		if (persona.Entrada && persona.Salida) {
-			return 'Completa';
-		} else if (persona.Entrada && !persona.Salida) {
-			return 'Falta salida';
-		} else if (!persona.Entrada && persona.Salida) {
-			return 'Falta entrada';
-		} else {
-			return 'No marcada';
 		}
 	}
 
@@ -104,6 +93,7 @@
 
 <body>
 	<main class="main shadow:8|8|3|blue">
+
 		<div class="d:flex flex:row justify-content:space-between">
 			<h1 class="text:center bg:white r:10 p:10 w:fit-content shadow:4|4|3|gray-70">
 				Presentismo - {data.hostname}
