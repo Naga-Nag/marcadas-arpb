@@ -1,7 +1,7 @@
 <script lang="ts">
 	export let data;
 	import DlCsv from '$lib/components/DlCsv.svelte';
-
+	import TabsDepartamento from '$lib/components/TabsDepartamento.svelte';
 	// Variables para búsqueda y departamentos
 	let searchText = '';
 
@@ -112,17 +112,7 @@
 
 		<!-- Tabs de departamentos -->
 		{#if data.hostname === 'PEAP'}
-			<div class="d:flex mb:10 mt:10">
-				{#each departamentos as departamento}
-					<button
-						class="btn ml:5"
-						on:click={() => (selectedDepartamento = departamento)}
-						class:selected={selectedDepartamento === departamento}
-					>
-						{departamento.DeptName}
-					</button>
-				{/each}
-			</div>
+			<TabsDepartamento {departamentos} bind:selectedDepartamento hostname={data.hostname} />
 		{/if}
 
 		<!-- Campo de búsqueda -->
