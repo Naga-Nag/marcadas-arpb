@@ -75,6 +75,8 @@
 			return 0;
 		});
 
+	$: filteredAusentesDepartamento = filterAusentesDepartamento(selectedDepartamento.DeptName);
+
 	// Redirige cuando se selecciona una nueva fecha
 	function onDateChange(event: Event) {
 		const newDate = (event.target as HTMLInputElement).value;
@@ -89,7 +91,7 @@
 		);
 	}
 
-	function filterAusentesDepartamento() {
+	function filterAusentesDepartamento(dep: String) {
 		let datos = data.records.filter(
 			(persona: { Departamento: string; Entrada: any; Salida: any }) =>
 				persona.Departamento === selectedDepartamento.DeptName &&
@@ -141,7 +143,7 @@
 			/>
 			<DlCsv data={filteredData} placeholder="Descargar Vista Actual" />
 			<DlCsv
-				data={filterAusentesDepartamento()}
+				data={filteredAusentesDepartamento}
 				placeholder="Descargar Ausentes del Departamento"
 			/>
 			{#if data.hostname === 'PEAP'}
