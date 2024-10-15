@@ -2,6 +2,7 @@
 	export let data;
 	import DlCsv from '$lib/components/DlCsv.svelte';
 	import TabsDepartamento from '$lib/components/TabsDepartamento.svelte';
+	import DataTable from '$lib/components/DataTable.svelte';
 	// Variables para búsqueda y departamentos
 	let searchText = '';
 
@@ -112,7 +113,7 @@
 
 		<!-- Tabs de departamentos -->
 		{#if data.hostname === 'PEAP'}
-			<TabsDepartamento {departamentos} bind:selectedDepartamento hostname={data.hostname} />
+			<TabsDepartamento {departamentos} bind:selectedDepartamento />
 		{/if}
 
 		<!-- Campo de búsqueda -->
@@ -142,85 +143,14 @@
 		</div>
 
 		<!-- Tabla de datos filtrados -->
-		{#if data.error}
-			<p>Hubo un error al cargar los datos: {data.error}</p>
-		{:else}
-			<table class="w:100% border:collapse">
-				<thead>
-					<tr>
-						<th>
-							MR
-							<button
-								on:click={() => sortDataBy('MR')}
-								class={sortDirection === 'asc' && sortColumn === 'MR' ? 'active' : ''}>△</button
-							>
-							<button
-								on:click={() => sortDataBy('MR')}
-								class={sortDirection === 'desc' && sortColumn === 'MR' ? 'active' : ''}>▽</button
-							>
-						</th>
-						<th>
-							Nombre
-							<button
-								on:click={() => sortDataBy('Nombre')}
-								class={sortDirection === 'asc' && sortColumn === 'Nombre' ? 'active' : ''}>△</button
-							>
-							<button
-								on:click={() => sortDataBy('Nombre')}
-								class={sortDirection === 'desc' && sortColumn === 'Nombre' ? 'active' : ''}
-								>▽</button
-							>
-						</th>
-						<th>Departamento</th>
-						<th>Entrada</th>
-						<th>Salida</th>
-						<th>
-							Estado
-							<button
-								on:click={() => sortDataBy('Estado')}
-								class={sortDirection === 'asc' && sortColumn === 'Estado' ? 'active' : ''}
-							>
-								△
-							</button>
-							<button
-								on:click={() => sortDataBy('Estado')}
-								class={sortDirection === 'desc' && sortColumn === 'Estado' ? 'active' : ''}
-							>
-								▽
-							</button>
-						</th>
-					</tr>
-				</thead>
-				<tbody class="bg:white overflow:scroll-y">
-					{#each filteredData as persona}
-						<tr
-							class={!persona.Entrada && !persona.Salida
-								? 'no-marcado'
-								: (persona.Entrada && !persona.Salida) || (!persona.Entrada && persona.Salida)
-									? 'falta-marcado'
-									: ''}
-						>
-							<td>{persona.MR}</td>
-							<td>{persona.Nombre}</td>
-							<td>{persona.Departamento}</td>
-							<td>{persona.Entrada ? persona.Entrada.toString().padStart(5, '0') : ''}</td>
-							<td>{persona.Salida ? persona.Salida.toString().padStart(5, '0') : ''}</td>
-							<td>
-								{#if persona.Entrada && persona.Salida}
-									Ok
-								{:else if persona.Entrada && !persona.Salida}
-									<div class="bg:rgb(213,138,52)">Falta salida</div>
-								{:else if !persona.Entrada && persona.Salida}
-									<div class="bg:rgb(213,138,52)">Falta entrada</div>
-								{:else}
-									<div class="bg:rgb(213,85,87)">No marco</div>
-								{/if}
-							</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		{/if}
+		<DataTable
+			{data}
+			{filteredData}
+			{sortDataBy}
+			{sortColumn}
+			{sortDirection}
+			
+		/>
 	</main>
 </body>
 
@@ -228,49 +158,5 @@
 	body {
 		background: linear-gradient(-180deg, #306cce, #2eb7e9);
 		background-size: 200% 200%;
-	}
-	th,
-	td {
-		border: 1px solid #ccc;
-		padding: 8px;
-		text-align: left;
-	}
-
-	th {
-		background-color: #f4f4f4;
-		position: relative;
-	}
-
-	th button {
-		background: none;
-		border: none;
-		cursor: pointer;
-		margin-left: 5px;
-	}
-
-	th button.active {
-		font-weight: bold;
-		color: #007bff;
-	}
-
-	tr.no-marcado {
-		border: 2px solid red;
-	}
-
-	tr.falta-marcado {
-		border: 2px solid orange;
-	}
-
-	td {
-		padding: 8px;
-	}
-
-	tr {
-		border-collapse: separate;
-	}
-
-	th,
-	td {
-		border: 1px solid #ccc;
 	}
 </style>
