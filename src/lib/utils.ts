@@ -58,6 +58,6 @@ export function getEstado(persona: { Entrada: any; Salida: any }) {
   } else if (!persona.Entrada && persona.Salida) {
     return 'Falta entrada';
   } else {
-    return 'No marcada';
+    return 'Sin datos';
   }
 }
