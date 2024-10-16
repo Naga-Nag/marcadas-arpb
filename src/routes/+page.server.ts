@@ -5,7 +5,9 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ url }) => {
     try {
         // Obtén la fecha seleccionada desde la query (o usa la fecha de hoy como predeterminada)
-        const fecha = url.searchParams.get('fecha') || new Date().toISOString().substring(0, 10);
+        const fecha = url.searchParams.get('fecha') ||
+            new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
 
         // Obtén los registros y los departamentos
         const records = await fetchMarcadaDelDia(new Date(fecha));

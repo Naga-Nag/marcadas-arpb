@@ -1,12 +1,12 @@
 <script lang="ts">
 	export let data;
-	import DlCsv from '$lib/components/DlCsv.svelte';
+	import BtnDescargar from '$lib/components/BtnDescargar.svelte';
 	import TabsDepartamento from '$lib/components/TabsDepartamento.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import { getEstado } from '$lib/utils.js';
+
 	// Variables para búsqueda y departamentos
 	let searchText = '';
-
 	let departamentos = data.departamentos.sort((a, b) => a.DeptName.localeCompare(b.DeptName));
 	let selectedDepartamento: { DeptName: string };
 
@@ -20,7 +20,7 @@
 	let sortDirection = 'asc'; // Direccion de la ordenación: 'asc' o 'desc'
 
 	// Función para cambiar la columna de ordenación y su dirección
-	function sortDataBy(column: string) {
+	function sortDataBy(column: string, direction: string) {
 		if (sortColumn === column) {
 			// Si ya estamos ordenando por esta columna, cambiamos la dirección
 			sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -28,6 +28,9 @@
 			// Si cambiamos de columna, ponemos dirección ascendente por defecto
 			sortColumn = column;
 			sortDirection = 'asc';
+		}
+		if (direction) {
+			sortDirection = direction;
 		}
 	}
 
@@ -75,6 +78,32 @@
 		window.location.href = url.toString();
 	}
 
+	function setDateAyer() {
+		if (data.fechaMarcada !== null) {
+			let tomorrow = new Date(data.fechaMarcada);
+			tomorrow.setDate(tomorrow.getDate() - 1);
+			const url = new URL(window.location.href);
+			url.searchParams.set('fecha', tomorrow.toISOString().split('T')[0]);
+			window.location.href = url.toString();
+		} else {
+			// Handle the case where data.fechaMarcada is null
+			// For example, you could set a default date or throw an error
+		}
+	}
+
+	function setDateMañana() {
+		if (data.fechaMarcada !== null) {
+			let yesterday = new Date(data.fechaMarcada);
+			yesterday.setDate(yesterday.getDate() + 1);
+			const url = new URL(window.location.href);
+			url.searchParams.set('fecha', yesterday.toISOString().split('T')[0]);
+			window.location.href = url.toString();
+		} else {
+			// Handle the case where data.fechaMarcada is null
+			// For example, you could set a default date or throw an error
+		}
+	}
+
 	function filterAusentes() {
 		return data.records.filter(
 			(persona: { Entrada: any; Salida: any }) => !persona.Entrada || !persona.Salida
@@ -89,11 +118,12 @@
 		);
 		return datos;
 	}
+
+	sortDataBy('Estado', 'desc');
 </script>
 
 <body>
 	<main class="main shadow:8|8|3|blue">
-
 		<div class="d:flex flex:row justify-content:space-between">
 			<h1 class="text:center bg:white r:10 p:10 w:fit-content shadow:4|4|3|gray-70">
 				Presentismo - {data.hostname}
@@ -116,31 +146,47 @@
 
 		<!-- DatePicker y Botones para exportar datos -->
 		<div class="d:flex">
+			<span class="font-size:25 font-color:white transform: scaleX(-1);" on:click={setDateAyer}
+				>&#10148;</span
+			>
 			<input
 				type="date"
 				value={data.fechaMarcada}
 				on:change={onDateChange}
-				class="b:1|solid|#ccc mb:10 p:8 mr:10 w:99% r:15 w:fit-content"
+				class="b:1|solid|#ccc mb:10 p:8 mr:10 ml:10 w:99% r:15 w:fit-content"
 			/>
-			<DlCsv data={filteredData} placeholder="Descargar Vista Actual" />
-			<DlCsv
+			<span class="font-size:25 font-color:white" on:click={setDateMañana}>&#10148;</span>
+
+			<span class="m:20|20"></span>
+
+			<BtnDescargar
+				data={filteredData}
+				placeholder="Descargar Vista Actual"
+				filename="marcadas VA - {selectedDepartamento.DeptName} {data.fechaMarcada}"
+			/>
+			<BtnDescargar
 				data={filteredAusentesDepartamento}
 				placeholder="Descargar Ausentes del Departamento"
+				filename="marcadas AD - {selectedDepartamento.DeptName} {data.fechaMarcada}"
 			/>
 			{#if data.hostname === 'PEAP'}
-				<DlCsv data={filterAusentes()} placeholder="Descargar Todos los Ausentes" />
+				<BtnDescargar
+					data={filterAusentes()}
+					placeholder="Descargar Todos los Ausentes"
+					filename="marcadas TD {data.fechaMarcada}"
+				/>
 			{/if}
 		</div>
 
 		<!-- Tabla de datos filtrados -->
-		<DataTable
-			{data}
-			{filteredData}
-			{sortDataBy}
-			{sortColumn}
-			{sortDirection}
-			
-		/>
+		<DataTable {data} {filteredData} {sortDataBy} {sortColumn} {sortDirection} />
+
+		<!-- Cuenta de registros -->
+		<div class="d:flex flex:col">
+			<p class="font-size:18 bg:white r:10 p:10 w:fit-content">
+				Total Ausentes: {filterAusentesDepartamento(selectedDepartamento.DeptName).length}
+			</p>
+		</div>
 	</main>
 </body>
 

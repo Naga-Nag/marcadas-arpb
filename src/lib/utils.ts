@@ -1,7 +1,7 @@
 import os from 'os';
 import * as XLSX from 'xlsx';
 
-export function downloadExcel(data: Array<any>) {
+export function downloadExcel(data: Array<any>, fileName = 'marcada') {
   if (!Array.isArray(data) || data.length === 0) {
     console.warn("No hay datos para exportar a Excel");
     return;
@@ -22,7 +22,7 @@ export function downloadExcel(data: Array<any>) {
   // Crear un enlace y simular un clic para descargar el archivo
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'marcada.xls';
+  link.download = `${fileName}.xlsx`;
   link.click();
 
   // Liberar el objeto URL
