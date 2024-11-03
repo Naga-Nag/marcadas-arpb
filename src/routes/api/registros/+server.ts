@@ -1,5 +1,5 @@
 // src/routes/api/records/+server.ts
-import { fetchMarcadaDelDia } from '$lib/server/db';
+import { fetchMarcadaDelDia, fetchMarcadaDetalle } from '$lib/server/db';
 import type { RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async ({ url }) => {

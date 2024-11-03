@@ -1,6 +1,16 @@
 <script lang="ts">
 	export let departamentos: { DeptName: string }[];
 	export let selectedDepartamento: { DeptName: string };
+
+	departamentos.sort((a, b) => {
+		if (a.DeptName === 'ARPB') {
+			return -1; // 'ARPB' should come first
+		}
+		if (b.DeptName === 'ARPB') {
+			return 1; // 'ARPB' should come first
+		}
+		return a.DeptName.localeCompare(b.DeptName); // Sort the remaining elements alphabetically
+	});
 </script>
 
 <div class="d:flex mb:10 mt:10 p:5|5|5|5 overflow-x:auto size:6::scrollbar bg:gray/.2::scrollbar-thumb">

@@ -6,6 +6,7 @@
 	export let sortDirection;
 
 	import { formatTime, getEstado } from '$lib/utils.js';
+
 </script>
 
 <div class="table-container">
@@ -38,8 +39,36 @@
 						>
 					</th>
 					<th>Departamento</th>
-					<th>Entrada</th>
-					<th>Salida</th>
+					<th>
+						Entrada
+						<button
+							on:click={() => sortDataBy('Entrada', 'asc')}
+							class={sortDirection === 'asc' && sortColumn === 'Entrada' ? 'active' : ''}
+						>
+							△
+						</button>
+						<button
+							on:click={() => sortDataBy('Entrada', 'desc')}
+							class={sortDirection === 'desc' && sortColumn === 'Entrada' ? 'active' : ''}
+						>
+							▽
+						</button>
+					</th>
+					<th>
+						Salida
+						<button
+							on:click={() => sortDataBy('Salida', 'asc')}
+							class={sortDirection === 'asc' && sortColumn === 'Salida' ? 'active' : ''}
+						>
+							△
+						</button>
+						<button
+							on:click={() => sortDataBy('Salida', 'desc')}
+							class={sortDirection === 'desc' && sortColumn === 'Salida' ? 'active' : ''}
+						>
+							▽
+						</button>
+					</th>
 					<th>
 						Estado
 						<button
@@ -76,50 +105,51 @@
 </div>
 
 <style>
-  .table-container {
-    max-height:550px; /* Altura máxima del área de la tabla */
-    overflow-y: auto;  /* Habilitar el scroll vertical */
-  }
+	.table-container {
+		min-height: 550px; /* Altura mínima de la tabla */
+		max-height: 550px; /* Altura máxima del área de la tabla */
+		overflow-y: auto; /* Habilitar el scroll vertical */
+	}
 
-  .table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+	.table {
+		width: 100%;
+		border-collapse: collapse;
+	}
 
-  th,
-  td {
-    padding: 8px;
-    text-align: left;
-  }
+	th,
+	td {
+		padding: 8px;
+		text-align: left;
+	}
 
-  th {
-    background-color: #f4f4f4;
-    position: sticky;
-    top: 0; /* Mantener el encabezado fijo en la parte superior */
-    z-index: 1;
-  }
+	th {
+		background-color: #f4f4f4;
+		position: sticky;
+		top: 0; /* Mantener el encabezado fijo en la parte superior */
+		z-index: 1;
+	}
 
-  th button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin-left: 5px;
-  }
+	th button {
+		background: none;
+		border: none;
+		cursor: pointer;
+		margin-left: 5px;
+	}
 
-  th button.active {
-    font-weight: bold;
-    color: #007bff;
-  }
+	th button.active {
+		font-weight: bold;
+		color: #007bff;
+	}
 
-  tr.no-marcado {
-    border: 2px solid red;
-  }
+	tr.no-marcado {
+		border: 2px solid red;
+	}
 
-  tr.falta-marcado {
-    border: 2px solid orange;
-  }
+	tr.falta-marcado {
+		border: 2px solid orange;
+	}
 
-  tbody tr {
-    border-collapse: separate;
-  }
+	tbody tr {
+		border-collapse: separate;
+	}
 </style>

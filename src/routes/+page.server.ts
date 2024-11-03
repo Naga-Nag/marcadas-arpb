@@ -1,4 +1,4 @@
-import { fetchMarcadaDelDia, getDepartamentos } from '$lib/server/db'; // Asegúrate de que estas funciones estén bien definidas
+import { fetchMarcadaDelDia, fetchMarcadaDetalle, getDepartamentos } from '$lib/server/db'; // Asegúrate de que estas funciones estén bien definidas
 import { getDepartamentoHost } from '$lib/utils';
 import type { PageServerLoad } from './$types';
 
@@ -10,9 +10,8 @@ export const load: PageServerLoad = async ({ url }) => {
 
 
         // Obtén los registros y los departamentos
-        const records = await fetchMarcadaDelDia(new Date(fecha));
+        let records = await fetchMarcadaDelDia(new Date(fecha));
         const departamentos = await getDepartamentos();
-
         return {
             fechaMarcada: fecha,
             records,

@@ -20,15 +20,17 @@
 	let sortDirection = 'asc'; // Direccion de la ordenación: 'asc' o 'desc'
 
 	// Función para cambiar la columna de ordenación y su dirección
-	function sortDataBy(column: string, direction: string) {
+	function sortDataBy(column: string, direction?: string) {
 		if (sortColumn === column) {
-			// Si ya estamos ordenando por esta columna, cambiamos la dirección
+			// Toggle direction if the same column is clicked without a direction
 			sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
 		} else {
-			// Si cambiamos de columna, ponemos dirección ascendente por defecto
+			// Set new column and default to ascending order
 			sortColumn = column;
-			sortDirection = 'asc';
+			sortDirection = direction || 'asc';
 		}
+
+		// Override with explicit direction if provided
 		if (direction) {
 			sortDirection = direction;
 		}
@@ -39,14 +41,22 @@
 		.filter((persona: { Nombre: string; Departamento: string; MR: number }) => {
 			// Si el hostname es PEAP, filtramos por departamento, si no, ignoramos el departamento
 			if (data.hostname === 'PEAP') {
-				return (
-					persona.Departamento === selectedDepartamento.DeptName &&
-					(persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
-						persona.MR.toString().includes(searchText))
-				);
+				if (selectedDepartamento.DeptName === 'ARPB') {
+					return (
+						persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
+						persona.MR.toString().includes(searchText)
+					);
+				} else {
+					return (
+						persona.Departamento === selectedDepartamento.DeptName &&
+						(persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
+							persona.MR.toString().includes(searchText))
+					);
+				}
 			} else {
 				// Si no es PEAP, solo filtramos por el texto de búsqueda
 				return (
+					persona.Departamento === selectedDepartamento.DeptName &&
 					persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
 					persona.MR.toString().includes(searchText)
 				);
@@ -60,6 +70,12 @@
 			const valA = a[sortColumn as keyof typeof a];
 			const valB = b[sortColumn as keyof typeof b];
 
+			// Handle null or undefined values by pushing them to the end or beginning
+			if (valA == null && valB != null) return 1; // Push `valA` to the end
+			if (valA != null && valB == null) return -1; // Push `valB` to the end
+			if (valA == null && valB == null) return 0; // Both are null, consider them equal
+
+			// Proceed with usual sorting if values are non-null
 			if (typeof valA === 'string' && typeof valB === 'string') {
 				return sortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
 			} else if (typeof valA === 'number' && typeof valB === 'number') {
