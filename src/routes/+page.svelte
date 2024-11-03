@@ -6,49 +6,34 @@
 	import { getEstado } from '$lib/utils.js';
 
 	// Variables para búsqueda y departamentos
+	let registros = data.records;
 	let searchText = '';
-	let departamentos = data.departamentos.sort((a, b) => a.DeptName.localeCompare(b.DeptName));
-	let selectedDepartamento: { DeptName: string };
+	let departamentos: string[] = data.departamentos.map(depto => depto.DeptName).sort((a, b) => a.localeCompare(b));
+	let selectedDepartamento: string = data.hostname ?? '';
 
 	// Buscar el departamento que coincida con el hostname
 	if (data.hostname) {
-		selectedDepartamento = departamentos.find((depto) => depto.DeptName === data.hostname);
+		selectedDepartamento = departamentos.find((depto) => depto === data.hostname) ?? '';
 	}
 
 	// Variables de ordenación
 	let sortColumn = 'Nombre'; // Columna por la que ordenar
 	let sortDirection = 'asc'; // Direccion de la ordenación: 'asc' o 'desc'
 
-	// Función para cambiar la columna de ordenación y su dirección
-	function sortDataBy(column: string, direction?: string) {
-		if (sortColumn === column) {
-			// Toggle direction if the same column is clicked without a direction
-			sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-		} else {
-			// Set new column and default to ascending order
-			sortColumn = column;
-			sortDirection = direction || 'asc';
-		}
-
-		// Override with explicit direction if provided
-		if (direction) {
-			sortDirection = direction;
-		}
-	}
 
 	// Computamos los datos filtrados en función del departamento seleccionado, el texto de búsqueda y la ordenación
 	$: filteredData = data.records
 		.filter((persona: { Nombre: string; Departamento: string; MR: number }) => {
 			// Si el hostname es PEAP, filtramos por departamento, si no, ignoramos el departamento
 			if (data.hostname === 'PEAP') {
-				if (selectedDepartamento.DeptName === 'ARPB') {
+				if (selectedDepartamento === 'ARPB') {
 					return (
 						persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
 						persona.MR.toString().includes(searchText)
 					);
 				} else {
 					return (
-						persona.Departamento === selectedDepartamento.DeptName &&
+						persona.Departamento === selectedDepartamento &&
 						(persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
 							persona.MR.toString().includes(searchText))
 					);
@@ -56,7 +41,7 @@
 			} else {
 				// Si no es PEAP, solo filtramos por el texto de búsqueda
 				return (
-					persona.Departamento === selectedDepartamento.DeptName &&
+					persona.Departamento === selectedDepartamento &&
 					persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
 					persona.MR.toString().includes(searchText)
 				);
@@ -84,7 +69,7 @@
 			return 0;
 		});
 
-	$: filteredAusentesDepartamento = filterAusentesDepartamento(selectedDepartamento.DeptName);
+	$: filteredAusentesDepartamento = filterAusentesDepartamento(selectedDepartamento);
 
 	// Redirige cuando se selecciona una nueva fecha
 	function onDateChange(event: Event) {
@@ -129,13 +114,13 @@
 	function filterAusentesDepartamento(dep: String) {
 		let datos = data.records.filter(
 			(persona: { Departamento: string; Entrada: any; Salida: any }) =>
-				persona.Departamento === selectedDepartamento.DeptName &&
+				persona.Departamento === selectedDepartamento &&
 				(!persona.Entrada || !persona.Salida)
 		);
 		return datos;
 	}
 
-	sortDataBy('Estado', 'desc');
+	
 </script>
 
 <body>
@@ -161,7 +146,10 @@
 		/>
 
 		<!-- DatePicker y Botones para exportar datos -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div class="d:flex">
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<span class="font-size:25 font-color:white transform: scaleX(-1);" on:click={setDateAyer}
 				>&#10148;</span
 			>
@@ -171,6 +159,7 @@
 				on:change={onDateChange}
 				class="b:1|solid|#ccc mb:10 p:8 mr:10 ml:10 w:99% r:15 w:fit-content"
 			/>
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<span class="font-size:25 font-color:white" on:click={setDateMañana}>&#10148;</span>
 
 			<span class="m:20|20"></span>
@@ -178,12 +167,12 @@
 			<BtnDescargar
 				data={filteredData}
 				placeholder="Descargar Vista Actual"
-				filename="marcadas VA - {selectedDepartamento.DeptName} {data.fechaMarcada}"
+				filename="marcadas VA - {selectedDepartamento} {data.fechaMarcada}"
 			/>
 			<BtnDescargar
 				data={filteredAusentesDepartamento}
 				placeholder="Descargar Ausentes del Departamento"
-				filename="marcadas AD - {selectedDepartamento.DeptName} {data.fechaMarcada}"
+				filename="marcadas AD - {selectedDepartamento} {data.fechaMarcada}"
 			/>
 			{#if data.hostname === 'PEAP'}
 				<BtnDescargar
@@ -195,12 +184,12 @@
 		</div>
 
 		<!-- Tabla de datos filtrados -->
-		<DataTable {data} {filteredData} {sortDataBy} {sortColumn} {sortDirection} />
+		<DataTable registros={filteredData} />
 
 		<!-- Cuenta de registros -->
 		<div class="d:flex flex:col">
 			<p class="font-size:18 bg:white r:10 p:10 w:fit-content">
-				Total Ausentes: {filterAusentesDepartamento(selectedDepartamento.DeptName).length}
+				Total Ausentes: {filterAusentesDepartamento(selectedDepartamento).length}
 			</p>
 		</div>
 	</main>

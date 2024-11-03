@@ -1,107 +1,96 @@
 <script lang="ts">
-	export let data;
-	export let filteredData;
-	export let sortDataBy;
-	export let sortColumn;
-	export let sortDirection;
-
+	import type { Marcada } from '$lib/types';
 	import { formatTime, getEstado } from '$lib/utils.js';
+	import { createTable, Subscribe, Render } from 'svelte-headless-table';
+	import { addSortBy } from 'svelte-headless-table/plugins';
+	import { writable } from 'svelte/store';
 
+	export let registros: Array<Marcada>;
+
+	const pageSize = 40;
+	let loadedItems = pageSize;  // Initial load count
+	const dataToDisplay = writable(registros.slice(0, loadedItems));  // Data currently displayed
+
+	// Update displayed data as items are loaded
+	function loadMoreData() {
+		if (loadedItems < registros.length) {
+			loadedItems += pageSize;
+			dataToDisplay.set(registros.slice(0, loadedItems));
+		}
+	}
+
+	const table = createTable(dataToDisplay, {
+		sort: addSortBy({
+			initialSortKeys: [
+				{
+					id: 'Estado',
+					order: 'desc'
+				}
+			]
+		})
+	});
+
+	const columns = table.createColumns([
+		table.column({ header: 'MR', accessor: 'MR' }),
+		table.column({ header: 'Nombre', accessor: 'Nombre' }),
+		table.column({ header: 'Departamento', accessor: 'Departamento' }),
+		table.column({ header: 'Entrada', accessor: (row) => formatTime(row.Entrada) ?? '' }),
+		table.column({ header: 'Salida', accessor: (row) => formatTime(row.Salida) ?? '' }),
+		table.column({ header: 'Estado', accessor: 'Estado' })
+	]);
+
+	const { headerRows, rows, tableAttrs, tableBodyAttrs } = table.createViewModel(columns);
+
+	// Scroll event handler
+	function handleScroll(event: Event) {
+		const element = event.target as HTMLElement;
+		// Check if the user has scrolled near the bottom of the container
+		if (element.scrollTop + element.clientHeight >= element.scrollHeight - 100) {
+			loadMoreData();  // Load more data when near the bottom
+		}
+	}
+
+	$: dataToDisplay.set(registros.slice(0, loadedItems));
 </script>
 
-<div class="table-container">
-	{#if data.error}
-		<p>Hubo un error al cargar los datos: {data.error}</p>
-	{:else}
-		<table class="table">
-			<thead>
-				<tr>
-					<th>
-						MR
-						<button
-							on:click={() => sortDataBy('MR')}
-							class={sortDirection === 'asc' && sortColumn === 'MR' ? 'active' : ''}>△</button
-						>
-						<button
-							on:click={() => sortDataBy('MR')}
-							class={sortDirection === 'desc' && sortColumn === 'MR' ? 'active' : ''}>▽</button
-						>
-					</th>
-					<th>
-						Nombre
-						<button
-							on:click={() => sortDataBy('Nombre')}
-							class={sortDirection === 'asc' && sortColumn === 'Nombre' ? 'active' : ''}>△</button
-						>
-						<button
-							on:click={() => sortDataBy('Nombre')}
-							class={sortDirection === 'desc' && sortColumn === 'Nombre' ? 'active' : ''}>▽</button
-						>
-					</th>
-					<th>Departamento</th>
-					<th>
-						Entrada
-						<button
-							on:click={() => sortDataBy('Entrada', 'asc')}
-							class={sortDirection === 'asc' && sortColumn === 'Entrada' ? 'active' : ''}
-						>
-							△
-						</button>
-						<button
-							on:click={() => sortDataBy('Entrada', 'desc')}
-							class={sortDirection === 'desc' && sortColumn === 'Entrada' ? 'active' : ''}
-						>
-							▽
-						</button>
-					</th>
-					<th>
-						Salida
-						<button
-							on:click={() => sortDataBy('Salida', 'asc')}
-							class={sortDirection === 'asc' && sortColumn === 'Salida' ? 'active' : ''}
-						>
-							△
-						</button>
-						<button
-							on:click={() => sortDataBy('Salida', 'desc')}
-							class={sortDirection === 'desc' && sortColumn === 'Salida' ? 'active' : ''}
-						>
-							▽
-						</button>
-					</th>
-					<th>
-						Estado
-						<button
-							on:click={() => sortDataBy('Estado')}
-							class={sortDirection === 'asc' && sortColumn === 'Estado' ? 'active' : ''}>△</button
-						>
-						<button
-							on:click={() => sortDataBy('Estado')}
-							class={sortDirection === 'desc' && sortColumn === 'Estado' ? 'active' : ''}>▽</button
-						>
-					</th>
-				</tr>
-			</thead>
-			<tbody class="bg:white overflow:scroll-y">
-				{#each filteredData as persona}
-					<tr
-						class={!persona.Entrada && !persona.Salida
-							? 'no-marcado'
-							: (persona.Entrada && !persona.Salida) || (!persona.Entrada && persona.Salida)
-								? 'falta-marcado'
-								: ''}
-					>
-						<td>{persona.MR}</td>
-						<td>{persona.Nombre}</td>
-						<td>{persona.Departamento}</td>
-						<td>{persona.Entrada ? formatTime(persona.Entrada) : ''}</td>
-						<td>{persona.Salida ? formatTime(persona.Salida) : ''}</td>
-						<td>{getEstado(persona)}</td>
+<div class="table-container" on:scroll={handleScroll}>
+	<table {...$tableAttrs} class="table">
+		<thead>
+			{#each $headerRows as headerRow (headerRow.id)}
+				<Subscribe rowAttrs={headerRow.attrs()} let:rowAttrs>
+					<tr {...rowAttrs}>
+						{#each headerRow.cells as cell (cell.id)}
+							<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
+								<th {...attrs} on:click={props.sort.toggle}>
+									<Render of={cell.render()} />
+									{#if props.sort.order === 'asc'}
+									▼
+									{:else if props.sort.order === 'desc'}
+									▲
+									{/if}
+								</th>
+							</Subscribe>
+						{/each}
 					</tr>
-				{/each}
-			</tbody>
-		</table>
-	{/if}
+				</Subscribe>
+			{/each}
+		</thead>
+		<tbody {...$tableBodyAttrs} class="bg:white">
+			{#each $rows as row (row.id)}
+				<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
+					<tr {...rowAttrs}>
+						{#each row.cells as cell (cell.id)}
+							<Subscribe attrs={cell.attrs()} let:attrs>
+								<td {...attrs}>
+									<Render of={cell.render()} />
+								</td>
+							</Subscribe>
+						{/each}
+					</tr>
+				</Subscribe>
+			{/each}
+		</tbody>
+	</table>
 </div>
 
 <style>
@@ -127,18 +116,6 @@
 		position: sticky;
 		top: 0; /* Mantener el encabezado fijo en la parte superior */
 		z-index: 1;
-	}
-
-	th button {
-		background: none;
-		border: none;
-		cursor: pointer;
-		margin-left: 5px;
-	}
-
-	th button.active {
-		font-weight: bold;
-		color: #007bff;
 	}
 
 	tr.no-marcado {

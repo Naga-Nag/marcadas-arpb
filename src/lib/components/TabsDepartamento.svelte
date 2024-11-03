@@ -1,15 +1,15 @@
 <script lang="ts">
-	export let departamentos: { DeptName: string }[];
-	export let selectedDepartamento: { DeptName: string };
+	export let departamentos: string[];
+	export let selectedDepartamento: string;
 
 	departamentos.sort((a, b) => {
-		if (a.DeptName === 'ARPB') {
+		if (a === 'ARPB') {
 			return -1; // 'ARPB' should come first
 		}
-		if (b.DeptName === 'ARPB') {
+		if (b === 'ARPB') {
 			return 1; // 'ARPB' should come first
 		}
-		return a.DeptName.localeCompare(b.DeptName); // Sort the remaining elements alphabetically
+		return a.localeCompare(b); // Sort the remaining elements alphabetically
 	});
 </script>
 
@@ -20,7 +20,7 @@
 			on:click={() => (selectedDepartamento = departamento)}
 			class:selected={selectedDepartamento === departamento}
 		>
-			{departamento.DeptName}
+			{departamento}
 		</button>
 	{/each}
 </div>
