@@ -15,80 +15,115 @@ const sqlConfig = {
   options: {
     encrypt: false,
     trustServerCertificate: true
-  }
+  },
+  stream: true,  // Enable streaming
 };
 
-
 export async function fetchMarcadaDelDia(fecha: Date) {
-  try {
-    await sql.connect(sqlConfig);
-    
-    if (getDepartamentoHost() === 'PEAP') {
-      var result = await sql.query("USE " + Bun.env.DB + ";" + "SELECT * FROM MarcadaDelDiaPEAP('" + fecha.toISOString().substring(0, 10) + "');");
-    }
-    else {
-      result = await sql.query("USE " + Bun.env.DB + ";" + "SELECT * FROM dbo.MarcadaDelDia('" + getDepartamentoHost() + "', '" + fecha.toISOString().substring(0, 10) + "');");
-    }
+  await sql.connect(sqlConfig);
 
-    // Handle potential circular references or complex data structures
-    const sanitizedData = JSON.parse(JSON.stringify(result.recordset));
-    return sanitizedData;
-  } catch (err) {
-    console.error('Error fetching data:', err);
-    return [];
-  }
+  return new Promise((resolve, reject) => {
+    const rows: Array<Record<string, any>> = [];
+    const request = new sql.Request();
+    request.stream = true;
+
+    // Set up the query based on the department host
+    const query =
+      getDepartamentoHost() === 'PEAP'
+        ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDiaPEAP('${fecha.toISOString().substring(0, 10)}');`
+        : `USE ${Bun.env.DB}; SELECT * FROM dbo.MarcadaDelDia('${getDepartamentoHost()}', '${fecha.toISOString().substring(0, 10)}');`;
+
+    request.query(query);
+
+    // Event handler for each row
+    request.on('row', (row) => {
+      rows.push(row); // Accumulate rows
+    });
+
+    // Handle errors
+    request.on('error', (err) => {
+      console.error('Error fetching data:', err);
+      reject(err);
+    });
+
+    // Finalize on completion
+    request.on('done', () => {
+      const sanitizedData = JSON.parse(JSON.stringify(rows));
+      resolve(sanitizedData);
+    });
+  });
 }
 
 export async function getDepartamentos() {
-  try {
-    var result = await sql.query("USE " + Bun.env.DB + ";" + "SELECT DeptName FROM Dept;");
-    return result.recordset;
-  } catch (err) {
-    console.error('Error fetching data:', err);
-    return [];
-  }
+  await sql.connect(sqlConfig);
+
+  return new Promise((resolve, reject) => {
+    const rows: Array<Record<string, any>> = [];
+    const request = new sql.Request();
+    request.stream = true;
+
+    // Define and execute the query
+    const query = `USE ${Bun.env.DB}; SELECT DeptName FROM Dept;`;
+    request.query(query);
+
+    request.on('row', (row) => {
+      rows.push(row);
+    });
+
+    request.on('error', (err) => {
+      console.error('Error fetching data:', err);
+      reject(err);
+    });
+
+    request.on('done', () => {
+      resolve(rows);
+    });
+  });
 }
 
 export async function fetchMarcadaDetalle(uid: number, fecha: Date) {
-  try {
-    await sql.connect(sqlConfig);
+  await sql.connect(sqlConfig);
 
-    // Consulta a la base de datos
-    var result = await sql.query("USE " + Bun.env.DB + ";" +
-      "SELECT * FROM dbo.MarcadaDetalle(" + uid + ", '" + fecha.toISOString().substring(0, 10) + "');");
+  return new Promise((resolve, reject) => {
+    const rows: Array<Record<string, any>> = [];
+    const request = new sql.Request();
+    request.stream = true;
 
-    const data = result.recordset;
-    if (!data.length) return [];
+    // Set up the query for detailed data
+    const query = `USE ${Bun.env.DB}; SELECT * FROM dbo.MarcadaDetalle(${uid}, '${fecha.toISOString().substring(0, 10)}');`;
+    request.query(query);
 
-    const sanitizedData = JSON.parse(JSON.stringify(data));
+    request.on('row', (row) => {
+      rows.push(row);
+    });
 
-    // Inicializamos la variable que guardará el resultado final
-    const resultCurado = [];
+    request.on('error', (err) => {
+      console.error('Error fetching data:', err);
+      reject(err);
+    });
 
-    for (let i = 0; i < sanitizedData.length; i++) {
-      const currentRecord = sanitizedData[i];
+    request.on('done', () => {
+      // Process rows with filtering logic for time differences
+      const resultCurado = [];
+      for (let i = 0; i < rows.length; i++) {
+        const currentRecord = rows[i];
 
-      // Siempre añadir el último registro
-      if (i === sanitizedData.length - 1) {
-        resultCurado.push(currentRecord);
-        continue;
+        // Always add the last record
+        if (i === rows.length - 1) {
+          resultCurado.push(currentRecord);
+          continue;
+        }
+
+        const nextRecord = rows[i + 1];
+        const timeDiff = differenceInMinutes(parseISO(nextRecord.Marcada), parseISO(currentRecord.Marcada));
+
+        // Skip records within 5 minutes of each other
+        if (timeDiff >= 5) {
+          resultCurado.push(currentRecord);
+        }
       }
 
-      const nextRecord = sanitizedData[i + 1];
-
-      // Calculamos la diferencia en minutos entre el registro actual y el siguiente
-      const timeDiff = differenceInMinutes(parseISO(nextRecord.Marcada), parseISO(currentRecord.Marcada));
-
-      // Si la diferencia de tiempo es menor a 5 minutos, se ignora el registro actual y no se añade
-      if (timeDiff >= 5) {
-        resultCurado.push(currentRecord);
-      }
-    }
-
-    return resultCurado;
-
-  } catch (err) {
-    console.error('Error fetching data:', err);
-    return [];
-  }
+      resolve(resultCurado);
+    });
+  });
 }

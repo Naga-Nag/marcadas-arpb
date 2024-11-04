@@ -1,14 +1,17 @@
 <script lang="ts">
-	export let data;
+	export let data: any;
 	import BtnDescargar from '$lib/components/BtnDescargar.svelte';
 	import TabsDepartamento from '$lib/components/TabsDepartamento.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import { getEstado } from '$lib/utils.js';
+	import type { Data } from '$lib/types.js';
 
 	// Variables para búsqueda y departamentos
 	let registros = data.records;
 	let searchText = '';
-	let departamentos: string[] = data.departamentos.map(depto => depto.DeptName).sort((a, b) => a.localeCompare(b));
+	let departamentos: string[] = data.departamentos
+		.map((depto: { DeptName: string }) => depto.DeptName)
+		.sort((a: string, b: string) => a.localeCompare(b));
 	let selectedDepartamento: string = data.hostname ?? '';
 
 	// Buscar el departamento que coincida con el hostname
@@ -20,9 +23,8 @@
 	let sortColumn = 'Nombre'; // Columna por la que ordenar
 	let sortDirection = 'asc'; // Direccion de la ordenación: 'asc' o 'desc'
 
-
 	// Computamos los datos filtrados en función del departamento seleccionado, el texto de búsqueda y la ordenación
-	$: filteredData = data.records
+	$: filteredData = registros
 		.filter((persona: { Nombre: string; Departamento: string; MR: number }) => {
 			// Si el hostname es PEAP, filtramos por departamento, si no, ignoramos el departamento
 			if (data.hostname === 'PEAP') {
@@ -41,33 +43,16 @@
 			} else {
 				// Si no es PEAP, solo filtramos por el texto de búsqueda
 				return (
-					persona.Departamento === selectedDepartamento &&
-					persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
+					(persona.Departamento === selectedDepartamento &&
+						persona.Nombre.toLowerCase().includes(searchText.toLowerCase())) ||
 					persona.MR.toString().includes(searchText)
 				);
 			}
-		})
+		}) //Agregamos estado a cada marcada
 		.map((persona: { Entrada: string; Salida: string }) => ({
 			...persona,
 			Estado: getEstado(persona)
-		}))
-		.sort((a: { [x: string]: any }, b: { [x: string]: any }) => {
-			const valA = a[sortColumn as keyof typeof a];
-			const valB = b[sortColumn as keyof typeof b];
-
-			// Handle null or undefined values by pushing them to the end or beginning
-			if (valA == null && valB != null) return 1; // Push `valA` to the end
-			if (valA != null && valB == null) return -1; // Push `valB` to the end
-			if (valA == null && valB == null) return 0; // Both are null, consider them equal
-
-			// Proceed with usual sorting if values are non-null
-			if (typeof valA === 'string' && typeof valB === 'string') {
-				return sortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-			} else if (typeof valA === 'number' && typeof valB === 'number') {
-				return sortDirection === 'asc' ? valA - valB : valB - valA;
-			}
-			return 0;
-		});
+		}));
 
 	$: filteredAusentesDepartamento = filterAusentesDepartamento(selectedDepartamento);
 
@@ -114,13 +99,10 @@
 	function filterAusentesDepartamento(dep: String) {
 		let datos = data.records.filter(
 			(persona: { Departamento: string; Entrada: any; Salida: any }) =>
-				persona.Departamento === selectedDepartamento &&
-				(!persona.Entrada || !persona.Salida)
+				persona.Departamento === selectedDepartamento && (!persona.Entrada || !persona.Salida)
 		);
 		return datos;
 	}
-
-	
 </script>
 
 <body>

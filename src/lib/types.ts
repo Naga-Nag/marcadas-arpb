@@ -1,4 +1,4 @@
-type Marcada = {
+export type Marcada = {
     MR: number;
     Nombre: string;
     Departamento: string;
@@ -7,5 +7,10 @@ type Marcada = {
     Estado: string;
 };
 
-export type { Marcada };
+export interface Data {
+    records: any[];
+    departamentos: { DeptName: string }[];
+    hostname: string;
+}
+
 
