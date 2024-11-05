@@ -1,4 +1,4 @@
-CREATE FUNCTION MarcadaDelDiaENTREFECHAS(@FechaInicio DATE, @FechaFin DATE) 
+CREATE FUNCTION MarcadaEntreFECHAS(@FechaInicio DATE, @FechaFin DATE) 
 RETURNS @Resultado TABLE 
 (
     UID INT,

@@ -6,11 +6,3 @@ export type Marcada = {
     Salida: string;
     Estado: string;
 };
-
-export interface Data {
-    records: any[];
-    departamentos: { DeptName: string }[];
-    hostname: string;
-}
-
-

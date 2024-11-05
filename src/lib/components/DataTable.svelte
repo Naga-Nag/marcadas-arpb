@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Marcada } from '$lib/types';
-	import { formatTime, getEstado } from '$lib/utils.js';
+	import { formatTime, compareTime } from '$lib/utils.js';
 	import { createTable, Subscribe, Render } from 'svelte-headless-table';
 	import { addSortBy } from 'svelte-headless-table/plugins';
 	import { writable } from 'svelte/store';
@@ -31,13 +31,29 @@
 	});
 
 	const columns = table.createColumns([
-		table.column({ header: 'MR', accessor: 'MR' }),
-		table.column({ header: 'Nombre', accessor: 'Nombre' }),
-		table.column({ header: 'Departamento', accessor: 'Departamento' }),
-		table.column({ header: 'Entrada', accessor: (row) => formatTime(row.Entrada) ?? '' }),
-		table.column({ header: 'Salida', accessor: (row) => formatTime(row.Salida) ?? '' }),
-		table.column({ header: 'Estado', accessor: 'Estado' })
-	]);
+	table.column({ header: 'MR', accessor: 'MR' }),
+	table.column({ header: 'Nombre', accessor: 'Nombre' }),
+	table.column({ header: 'Departamento', accessor: 'Departamento' }),
+	table.column({
+		header: 'Entrada',
+		accessor: (row) => formatTime(row.Entrada),
+		plugins: {
+			sort: {
+				compareFn: (a, b) => compareTime(a, b)
+			}
+		}
+	}),
+	table.column({
+		header: 'Salida',
+		accessor: (row) => formatTime(row.Salida),
+		plugins: {
+			sort: {
+				compareFn: (a, b) => compareTime(a, b)
+			}
+		}
+	}),
+	table.column({ header: 'Estado', accessor: 'Estado' })
+]);
 
 	const { headerRows, rows, tableAttrs, tableBodyAttrs } = table.createViewModel(columns);
 

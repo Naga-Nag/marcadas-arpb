@@ -39,14 +39,20 @@ export function getDepartamentoHost() {
 }
 
 export function formatTime(dateString: string) {
-  if (!dateString) return ''; // Handle null or empty case
+  if (!dateString) return null; // Handle null or empty case
   const date = new Date(dateString);
   const day = date.getDate().toString().padStart(2, '0');
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear().toString(); 
+  const year = date.getFullYear().toString();
   const hours = date.getUTCHours().toString().padStart(2, '0');
   const minutes = date.getUTCMinutes().toString().padStart(2, '0');
   return `${day}/${month}/${year} ${hours}:${minutes}`;
+}
+
+export function compareTime(a: string, b: string) {
+  if (a === null) return 1; // Null values go to the end
+  if (b === null) return -1;
+  return new Date(a).getTime() - new Date(b).getTime();
 }
 
 export function getEstado(persona: { Entrada: any; Salida: any }) {

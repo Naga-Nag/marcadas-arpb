@@ -3,8 +3,9 @@
 	import BtnDescargar from '$lib/components/BtnDescargar.svelte';
 	import TabsDepartamento from '$lib/components/TabsDepartamento.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
+	import RangeDatePicker from '$lib/components/RangeDatePicker.svelte';
+
 	import { getEstado } from '$lib/utils.js';
-	import type { Data } from '$lib/types.js';
 
 	// Variables para búsqueda y departamentos
 	let registros = data.records;
@@ -18,10 +19,6 @@
 	if (data.hostname) {
 		selectedDepartamento = departamentos.find((depto) => depto === data.hostname) ?? '';
 	}
-
-	// Variables de ordenación
-	let sortColumn = 'Nombre'; // Columna por la que ordenar
-	let sortDirection = 'asc'; // Direccion de la ordenación: 'asc' o 'desc'
 
 	// Computamos los datos filtrados en función del departamento seleccionado, el texto de búsqueda y la ordenación
 	$: filteredData = registros
@@ -128,23 +125,9 @@
 		/>
 
 		<!-- DatePicker y Botones para exportar datos -->
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div class="d:flex">
-			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<span class="font-size:25 font-color:white transform: scaleX(-1);" on:click={setDateAyer}
-				>&#10148;</span
-			>
-			<input
-				type="date"
-				value={data.fechaMarcada}
-				on:change={onDateChange}
-				class="b:1|solid|#ccc mb:10 p:8 mr:10 ml:10 w:99% r:15 w:fit-content"
-			/>
-			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<span class="font-size:25 font-color:white" on:click={setDateMañana}>&#10148;</span>
-
-			<span class="m:20|20"></span>
+			
+			<RangeDatePicker></RangeDatePicker>
 
 			<BtnDescargar
 				data={filteredData}
