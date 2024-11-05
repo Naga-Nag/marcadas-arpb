@@ -13,14 +13,16 @@
     // Optional: Run something when the range is selected
     function handleDateChange() {
       console.log("Selected range:", $startDate, $endDate);
+
+      
     }
   </script>
   
   
   
-  <div class="date-picker color:w">
+  <div class="date-picker color:white mt:2.5">
     <div>
-      <label for="start">Fecha Inicial:</label>
+      <label for="start">Inicio</label>
       <input
         type="date"
         id="start"
@@ -29,7 +31,7 @@
       />
     </div>
     <div>
-      <label for="end">Fecha Final:</label>
+      <label for="end">Final</label>
       <input
         type="date"
         id="end"
@@ -45,6 +47,7 @@
       display: flex;
       gap: 1rem;
     }
+
     input[type="date"] {
       padding: 0.5rem;
       border-radius: 4px;

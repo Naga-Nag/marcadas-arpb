@@ -4,12 +4,21 @@
 	import { createTable, Subscribe, Render } from 'svelte-headless-table';
 	import { addSortBy } from 'svelte-headless-table/plugins';
 	import { writable } from 'svelte/store';
+	import { tabStore } from '$lib/stores/selDepartamento';
 
 	export let registros: Array<Marcada>;
 
+	tabStore.subscribe(($tab) => {
+		if ($tab.selDepa !== '') {
+			console.log('selDepa:', $tab.selDepa);
+			loadedItems = pageSize;
+			dataToDisplay.set(registros.slice(0, loadedItems));
+		}
+	});
+
 	const pageSize = 40;
-	let loadedItems = pageSize;  // Initial load count
-	const dataToDisplay = writable(registros.slice(0, loadedItems));  // Data currently displayed
+	let loadedItems = pageSize; // Initial load count
+	const dataToDisplay = writable(registros.slice(0, loadedItems)); // Data currently displayed
 
 	// Update displayed data as items are loaded
 	function loadMoreData() {
@@ -31,29 +40,29 @@
 	});
 
 	const columns = table.createColumns([
-	table.column({ header: 'MR', accessor: 'MR' }),
-	table.column({ header: 'Nombre', accessor: 'Nombre' }),
-	table.column({ header: 'Departamento', accessor: 'Departamento' }),
-	table.column({
-		header: 'Entrada',
-		accessor: (row) => formatTime(row.Entrada),
-		plugins: {
-			sort: {
-				compareFn: (a, b) => compareTime(a, b)
+		table.column({ header: 'MR', accessor: 'MR' }),
+		table.column({ header: 'Nombre', accessor: 'Nombre' }),
+		table.column({ header: 'Departamento', accessor: 'Departamento' }),
+		table.column({
+			header: 'Entrada',
+			accessor: (row) => formatTime(row.Entrada),
+			plugins: {
+				sort: {
+					compareFn: (a, b) => compareTime(a, b)
+				}
 			}
-		}
-	}),
-	table.column({
-		header: 'Salida',
-		accessor: (row) => formatTime(row.Salida),
-		plugins: {
-			sort: {
-				compareFn: (a, b) => compareTime(a, b)
+		}),
+		table.column({
+			header: 'Salida',
+			accessor: (row) => formatTime(row.Salida),
+			plugins: {
+				sort: {
+					compareFn: (a, b) => compareTime(a, b)
+				}
 			}
-		}
-	}),
-	table.column({ header: 'Estado', accessor: 'Estado' })
-]);
+		}),
+		table.column({ header: 'Estado', accessor: 'Estado' })
+	]);
 
 	const { headerRows, rows, tableAttrs, tableBodyAttrs } = table.createViewModel(columns);
 
@@ -62,8 +71,13 @@
 		const element = event.target as HTMLElement;
 		// Check if the user has scrolled near the bottom of the container
 		if (element.scrollTop + element.clientHeight >= element.scrollHeight - 100) {
-			loadMoreData();  // Load more data when near the bottom
+			loadMoreData(); // Load more data when near the bottom
 		}
+	}
+
+	function handleChangeDepartamento(selectedDepartamento: string) {
+		loadedItems = pageSize;
+		dataToDisplay.set(registros.slice(0, loadedItems));
 	}
 
 	$: dataToDisplay.set(registros.slice(0, loadedItems));
@@ -80,9 +94,9 @@
 								<th {...attrs} on:click={props.sort.toggle}>
 									<Render of={cell.render()} />
 									{#if props.sort.order === 'asc'}
-									▼
+										▼
 									{:else if props.sort.order === 'desc'}
-									▲
+										▲
 									{/if}
 								</th>
 							</Subscribe>

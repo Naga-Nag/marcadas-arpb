@@ -1,18 +1,24 @@
 <script lang="ts">
 	export let data: any;
+
 	import BtnDescargar from '$lib/components/BtnDescargar.svelte';
 	import TabsDepartamento from '$lib/components/TabsDepartamento.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import RangeDatePicker from '$lib/components/RangeDatePicker.svelte';
+	import MainOptions from '$lib/components/MainOptions.svelte';
+	import DatePicker from '$lib/components/DatePicker.svelte';
 
+	import { fetchMarcadaEntreFechas } from '$lib/server/db';
 	import { getEstado } from '$lib/utils.js';
+	
+	let startDate: Date;
+	let endDate: Date;
 
 	// Variables para búsqueda y departamentos
 	let registros = data.records;
 	let searchText = '';
-	let departamentos: string[] = data.departamentos
-		.map((depto: { DeptName: string }) => depto.DeptName)
-		.sort((a: string, b: string) => a.localeCompare(b));
+	let departamentos: string[] = String(data.departamentos).split(',') ?? [];
+	console.log(departamentos);
 	let selectedDepartamento: string = data.hostname ?? '';
 
 	// Buscar el departamento que coincida con el hostname
@@ -53,40 +59,6 @@
 
 	$: filteredAusentesDepartamento = filterAusentesDepartamento(selectedDepartamento);
 
-	// Redirige cuando se selecciona una nueva fecha
-	function onDateChange(event: Event) {
-		const newDate = (event.target as HTMLInputElement).value;
-		const url = new URL(window.location.href);
-		url.searchParams.set('fecha', newDate);
-		window.location.href = url.toString();
-	}
-
-	function setDateAyer() {
-		if (data.fechaMarcada !== null) {
-			let tomorrow = new Date(data.fechaMarcada);
-			tomorrow.setDate(tomorrow.getDate() - 1);
-			const url = new URL(window.location.href);
-			url.searchParams.set('fecha', tomorrow.toISOString().split('T')[0]);
-			window.location.href = url.toString();
-		} else {
-			// Handle the case where data.fechaMarcada is null
-			// For example, you could set a default date or throw an error
-		}
-	}
-
-	function setDateMañana() {
-		if (data.fechaMarcada !== null) {
-			let yesterday = new Date(data.fechaMarcada);
-			yesterday.setDate(yesterday.getDate() + 1);
-			const url = new URL(window.location.href);
-			url.searchParams.set('fecha', yesterday.toISOString().split('T')[0]);
-			window.location.href = url.toString();
-		} else {
-			// Handle the case where data.fechaMarcada is null
-			// For example, you could set a default date or throw an error
-		}
-	}
-
 	function filterAusentes() {
 		return data.records.filter(
 			(persona: { Entrada: any; Salida: any }) => !persona.Entrada || !persona.Salida
@@ -99,6 +71,12 @@
 				persona.Departamento === selectedDepartamento && (!persona.Entrada || !persona.Salida)
 		);
 		return datos;
+	}
+
+	//variables para configuracion
+	let entreFechas = false;
+	function toggleEntreFechas() {
+		entreFechas = !entreFechas;
 	}
 </script>
 
@@ -125,9 +103,17 @@
 		/>
 
 		<!-- DatePicker y Botones para exportar datos -->
-		<div class="d:flex">
-			
-			<RangeDatePicker></RangeDatePicker>
+		<div class="d:flex mb:10">
+
+			<span> </span>
+			<MainOptions {toggleEntreFechas}></MainOptions>
+			<span></span>
+
+			{#if entreFechas}
+				<RangeDatePicker></RangeDatePicker>
+			{:else}
+				<DatePicker fechaMarcada={data.fechaMarcada}></DatePicker>
+			{/if}
 
 			<BtnDescargar
 				data={filteredData}
@@ -149,7 +135,7 @@
 		</div>
 
 		<!-- Tabla de datos filtrados -->
-		<DataTable registros={filteredData} />
+		<DataTable registros={filteredData}/>
 
 		<!-- Cuenta de registros -->
 		<div class="d:flex flex:col">

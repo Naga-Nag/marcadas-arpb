@@ -25,7 +25,6 @@ export async function fetchMarcadaDelDia(fecha: Date) {
   return new Promise((resolve, reject) => {
     const rows: Array<Record<string, any>> = [];
     const request = new sql.Request();
-    request.stream = true;
 
     // Set up the query based on the department host
     const query =
@@ -60,7 +59,7 @@ export async function getDepartamentos() {
   return new Promise((resolve, reject) => {
     const rows: Array<Record<string, any>> = [];
     const request = new sql.Request();
-    request.stream = true;
+    request.arrayRowMode = true;
 
     // Define and execute the query
     const query = `USE ${Bun.env.DB}; SELECT DeptName FROM Dept;`;
@@ -87,7 +86,6 @@ export async function fetchMarcadaDetalle(uid: number, fecha: Date) {
   return new Promise((resolve, reject) => {
     const rows: Array<Record<string, any>> = [];
     const request = new sql.Request();
-    request.stream = true;
 
     // Set up the query for detailed data
     const query = `USE ${Bun.env.DB}; SELECT * FROM dbo.MarcadaDetalle(${uid}, '${fecha.toISOString().substring(0, 10)}');`;
@@ -124,6 +122,33 @@ export async function fetchMarcadaDetalle(uid: number, fecha: Date) {
       }
 
       resolve(resultCurado);
+    });
+  });
+}
+
+export async function fetchMarcadaEntreFechas(startDate: Date, endDate: Date) {
+  await sql.connect(sqlConfig);
+
+  return new Promise((resolve, reject) => {
+    const rows: Array<Record<string, any>> = [];
+    const request = new sql.Request();
+    request.stream = true;
+
+    const query = `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechas('${startDate.toISOString().substring(0, 10)}', '${endDate.toISOString().substring(0, 10)}');`;
+    request.query(query);
+
+    request.on('row', (row) => {
+      rows.push(row);
+    });
+
+    request.on('error', (err) => {
+      console.error('Error fetching data:', err);
+      reject(err);
+    });
+
+    request.on('done', () => {
+      const sanitizedData = JSON.parse(JSON.stringify(rows));
+      resolve(sanitizedData);
     });
   });
 }
