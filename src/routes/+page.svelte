@@ -1,24 +1,18 @@
 <script lang="ts">
 	export let data: any;
-
 	import BtnDescargar from '$lib/components/BtnDescargar.svelte';
 	import TabsDepartamento from '$lib/components/TabsDepartamento.svelte';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import RangeDatePicker from '$lib/components/RangeDatePicker.svelte';
 	import MainOptions from '$lib/components/MainOptions.svelte';
 	import DatePicker from '$lib/components/DatePicker.svelte';
-
-	import { fetchMarcadaEntreFechas } from '$lib/server/db';
 	import { getEstado } from '$lib/utils.js';
-	
-	let startDate: Date;
-	let endDate: Date;
+	import { fechaStore } from '$lib/stores/fechaStore';
 
 	// Variables para búsqueda y departamentos
 	let registros = data.records;
 	let searchText = '';
 	let departamentos: string[] = String(data.departamentos).split(',') ?? [];
-	console.log(departamentos);
 	let selectedDepartamento: string = data.hostname ?? '';
 
 	// Buscar el departamento que coincida con el hostname
@@ -74,10 +68,8 @@
 	}
 
 	//variables para configuracion
-	let entreFechas = false;
-	function toggleEntreFechas() {
-		entreFechas = !entreFechas;
-	}
+	let menuEntreFechas: boolean;
+
 </script>
 
 <body>
@@ -104,15 +96,14 @@
 
 		<!-- DatePicker y Botones para exportar datos -->
 		<div class="d:flex mb:10">
-
 			<span> </span>
-			<MainOptions {toggleEntreFechas}></MainOptions>
+			<MainOptions {menuEntreFechas}></MainOptions>
 			<span></span>
 
-			{#if entreFechas}
+			{#if menuEntreFechas}
 				<RangeDatePicker></RangeDatePicker>
 			{:else}
-				<DatePicker fechaMarcada={data.fechaMarcada}></DatePicker>
+				<DatePicker fechaMarcada={data.fechaMarcada} on:cambioFecha></DatePicker>
 			{/if}
 
 			<BtnDescargar
@@ -135,7 +126,7 @@
 		</div>
 
 		<!-- Tabla de datos filtrados -->
-		<DataTable registros={filteredData}/>
+		<DataTable registros={filteredData} />
 
 		<!-- Cuenta de registros -->
 		<div class="d:flex flex:col">

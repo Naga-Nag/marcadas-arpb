@@ -1,6 +1,7 @@
 <script lang="ts">
 	export let departamentos: string[];
 	export let selectedDepartamento: string;
+	
 	import { updateDepaTab } from '$lib/stores/selDepartamento';
 
 	function selectDepartamento(departamento: string) {

@@ -1,33 +1,28 @@
 <script>
     import { writable } from 'svelte/store';
-  
-    // Define start and end dates as writable stores
-    let startDate = writable('');
-    let endDate = writable('');
-  
-    // Optional: Ensure endDate is after startDate
-    $: if (startDate && endDate && new Date($endDate) < new Date($startDate)) {
-      endDate.set($startDate);
-    }
-  
-    // Optional: Run something when the range is selected
-    function handleDateChange() {
-      console.log("Selected range:", $startDate, $endDate);
+    import { updatefechaFinal, updatefechaInicial } from '$lib/stores/fechaStore';
 
-      
+    let fechaInicial = writable('');
+    let fechaFinal = writable('');
+  
+    
+    function handleDateChange() {
+      console.log("Selected range:", $fechaInicial, $fechaFinal);
+      updatefechaInicial($fechaInicial);
+      updatefechaFinal($fechaFinal);
     }
   </script>
   
   
-  
-  <div class="date-picker color:white mt:2.5">
+  <div class="date-picker mt:2.5 color:white">
     <div>
       <label for="start">Inicio</label>
       <input
         type="date"
         id="start"
-        bind:value={$startDate}
+        bind:value={$fechaInicial}
         on:change={handleDateChange}
+        class:selected-date={$fechaInicial ? 'selected' : ''}
       />
     </div>
     <div>
@@ -35,8 +30,9 @@
       <input
         type="date"
         id="end"
-        bind:value={$endDate}
+        bind:value={$fechaFinal}
         on:change={handleDateChange}
+        class:selected-date={$fechaFinal ? 'selected' : ''}
       />
     </div>
   </div>
@@ -53,4 +49,10 @@
       border-radius: 4px;
       border: 1px solid #ccc;
     }
+
+    input[type="date"].selected-date {
+    color: #fff; /* Change text color for selected date */
+    background-color: #429643; /* Change background color for selected date */
+    border-color: #4CAF50;
+  }
   </style>
