@@ -19,7 +19,7 @@ const sqlConfig = {
   stream: true,  // Enable streaming
 };
 
-export async function fetchMarcadaDelDia(fecha: Date) {
+export async function fetchMarcadaDelDia(fecha: Date): Promise<Array<Record<string, any>>> {
   await sql.connect(sqlConfig);
 
   return new Promise((resolve, reject) => {
@@ -53,7 +53,7 @@ export async function fetchMarcadaDelDia(fecha: Date) {
   });
 }
 
-export async function getDepartamentos() {
+export async function getDepartamentos(): Promise<Array<Record<string, any>>> {
   await sql.connect(sqlConfig);
 
   return new Promise((resolve, reject) => {
