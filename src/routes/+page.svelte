@@ -8,12 +8,51 @@
 	import DatePicker from '$lib/components/DatePicker.svelte';
 	import { getEstado } from '$lib/utils.js';
 	import { fechaStore } from '$lib/stores/fechaStore';
+	import { onMount } from 'svelte';
 
 	// Variables para búsqueda y departamentos
 	let registros = data.records;
 	let searchText = '';
 	let departamentos: string[] = String(data.departamentos).split(',') ?? [];
 	let selectedDepartamento: string = data.hostname ?? '';
+
+	/// Fetch data reactively when fechaStore changes
+	$: {
+		// Await `fechaStore` values reactively
+		fechaStore.subscribe(async ($fechas) => {
+			let { fechaInicial, fechaFinal, fechaMarcada } = $fechas;
+
+			let url = `/api/fetchRecords/`;
+			const payload: { fechaInicial?: string; fechaFinal?: string; fechaMarcada?: string } = {};
+
+			if (fechaMarcada !== '' && showEntreFechas === false) {
+				payload.fechaMarcada = fechaMarcada;
+			} else if (fechaInicial !== '' && fechaFinal !== '') {
+				console.log('entre fechas', fechaInicial, fechaFinal);
+				payload.fechaInicial = fechaInicial;
+				payload.fechaFinal = fechaFinal;
+			}
+
+			if ((fechaInicial !== '' && fechaFinal !== '') || fechaMarcada !== '' && showEntreFechas === false) {
+				try {
+					const response = await fetch(url, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(payload)
+					});
+					if (response.ok) {
+						registros = await response.json();
+					} else {
+						console.error('Error fetching data:', await response.json());
+					}
+				} catch (error) {
+					console.error('Fetch error:', error);
+				}
+			}
+		});
+	}
 
 	// Buscar el departamento que coincida con el hostname
 	if (data.hostname) {
@@ -68,8 +107,7 @@
 	}
 
 	//variables para configuracion
-	let menuEntreFechas: boolean;
-
+	let showEntreFechas: boolean = false;
 </script>
 
 <body>
@@ -97,11 +135,15 @@
 		<!-- DatePicker y Botones para exportar datos -->
 		<div class="d:flex mb:10">
 			<span> </span>
-			<MainOptions {menuEntreFechas}></MainOptions>
+			<MainOptions
+				{showEntreFechas}
+				on:showEntreFechas={() => (showEntreFechas = !showEntreFechas)}
+			/>
 			<span></span>
 
-			{#if menuEntreFechas}
+			{#if showEntreFechas}
 				<RangeDatePicker></RangeDatePicker>
+				<button >Buscar</button>
 			{:else}
 				<DatePicker fechaMarcada={data.fechaMarcada} on:cambioFecha></DatePicker>
 			{/if}

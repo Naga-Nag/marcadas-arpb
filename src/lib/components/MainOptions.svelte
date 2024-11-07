@@ -5,15 +5,16 @@
 	const dispatch = createEventDispatcher();
 
 	
-	export let menuEntreFechas = false;
 	let menuAbierto = false;
 	function toggleMenu() {
 		menuAbierto = !menuAbierto;
-		/* dispatch('menuEntreFechas', {
-			entreFechas: !menuEntreFechas
-		}); */
 	}
-</script> 
+	
+	export let showEntreFechas: boolean;
+	function dispatchShowEntreFechas() {
+		dispatch('showEntreFechas');
+	}
+</script>
 
 <main on:mouseleave={() => (menuAbierto = false)}>
 	<button class="bg:transparent b:unset mr:10" on:click={toggleMenu}>
@@ -30,7 +31,8 @@
 			in:fade={{ duration: 200 }}
 			out:fade={{ duration: 200 }}
 		>
-			<input type="checkbox" value={menuEntreFechas} on:change={toggleMenu} />Entre Fechas
+			<input type="checkbox" checked={showEntreFechas} on:change={dispatchShowEntreFechas}/>Entre Fechas
+			
 		</div>
 	{/if}
 </main>

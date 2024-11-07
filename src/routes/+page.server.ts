@@ -1,23 +1,25 @@
-import { fetchMarcadaDelDia, fetchMarcadaDetalle, getDepartamentos } from '$lib/server/db'; // Asegúrate de que estas funciones estén bien definidas
+import { fetchMarcadaDelDia, fetchMarcadaDetalle, fetchMarcadaEntreFechas, getDepartamentos } from '$lib/server/db';
+import { fechaStore } from '$lib/stores/fechaStore';
 import { getDepartamentoHost } from '$lib/utils';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async () => {
+    // Set default date (yesterday)
+    const defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
     try {
-        // Obtén la fecha seleccionada desde la query (o usa la fecha de hoy como predeterminada)
-        const fecha = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-        
-        // Obtén los registros y los departamentos
-        let records = await fetchMarcadaDelDia(new Date(fecha));
+        // Fetch initial data for the default date (yesterday)
+        let records = await fetchMarcadaDelDia(new Date(defaultDate));
         const departamentos = await getDepartamentos();
+        
         return {
-            fechaMarcada: fecha,
+            fechaMarcada: defaultDate,
             records,
             departamentos,
-            hostname: getDepartamentoHost(), // Ajusta este valor según lo que necesites
+            hostname: getDepartamentoHost(),
         };
     } catch (error) {
-        console.log('Error al cargar los datos:', error);
+        console.error('Error al cargar los datos:', error);
         return {
             error: 'Error al cargar los datos',
             fechaMarcada: null,

@@ -30,7 +30,7 @@ export async function fetchMarcadaDelDia(fecha: Date): Promise<Array<Record<stri
     const query =
       getDepartamentoHost() === 'PEAP'
         ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDiaPEAP('${fecha.toISOString().substring(0, 10)}');`
-        : `USE ${Bun.env.DB}; SELECT * FROM dbo.MarcadaDelDia('${getDepartamentoHost()}', '${fecha.toISOString().substring(0, 10)}');`;
+        : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDia('${getDepartamentoHost()}', '${fecha.toISOString().substring(0, 10)}');`;
 
     request.query(query);
 
@@ -126,7 +126,7 @@ export async function fetchMarcadaDetalle(uid: number, fecha: Date) {
   });
 }
 
-export async function fetchMarcadaEntreFechas(startDate: Date, endDate: Date) {
+export async function fetchMarcadaEntreFechas(startDate: string, endDate: string): Promise<Array<Record<string, any>>> {
   await sql.connect(sqlConfig);
 
   return new Promise((resolve, reject) => {
@@ -134,7 +134,7 @@ export async function fetchMarcadaEntreFechas(startDate: Date, endDate: Date) {
     const request = new sql.Request();
     request.stream = true;
 
-    const query = `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechas('${startDate.toISOString().substring(0, 10)}', '${endDate.toISOString().substring(0, 10)}');`;
+    const query = `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechas('${startDate}', '${endDate}');`;
     request.query(query);
 
     request.on('row', (row) => {
