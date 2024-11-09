@@ -134,6 +134,7 @@ export async function fetchMarcadaEntreFechas(startDate: string, endDate: string
     const request = new sql.Request();
     request.stream = true;
 
+    console.log('entre fechas', startDate, endDate);
     const query = `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechas('${startDate}', '${endDate}');`;
     request.query(query);
 
@@ -152,3 +153,5 @@ export async function fetchMarcadaEntreFechas(startDate: string, endDate: string
     });
   });
 }
+
+/* console.log(await fetchMarcadaEntreFechas('2024-01-01', '2024-01-04')); */

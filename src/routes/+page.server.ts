@@ -11,7 +11,6 @@ export const load: PageServerLoad = async () => {
         // Fetch initial data for the default date (yesterday)
         let records = await fetchMarcadaDelDia(new Date(defaultDate));
         const departamentos = await getDepartamentos();
-        
         return {
             fechaMarcada: defaultDate,
             records,

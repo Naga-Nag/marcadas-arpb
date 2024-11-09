@@ -40,28 +40,15 @@
 	});
 
 	const columns = table.createColumns([
+		table.column({ header: 'CUIL', accessor: 'CUIL' }),
+		table.column({ header: 'DNI', accessor: 'DNI' }),
 		table.column({ header: 'MR', accessor: 'MR' }),
 		table.column({ header: 'Nombre', accessor: 'Nombre' }),
 		table.column({ header: 'Departamento', accessor: 'Departamento' }),
-		table.column({
-			header: 'Entrada',
-			accessor: (row) => formatTime(row.Entrada),
-			plugins: {
-				sort: {
-					compareFn: (a, b) => compareTime(a, b)
-				}
-			}
-		}),
-		table.column({
-			header: 'Salida',
-			accessor: (row) => formatTime(row.Salida),
-			plugins: {
-				sort: {
-					compareFn: (a, b) => compareTime(a, b)
-				}
-			}
-		}),
+		table.column({ header: 'Entrada', accessor: 'Entrada' }),
+		table.column({ header: 'Salida', accessor: 'Salida' }),
 		table.column({ header: 'Estado', accessor: 'Estado' })
+/* 		,table.column({ header: 'ACTIVO', accessor: 'ACTIVO' }) */
 	]);
 
 	const { headerRows, rows, tableAttrs, tableBodyAttrs } = table.createViewModel(columns);
@@ -73,11 +60,6 @@
 		if (element.scrollTop + element.clientHeight >= element.scrollHeight - 100) {
 			loadMoreData(); // Load more data when near the bottom
 		}
-	}
-
-	function handleChangeDepartamento(selectedDepartamento: string) {
-		loadedItems = pageSize;
-		dataToDisplay.set(registros.slice(0, loadedItems));
 	}
 
 	$: dataToDisplay.set(registros.slice(0, loadedItems));

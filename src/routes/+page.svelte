@@ -28,7 +28,6 @@
 			if (fechaMarcada !== '' && showEntreFechas === false) {
 				payload.fechaMarcada = fechaMarcada;
 			} else if (fechaInicial !== '' && fechaFinal !== '') {
-				console.log('entre fechas', fechaInicial, fechaFinal);
 				payload.fechaInicial = fechaInicial;
 				payload.fechaFinal = fechaFinal;
 			}

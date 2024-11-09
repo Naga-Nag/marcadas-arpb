@@ -1,4 +1,4 @@
-CREATE FUNCTION MarcadaEntreFechas(@FechaInicio DATE, @FechaFin DATE) 
+CREATE OR ALTER FUNCTION MarcadaEntreFechas(@FechaInicio DATE, @FechaFin DATE) 
 RETURNS @Resultado TABLE 
 (
     UID INT,
@@ -23,5 +23,4 @@ BEGIN
     WHERE
         ci.CheckTime BETWEEN @FechaInicio AND @FechaFin
     RETURN
-END
-;
+END;
