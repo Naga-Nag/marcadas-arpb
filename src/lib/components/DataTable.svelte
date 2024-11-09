@@ -4,13 +4,12 @@
 	import { createTable, Subscribe, Render } from 'svelte-headless-table';
 	import { addSortBy } from 'svelte-headless-table/plugins';
 	import { writable } from 'svelte/store';
-	import { tabStore } from '$lib/stores/selDepartamento';
+	import { globalStore } from '$lib/stores/globalStore';
 
 	export let registros: Array<Marcada>;
 
-	tabStore.subscribe(($tab) => {
-		if ($tab.selDepa !== '') {
-			console.log('selDepa:', $tab.selDepa);
+	globalStore.subscribe(($value) => {
+		if ($value.selectedDepartamento !== '') {
 			loadedItems = pageSize;
 			dataToDisplay.set(registros.slice(0, loadedItems));
 		}
@@ -45,10 +44,31 @@
 		table.column({ header: 'MR', accessor: 'MR' }),
 		table.column({ header: 'Nombre', accessor: 'Nombre' }),
 		table.column({ header: 'Departamento', accessor: 'Departamento' }),
-		table.column({ header: 'Entrada', accessor: 'Entrada' }),
-		table.column({ header: 'Salida', accessor: 'Salida' }),
+		table.column({
+			header: 'Marcada',
+			accessor: 'Marcada',
+			
+		}),
+		table.column({
+			header: 'Entrada',
+			accessor: 'Entrada',
+			plugins: {
+				sort: {
+					compareFn: (a, b) => compareTime(a, b, sortOrder)
+				}
+			}
+		}),
+		table.column({
+			header: 'Salida',
+			accessor: 'Salida',
+			plugins: {
+				sort: {
+					compareFn: (a, b) => compareTime(a, b, sortOrder)
+				}
+			}
+		}),
 		table.column({ header: 'Estado', accessor: 'Estado' })
-/* 		,table.column({ header: 'ACTIVO', accessor: 'ACTIVO' }) */
+		/* 		,table.column({ header: 'ACTIVO', accessor: 'ACTIVO' }) */
 	]);
 
 	const { headerRows, rows, tableAttrs, tableBodyAttrs } = table.createViewModel(columns);
@@ -60,6 +80,11 @@
 		if (element.scrollTop + element.clientHeight >= element.scrollHeight - 100) {
 			loadMoreData(); // Load more data when near the bottom
 		}
+	}
+	let sortOrder: 'asc' | 'desc' | undefined;
+	function toggleSortOrder() {
+		sortOrder = sortOrder === 'asc' ? 'desc' : sortOrder === 'desc' ? undefined : 'asc';
+		console.log('sortOrder:', sortOrder);
 	}
 
 	$: dataToDisplay.set(registros.slice(0, loadedItems));
@@ -73,7 +98,13 @@
 					<tr {...rowAttrs}>
 						{#each headerRow.cells as cell (cell.id)}
 							<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
-								<th {...attrs} on:click={props.sort.toggle}>
+								<th
+									{...attrs}
+									on:click={(event) => {
+										props.sort.toggle(event);
+										toggleSortOrder();
+									}}
+								>
 									<Render of={cell.render()} />
 									{#if props.sort.order === 'asc'}
 										▼

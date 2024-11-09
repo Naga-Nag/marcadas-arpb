@@ -4,8 +4,7 @@ import { getDepartamentoHost } from '$lib/utils';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-    // Set default date (yesterday)
-    const defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    let defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
     try {
         // Fetch initial data for the default date (yesterday)

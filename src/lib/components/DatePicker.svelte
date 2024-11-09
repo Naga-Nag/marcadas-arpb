@@ -1,33 +1,29 @@
+<!-- 
+	events: fechaDefinida 
+-->
+
 <script lang="ts">
-	import { fechaStore, updatefecha } from '$lib/stores/fechaStore';
 	import { createEventDispatcher } from 'svelte';
 
 	export let fechaMarcada: string = '';
 
 	const dispatch = createEventDispatcher();
 
-	fechaStore.subscribe(($fechas) => {
-		fechaMarcada = $fechas.fechaMarcada;
-	});
-	
-	function onCambioFecha() {
-		dispatch('cambioFecha', {
+	function onCambioFecha(fechaMarcada: string) {
+		dispatch('fechaDefinida', {
 			fecha: fechaMarcada
 		});
 	}
 	function handleInputChange(e: any) {
-		updatefecha(e.target.value);
-		onCambioFecha();
+		console.log('DatePicker selected date:', e.target.value);
+		onCambioFecha(e.target.value);
 	}
 
 	function setDateAyer() {
 		if (fechaMarcada !== null) {
 			let tomorrow = new Date(fechaMarcada);
 			tomorrow.setDate(tomorrow.getDate() - 1);
-			updatefecha(tomorrow.toISOString().split('T')[0]);
-		} else {
-			// Handle the case where data.fechaMarcada is null
-			// For example, you could set a default date or throw an error
+			onCambioFecha(tomorrow.toISOString().split('T')[0]);
 		}
 	}
 
@@ -35,10 +31,7 @@
 		if (fechaMarcada !== null) {
 			let yesterday = new Date(fechaMarcada);
 			yesterday.setDate(yesterday.getDate() + 1);
-			updatefecha(yesterday.toISOString().split('T')[0]);
-		} else {
-			// Handle the case where data.fechaMarcada is null
-			// For example, you could set a default date or throw an error
+			onCambioFecha(yesterday.toISOString().split('T')[0]);
 		}
 	}
 </script>

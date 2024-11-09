@@ -7,8 +7,7 @@
 	import MainOptions from '$lib/components/MainOptions.svelte';
 	import DatePicker from '$lib/components/DatePicker.svelte';
 	import { getEstado } from '$lib/utils.js';
-	import { fechaStore } from '$lib/stores/fechaStore';
-	import { onMount } from 'svelte';
+	import { globalStore } from '$lib/stores/globalStore';
 
 	// Variables para búsqueda y departamentos
 	let registros = data.records;
@@ -16,41 +15,14 @@
 	let departamentos: string[] = String(data.departamentos).split(',') ?? [];
 	let selectedDepartamento: string = data.hostname ?? '';
 
-	/// Fetch data reactively when fechaStore changes
+	
 	$: {
-		// Await `fechaStore` values reactively
-		fechaStore.subscribe(async ($fechas) => {
-			let { fechaInicial, fechaFinal, fechaMarcada } = $fechas;
-
-			let url = `/api/fetchRecords/`;
-			const payload: { fechaInicial?: string; fechaFinal?: string; fechaMarcada?: string } = {};
-
-			if (fechaMarcada !== '' && showEntreFechas === false) {
-				payload.fechaMarcada = fechaMarcada;
-			} else if (fechaInicial !== '' && fechaFinal !== '') {
-				payload.fechaInicial = fechaInicial;
-				payload.fechaFinal = fechaFinal;
-			}
-
-			if ((fechaInicial !== '' && fechaFinal !== '') || fechaMarcada !== '' && showEntreFechas === false) {
-				try {
-					const response = await fetch(url, {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify(payload)
-					});
-					if (response.ok) {
-						registros = await response.json();
-					} else {
-						console.error('Error fetching data:', await response.json());
-					}
-				} catch (error) {
-					console.error('Fetch error:', error);
-				}
-			}
-		});
+		globalStore.subscribe((value) => {
+			selectedDepartamento = value.selectedDepartamento
+			showEntreFechas = value.showEntreFechas
+		})
+		console.log('selectedDepartamento:', selectedDepartamento);
+		console.log('showEntreFechas:', showEntreFechas);
 	}
 
 	// Buscar el departamento que coincida con el hostname
@@ -105,7 +77,50 @@
 		return datos;
 	}
 
-	//variables para configuracion
+	async function rangoFechalistener(fechaInicial: string, fechaFinal: string) {
+		let url = `/api/fetchEntreFechas/`;
+		let payload = { fechaInicial, fechaFinal };
+		try {
+			console.log('Fetching data... MarcadaEntreFechas:', fechaInicial, fechaFinal);
+			const response = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(payload)
+			});
+			if (response.ok) {
+				registros = await response.json();
+			} else {
+				console.error('Error fetching data:', await response.json());
+			}
+		} catch (error) {
+			console.error('Fetch error:', error);
+		}
+	}
+
+	async function fechaListener(fechaMarcada: string) {
+		let url = `/api/fetchMarcadas/`;
+		let payload = { fechaMarcada };
+		try {
+			console.log('Fetching data... MarcadaDelDia:', fechaMarcada);
+			const response = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(payload)
+			});
+			if (response.ok) {
+				registros = await response.json();
+			} else {
+				console.error('Error fetching data:', await response.json());
+			}
+		} catch (error) {
+			console.error('Fetch error:', error);
+		}
+	}
+
 	let showEntreFechas: boolean = false;
 </script>
 
@@ -141,10 +156,16 @@
 			<span></span>
 
 			{#if showEntreFechas}
-				<RangeDatePicker></RangeDatePicker>
-				<button >Buscar</button>
+				<RangeDatePicker
+					on:rangoFechaDefinido={(e) =>
+						rangoFechalistener(e.detail.fechaInicial, e.detail.fechaFinal)}
+				></RangeDatePicker>
+				<button>Buscar</button>
 			{:else}
-				<DatePicker fechaMarcada={data.fechaMarcada} on:cambioFecha></DatePicker>
+				<DatePicker
+					fechaMarcada={data.fechaMarcada}
+					on:fechaDefinida={(e) => fechaListener(e.detail.fecha)}
+				></DatePicker>
 			{/if}
 
 			<BtnDescargar

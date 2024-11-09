@@ -1,5 +1,5 @@
-import { getDepartamentoHost } from '$lib/utils';
-import { differenceInMinutes, parseISO } from 'date-fns';
+import { formatTime, getDepartamentoHost } from '$lib/utils';
+import { differenceInMinutes, format, parseISO } from 'date-fns';
 import sql from 'mssql';
 
 const sqlConfig = {
@@ -36,6 +36,8 @@ export async function fetchMarcadaDelDia(fecha: Date): Promise<Array<Record<stri
 
     // Event handler for each row
     request.on('row', (row) => {
+      row.Entrada = formatTime(row.Entrada);
+      row.Salida = formatTime(row.Salida);
       rows.push(row); // Accumulate rows
     });
 
@@ -134,11 +136,12 @@ export async function fetchMarcadaEntreFechas(startDate: string, endDate: string
     const request = new sql.Request();
     request.stream = true;
 
-    console.log('entre fechas', startDate, endDate);
     const query = `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechas('${startDate}', '${endDate}');`;
+    console.log('Query fetchMarcadaEntreFechas:', query);
     request.query(query);
 
     request.on('row', (row) => {
+      row.Marcada = formatTime(row.Marcada);
       rows.push(row);
     });
 
