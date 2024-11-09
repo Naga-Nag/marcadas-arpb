@@ -1,5 +1,4 @@
-import { fetchMarcadaDelDia, fetchMarcadaDetalle, fetchMarcadaEntreFechas, getDepartamentos } from '$lib/server/db';
-import { fechaStore } from '$lib/stores/fechaStore';
+import { fetchMarcadaDelDia, getDepartamentos } from '$lib/server/db';
 import { getDepartamentoHost } from '$lib/utils';
 import type { PageServerLoad } from './$types';
 

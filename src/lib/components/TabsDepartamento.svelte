@@ -2,12 +2,12 @@
 	export let departamentos: string[];
 	export let selectedDepartamento: string;
 	
-	import { globalStore } from '$lib/stores/globalStore';
+	import { updateSelectedDepartamento} from '$lib/stores/globalStore';
 
 	function selectDepartamento(departamento: string) {
 		if (selectedDepartamento !== departamento) {
 			selectedDepartamento = departamento;
-			globalStore.update((state) => ({ ...state, selectedDepartamento: departamento }));
+			updateSelectedDepartamento(departamento);
 		}
 	}
 

@@ -2,32 +2,28 @@
 	import type { Marcada } from '$lib/types';
 	import { formatTime, compareTime } from '$lib/utils.js';
 	import { createTable, Subscribe, Render } from 'svelte-headless-table';
+	import { addHiddenColumns } from 'svelte-headless-table/plugins';
 	import { addSortBy } from 'svelte-headless-table/plugins';
 	import { writable } from 'svelte/store';
 	import { globalStore } from '$lib/stores/globalStore';
 
 	export let registros: Array<Marcada>;
+	let showExtraColumns: boolean;
 
 	globalStore.subscribe(($value) => {
 		if ($value.selectedDepartamento !== '') {
 			loadedItems = pageSize;
 			dataToDisplay.set(registros.slice(0, loadedItems));
 		}
+		showExtraColumns = $value.showEntreFechas;
 	});
 
 	const pageSize = 40;
-	let loadedItems = pageSize; // Initial load count
-	const dataToDisplay = writable(registros.slice(0, loadedItems)); // Data currently displayed
-
-	// Update displayed data as items are loaded
-	function loadMoreData() {
-		if (loadedItems < registros.length) {
-			loadedItems += pageSize;
-			dataToDisplay.set(registros.slice(0, loadedItems));
-		}
-	}
+	let loadedItems = pageSize;
+	const dataToDisplay = writable(registros.slice(0, loadedItems));
 
 	const table = createTable(dataToDisplay, {
+		hideCols: addHiddenColumns(),
 		sort: addSortBy({
 			initialSortKeys: [
 				{
@@ -46,8 +42,7 @@
 		table.column({ header: 'Departamento', accessor: 'Departamento' }),
 		table.column({
 			header: 'Marcada',
-			accessor: 'Marcada',
-			
+			accessor: 'Marcada'
 		}),
 		table.column({
 			header: 'Entrada',
@@ -68,27 +63,54 @@
 			}
 		}),
 		table.column({ header: 'Estado', accessor: 'Estado' })
-		/* 		,table.column({ header: 'ACTIVO', accessor: 'ACTIVO' }) */
 	]);
 
-	const { headerRows, rows, tableAttrs, tableBodyAttrs } = table.createViewModel(columns);
+	const { flatColumns, headerRows, rows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
+	const { hiddenColumnIds } = pluginStates.hideCols;
+	const ids = flatColumns.map((c) => c.id);
+	let hideForId = Object.fromEntries(ids.map((id) => [id, false]));
 
-	// Scroll event handler
-	function handleScroll(event: Event) {
-		const element = event.target as HTMLElement;
-		// Check if the user has scrolled near the bottom of the container
-		if (element.scrollTop + element.clientHeight >= element.scrollHeight - 100) {
-			loadMoreData(); // Load more data when near the bottom
+	$: {
+		// Toggle columns based on `showExtraColumns`
+		hideForId.Entrada = showExtraColumns;
+		hideForId.Salida = showExtraColumns;
+		hideForId.Estado = showExtraColumns;
+
+		hideForId.Marcada = !showExtraColumns;
+		
+		$hiddenColumnIds = Object.entries(hideForId)
+			.filter(([, hide]) => hide)
+			.map(([id]) => id);
+	}
+
+	function loadMoreData() {
+		if (loadedItems < registros.length) {
+			loadedItems += pageSize;
+			dataToDisplay.set(registros.slice(0, loadedItems));
 		}
 	}
+
+	function handleScroll(event: Event) {
+		const element = event.target as HTMLElement;
+		if (element.scrollTop + element.clientHeight >= element.scrollHeight - 100) {
+			loadMoreData();
+		}
+	}
+
 	let sortOrder: 'asc' | 'desc' | undefined;
 	function toggleSortOrder() {
 		sortOrder = sortOrder === 'asc' ? 'desc' : sortOrder === 'desc' ? undefined : 'asc';
-		console.log('sortOrder:', sortOrder);
 	}
 
 	$: dataToDisplay.set(registros.slice(0, loadedItems));
 </script>
+
+<!-- {#each ids as id}
+  <div>
+    <input id="hide-{id}" type="checkbox" bind:checked={hideForId[id]} />
+    <label for="hide-{id}">{id}</label>
+  </div>
+{/each} -->
 
 <div class="table-container" on:scroll={handleScroll}>
 	<table {...$tableAttrs} class="table">
@@ -138,9 +160,9 @@
 
 <style>
 	.table-container {
-		min-height: 550px; /* Altura mínima de la tabla */
-		max-height: 550px; /* Altura máxima del área de la tabla */
-		overflow-y: auto; /* Habilitar el scroll vertical */
+		min-height: 550px;
+		max-height: 550px;
+		overflow-y: auto;
 	}
 
 	.table {
@@ -157,19 +179,7 @@
 	th {
 		background-color: #f4f4f4;
 		position: sticky;
-		top: 0; /* Mantener el encabezado fijo en la parte superior */
+		top: 0;
 		z-index: 1;
-	}
-
-	tr.no-marcado {
-		border: 2px solid red;
-	}
-
-	tr.falta-marcado {
-		border: 2px solid orange;
-	}
-
-	tbody tr {
-		border-collapse: separate;
 	}
 </style>

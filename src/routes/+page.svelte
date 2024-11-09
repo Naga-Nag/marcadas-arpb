@@ -7,22 +7,20 @@
 	import MainOptions from '$lib/components/MainOptions.svelte';
 	import DatePicker from '$lib/components/DatePicker.svelte';
 	import { getEstado } from '$lib/utils.js';
-	import { globalStore } from '$lib/stores/globalStore';
+	import { globalStore, toggleEntreFechas } from '$lib/stores/globalStore';
 
 	// Variables para búsqueda y departamentos
 	let registros = data.records;
 	let searchText = '';
 	let departamentos: string[] = String(data.departamentos).split(',') ?? [];
-	let selectedDepartamento: string = data.hostname ?? '';
+	let selectedDepartamento: string;
+	let showEntreFechas: boolean;
 
-	
 	$: {
 		globalStore.subscribe((value) => {
-			selectedDepartamento = value.selectedDepartamento
-			showEntreFechas = value.showEntreFechas
-		})
-		console.log('selectedDepartamento:', selectedDepartamento);
-		console.log('showEntreFechas:', showEntreFechas);
+			selectedDepartamento = value.selectedDepartamento;
+			showEntreFechas = value.showEntreFechas;
+		});
 	}
 
 	// Buscar el departamento que coincida con el hostname
@@ -121,7 +119,11 @@
 		}
 	}
 
-	let showEntreFechas: boolean = false;
+	function toggleEntreFechasResetData() {
+		toggleEntreFechas();
+		registros = [];
+	}
+
 </script>
 
 <body>
@@ -149,10 +151,7 @@
 		<!-- DatePicker y Botones para exportar datos -->
 		<div class="d:flex mb:10">
 			<span> </span>
-			<MainOptions
-				{showEntreFechas}
-				on:showEntreFechas={() => (showEntreFechas = !showEntreFechas)}
-			/>
+			<MainOptions {showEntreFechas} on:showEntreFechas={toggleEntreFechasResetData} />
 			<span></span>
 
 			{#if showEntreFechas}
@@ -160,7 +159,6 @@
 					on:rangoFechaDefinido={(e) =>
 						rangoFechalistener(e.detail.fechaInicial, e.detail.fechaFinal)}
 				></RangeDatePicker>
-				<button>Buscar</button>
 			{:else}
 				<DatePicker
 					fechaMarcada={data.fechaMarcada}

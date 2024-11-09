@@ -8,7 +8,7 @@
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
 
-	let fechaInicial = writable('2023-12-18');
+	let fechaInicial = writable('');
 	let fechaFinal = writable('');
 
 	function handleDateChange() {
