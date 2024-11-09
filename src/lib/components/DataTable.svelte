@@ -22,6 +22,11 @@
 	let loadedItems = pageSize;
 	const dataToDisplay = writable(registros.slice(0, loadedItems));
 
+	let sortOrder: 'asc' | 'desc' | undefined;
+	function toggleSortOrder() {
+		sortOrder = sortOrder === 'asc' ? 'desc' : sortOrder === 'desc' ? undefined : 'asc';
+	}
+	
 	function loadMoreData() {
 		if (loadedItems < registros.length) {
 			loadedItems += pageSize;
@@ -95,13 +100,6 @@
 		$hiddenColumnIds = Object.entries(hideForId)
 			.filter(([, hide]) => hide)
 			.map(([id]) => id);
-	}
-
-	
-
-	let sortOrder: 'asc' | 'desc' | undefined;
-	function toggleSortOrder() {
-		sortOrder = sortOrder === 'asc' ? 'desc' : sortOrder === 'desc' ? undefined : 'asc';
 	}
 
 	$: dataToDisplay.set(registros.slice(0, loadedItems));
