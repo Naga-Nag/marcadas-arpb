@@ -22,6 +22,20 @@
 	let loadedItems = pageSize;
 	const dataToDisplay = writable(registros.slice(0, loadedItems));
 
+	function loadMoreData() {
+		if (loadedItems < registros.length) {
+			loadedItems += pageSize;
+			dataToDisplay.set(registros.slice(0, loadedItems));
+		}
+	}
+
+	function handleScroll(event: Event) {
+		const element = event.target as HTMLElement;
+		if (element.scrollTop + element.clientHeight >= element.scrollHeight - 100) {
+			loadMoreData();
+		}
+	}
+
 	const table = createTable(dataToDisplay, {
 		hideCols: addHiddenColumns(),
 		sort: addSortBy({
@@ -83,19 +97,7 @@
 			.map(([id]) => id);
 	}
 
-	function loadMoreData() {
-		if (loadedItems < registros.length) {
-			loadedItems += pageSize;
-			dataToDisplay.set(registros.slice(0, loadedItems));
-		}
-	}
-
-	function handleScroll(event: Event) {
-		const element = event.target as HTMLElement;
-		if (element.scrollTop + element.clientHeight >= element.scrollHeight - 100) {
-			loadMoreData();
-		}
-	}
+	
 
 	let sortOrder: 'asc' | 'desc' | undefined;
 	function toggleSortOrder() {
