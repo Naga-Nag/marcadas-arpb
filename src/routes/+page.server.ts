@@ -1,6 +1,7 @@
 import { fetchMarcadaDelDia, getDepartamentos } from '$lib/server/db';
 import { getDepartamentoHost } from '$lib/utils';
 import type { PageServerLoad } from './$types';
+import { globalStore } from '$lib/stores/globalStore';
 
 export const load: PageServerLoad = async () => {
     let defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];

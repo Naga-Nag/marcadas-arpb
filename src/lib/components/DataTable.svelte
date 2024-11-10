@@ -2,46 +2,35 @@
 	import type { Marcada } from '$lib/types';
 	import { formatTime, compareTime } from '$lib/utils.js';
 	import { createTable, Subscribe, Render } from 'svelte-headless-table';
-	import { addHiddenColumns } from 'svelte-headless-table/plugins';
+	import { addHiddenColumns, addPagination } from 'svelte-headless-table/plugins';
 	import { addSortBy } from 'svelte-headless-table/plugins';
 	import { writable } from 'svelte/store';
 	import { globalStore } from '$lib/stores/globalStore';
 
 	export let registros: Array<Marcada>;
+		
 	let showExtraColumns: boolean;
+	let sortOrder: 'asc' | 'desc' | undefined;
+
 
 	globalStore.subscribe(($value) => {
-		if ($value.selectedDepartamento !== '') {
-			loadedItems = pageSize;
-			dataToDisplay.set(registros.slice(0, loadedItems));
-		}
 		showExtraColumns = $value.showEntreFechas;
 	});
 
-	const pageSize = 40;
-	let loadedItems = pageSize;
-	const dataToDisplay = writable(registros.slice(0, loadedItems));
-
-	let sortOrder: 'asc' | 'desc' | undefined;
-	function toggleSortOrder() {
-		sortOrder = sortOrder === 'asc' ? 'desc' : sortOrder === 'desc' ? undefined : 'asc';
-	}
 	
-	function loadMoreData() {
-		if (loadedItems < registros.length) {
-			loadedItems += pageSize;
-			dataToDisplay.set(registros.slice(0, loadedItems));
-		}
-	}
+	const dataToDisplay = writable(registros);
+	$: dataToDisplay.set(registros);
 
+	
 	function handleScroll(event: Event) {
 		const element = event.target as HTMLElement;
-		if (element.scrollTop + element.clientHeight >= element.scrollHeight - 100) {
-			loadMoreData();
+		if (element.scrollTop + element.clientHeight >= element.scrollHeight - 100 && $hasNextPage) {
+			$pageSize += 20;
 		}
 	}
 
 	const table = createTable(dataToDisplay, {
+		page: addPagination(),
 		hideCols: addHiddenColumns(),
 		sort: addSortBy({
 			initialSortKeys: [
@@ -84,7 +73,11 @@
 		table.column({ header: 'Estado', accessor: 'Estado' })
 	]);
 
-	const { flatColumns, headerRows, rows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
+	const { flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
+	const { pageIndex, pageCount, pageSize, hasNextPage, hasPreviousPage } = pluginStates.page;
+
+	$pageSize = 40;
+
 	const { hiddenColumnIds } = pluginStates.hideCols;
 	const ids = flatColumns.map((c) => c.id);
 	let hideForId = Object.fromEntries(ids.map((id) => [id, false]));
@@ -102,7 +95,12 @@
 			.map(([id]) => id);
 	}
 
-	$: dataToDisplay.set(registros.slice(0, loadedItems));
+	
+	function toggleSortOrder() {
+		sortOrder = sortOrder === 'asc' ? 'desc' : sortOrder === 'desc' ? undefined : 'asc';
+	}
+
+	$: console.log($pageSize);
 </script>
 
 <!-- {#each ids as id}
@@ -141,7 +139,7 @@
 			{/each}
 		</thead>
 		<tbody {...$tableBodyAttrs} class="bg:white">
-			{#each $rows as row (row.id)}
+			{#each $pageRows as row (row.id)}
 				<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
 					<tr {...rowAttrs}>
 						{#each row.cells as cell (cell.id)}

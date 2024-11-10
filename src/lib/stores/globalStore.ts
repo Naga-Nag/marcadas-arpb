@@ -1,9 +1,11 @@
 import { writable } from 'svelte/store';
-import os from 'os';
+import { getDepartamentoHost } from '$lib/utils';
+
+
 
 export const globalStore = writable({
     showEntreFechas: false,
-    selectedDepartamento: ''
+    selectedDepartamento: '',
 });
 
 export function updateSelectedDepartamento(departamento: string) {
@@ -13,5 +15,6 @@ export function updateSelectedDepartamento(departamento: string) {
 export function toggleEntreFechas() {
     globalStore.update((state) => ({ ...state, showEntreFechas: !state.showEntreFechas }));
 }
+
 
 globalStore.subscribe(value => console.log(value));

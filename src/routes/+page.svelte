@@ -11,22 +11,15 @@
 
 	// Variables para búsqueda y departamentos
 	let registros = data.records;
-	let searchText = '';
+	let searchText: string = '';
 	let departamentos: string[] = String(data.departamentos).split(',') ?? [];
-	let selectedDepartamento: string;
+	let selectedDepartamento: string = '';
 	let showEntreFechas: boolean;
 
-	$: {
-		globalStore.subscribe((value) => {
-			selectedDepartamento = value.selectedDepartamento;
-			showEntreFechas = value.showEntreFechas;
-		});
-	}
-
-	// Buscar el departamento que coincida con el hostname
-	if (data.hostname) {
-		selectedDepartamento = departamentos.find((depto) => depto === data.hostname) ?? '';
-	}
+	globalStore.subscribe((value) => {
+		selectedDepartamento = value.selectedDepartamento;
+		showEntreFechas = value.showEntreFechas;
+	});
 
 	// Computamos los datos filtrados en función del departamento seleccionado, el texto de búsqueda y la ordenación
 	$: filteredData = registros
@@ -59,7 +52,7 @@
 			Estado: getEstado(persona)
 		}));
 
-	$: filteredAusentesDepartamento = filterAusentesDepartamento(selectedDepartamento);
+	let filteredAusentesDepartamento = filterAusentesDepartamento(selectedDepartamento);
 
 	function filterAusentes() {
 		return data.records.filter(
@@ -123,7 +116,6 @@
 		toggleEntreFechas();
 		registros = [];
 	}
-
 </script>
 
 <body>
