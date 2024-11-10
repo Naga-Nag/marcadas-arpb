@@ -9,21 +9,21 @@
 
 	const dispatch = createEventDispatcher();
 
-	function onCambioFecha(fechaMarcada: string) {
+	function onFechaDefinida(fechaMarcada: string) {
 		dispatch('fechaDefinida', {
 			fecha: fechaMarcada
 		});
 	}
 	function handleInputChange(e: any) {
 		console.log('DatePicker selected date:', e.target.value);
-		onCambioFecha(e.target.value);
+		onFechaDefinida(e.target.value);
 	}
 
 	function setDateAyer() {
 		if (fechaMarcada !== null) {
 			let tomorrow = new Date(fechaMarcada);
 			tomorrow.setDate(tomorrow.getDate() - 1);
-			onCambioFecha(tomorrow.toISOString().split('T')[0]);
+			onFechaDefinida(tomorrow.toISOString().split('T')[0]);
 		}
 	}
 
@@ -31,7 +31,7 @@
 		if (fechaMarcada !== null) {
 			let yesterday = new Date(fechaMarcada);
 			yesterday.setDate(yesterday.getDate() + 1);
-			onCambioFecha(yesterday.toISOString().split('T')[0]);
+			onFechaDefinida(yesterday.toISOString().split('T')[0]);
 		}
 	}
 </script>

@@ -1,45 +1,25 @@
 <script lang="ts">
 	import type { Marcada } from '$lib/types';
-	import { formatTime, compareTime } from '$lib/utils.js';
+	import { sortTime, sortString, sortNumber, sortEstado } from '$lib/utils';
 	import { createTable, Subscribe, Render } from 'svelte-headless-table';
-	import { addHiddenColumns, addPagination } from 'svelte-headless-table/plugins';
-	import { addSortBy } from 'svelte-headless-table/plugins';
+	import { addHiddenColumns, addPagination, addSortBy } from 'svelte-headless-table/plugins';
 	import { writable } from 'svelte/store';
 	import { globalStore } from '$lib/stores/globalStore';
 
 	export let registros: Array<Marcada>;
-		
 	let showExtraColumns: boolean;
-	let sortOrder: 'asc' | 'desc' | undefined;
-
-
-	globalStore.subscribe(($value) => {
-		showExtraColumns = $value.showEntreFechas;
-	});
-
-	
 	const dataToDisplay = writable(registros);
-	$: dataToDisplay.set(registros);
-
-	
-	function handleScroll(event: Event) {
-		const element = event.target as HTMLElement;
-		if (element.scrollTop + element.clientHeight >= element.scrollHeight - 100 && $hasNextPage) {
-			$pageSize += 20;
-		}
-	}
 
 	const table = createTable(dataToDisplay, {
 		page: addPagination(),
 		hideCols: addHiddenColumns(),
 		sort: addSortBy({
-			initialSortKeys: [
-				{
-					id: 'Estado',
-					order: 'desc'
-				}
-			]
+			serverSide: true
 		})
+	});
+
+	globalStore.subscribe(($value) => {
+		showExtraColumns = $value.showEntreFechas;
 	});
 
 	const columns = table.createColumns([
@@ -54,26 +34,17 @@
 		}),
 		table.column({
 			header: 'Entrada',
-			accessor: 'Entrada',
-			plugins: {
-				sort: {
-					compareFn: (a, b) => compareTime(a, b, sortOrder)
-				}
-			}
+			accessor: 'Entrada'
 		}),
 		table.column({
 			header: 'Salida',
-			accessor: 'Salida',
-			plugins: {
-				sort: {
-					compareFn: (a, b) => compareTime(a, b, sortOrder)
-				}
-			}
+			accessor: 'Salida'
 		}),
 		table.column({ header: 'Estado', accessor: 'Estado' })
 	]);
 
-	const { flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
+	const { flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates } =
+		table.createViewModel(columns);
 	const { pageIndex, pageCount, pageSize, hasNextPage, hasPreviousPage } = pluginStates.page;
 
 	$pageSize = 40;
@@ -89,18 +60,38 @@
 		hideForId.Estado = showExtraColumns;
 
 		hideForId.Marcada = !showExtraColumns;
-		
+
 		$hiddenColumnIds = Object.entries(hideForId)
 			.filter(([, hide]) => hide)
 			.map(([id]) => id);
 	}
 
-	
-	function toggleSortOrder() {
-		sortOrder = sortOrder === 'asc' ? 'desc' : sortOrder === 'desc' ? undefined : 'asc';
+	function handleScroll(event: Event) {
+		const element = event.target as HTMLElement;
+		if (element.scrollTop + element.clientHeight >= element.scrollHeight - 100 && $hasNextPage) {
+			$pageSize += 20;
+		}
 	}
 
-	$: console.log($pageSize);
+	function toggleSortOrder(sortOrder: 'asc' | 'desc' | undefined, sortCol: string) {
+		console.log('DataTable: toggleSortOrder', sortOrder, sortCol);
+		if (sortCol === 'Entrada' || sortCol === 'Salida' || sortCol === 'Marcada') {
+			registros = registros.sort((a, b) => sortTime(a[sortCol], b[sortCol], sortOrder));
+		}
+		if (sortCol === 'Estado') {
+			registros = registros.sort((a, b) => {
+				return sortEstado(a, b, sortOrder);
+			});
+		}
+		if (sortCol === 'MR' || sortCol === 'CUIL' || sortCol === 'DNI') {
+			registros = registros.sort((a, b) => sortNumber(a, b, sortOrder));
+		}
+		if (sortCol === 'Departamento' || sortCol === 'Nombre') {
+			registros = registros.sort((a, b) => sortString(a[sortCol], b[sortCol], sortOrder));
+		}
+	}
+
+	$: dataToDisplay.set(registros);
 </script>
 
 <!-- {#each ids as id}
@@ -122,13 +113,16 @@
 									{...attrs}
 									on:click={(event) => {
 										props.sort.toggle(event);
-										toggleSortOrder();
+									}}
+									on:click={() => {
+										//INFO: Solo asi puedo ver prop.sort una vez actualizado
+										toggleSortOrder(props.sort.order, cell.id);
 									}}
 								>
 									<Render of={cell.render()} />
-									{#if props.sort.order === 'asc'}
+									{#if props.sort.order === 'desc'}
 										▼
-									{:else if props.sort.order === 'desc'}
+									{:else if props.sort.order === 'asc'}
 										▲
 									{/if}
 								</th>

@@ -148,13 +148,11 @@
 
 			{#if showEntreFechas}
 				<RangeDatePicker
-					on:rangoFechaDefinido={(e) =>
-						rangoFechalistener(e.detail.fechaInicial, e.detail.fechaFinal)}
+					on:rangoFechaDefinido={(e) => rangoFechalistener(e.detail.fechaInicial, e.detail.fechaFinal)}
 				></RangeDatePicker>
 			{:else}
 				<DatePicker
-					fechaMarcada={data.fechaMarcada}
-					on:fechaDefinida={(e) => fechaListener(e.detail.fecha)}
+					fechaMarcada={data.fechaMarcada} on:fechaDefinida={(e) => fechaListener(e.detail.fecha)}
 				></DatePicker>
 			{/if}
 

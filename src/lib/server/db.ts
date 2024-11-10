@@ -19,41 +19,71 @@ const sqlConfig = {
   stream: true,  // Enable streaming
 };
 
-export async function fetchMarcadaDelDia(fecha: Date): Promise<Array<Record<string, any>>> {
+export async function fetchMarcadaDelDia(
+  fecha: string,
+  sortColumn: string = 'Estado', // Default sort column
+  sortOrder: 'asc' | 'desc' | undefined = 'asc' // Default order
+): Promise<Array<Record<string, any>>> {
+
   await sql.connect(sqlConfig);
 
   return new Promise((resolve, reject) => {
     const rows: Array<Record<string, any>> = [];
     const request = new sql.Request();
 
-    // Set up the query based on the department host
-    const query =
-      getDepartamentoHost() === 'PEAP'
-        ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDiaPEAP('${fecha.toISOString().substring(0, 10)}');`
-        : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDia('${getDepartamentoHost()}', '${fecha.toISOString().substring(0, 10)}');`;
+    // Modificamos el CASE en el ORDER BY para respetar el sortOrder de Estado
+    const estadoOrder = sortOrder === 'desc'
+      ? `CASE Estado 
+           WHEN 'Completo' THEN 1 
+           WHEN 'Incompleto' THEN 2 
+           WHEN 'Ausente' THEN 3 
+           ELSE 4 
+         END`
+      : `CASE Estado 
+           WHEN 'Ausente' THEN 1 
+           WHEN 'Incompleto' THEN 2 
+           WHEN 'Completo' THEN 3 
+           ELSE 4 
+         END`;
+
+    const orderByClause = sortColumn !== 'Estado' && sortOrder
+      ? `, CASE WHEN ${sortColumn} IS NULL THEN 1 ELSE 0 END, ${sortColumn} ${sortOrder}`
+      : '';
+
+    const query = getDepartamentoHost() === 'PEAP'
+      ? `USE ${Bun.env.DB}; 
+          SELECT * 
+          FROM MarcadaDelDiaPEAP('${fecha}') 
+          ORDER BY ${estadoOrder}${orderByClause}`
+      : `USE ${Bun.env.DB}; 
+          SELECT * 
+          FROM MarcadaDelDia('${getDepartamentoHost()}', '${fecha}') 
+          ORDER BY ${estadoOrder}${orderByClause}`;
 
     request.query(query);
 
-    // Event handler for each row
+    // Event handler para cada fila
     request.on('row', (row) => {
       row.Entrada = formatTime(row.Entrada);
       row.Salida = formatTime(row.Salida);
-      rows.push(row); // Accumulate rows
+      rows.push(row); // Acumulamos las filas
     });
 
-    // Handle errors
+    // Manejo de errores
     request.on('error', (err) => {
       console.error('Error fetching data:', err);
       reject(err);
     });
 
-    // Finalize on completion
+    // Finalizamos al completar
     request.on('done', () => {
       const sanitizedData = JSON.parse(JSON.stringify(rows));
       resolve(sanitizedData);
     });
   });
 }
+
+/* console.log(await fetchMarcadaDelDia('2023-08-03', 'Estado', 'asc')); */
 
 export async function getDepartamentos(): Promise<Array<Record<string, any>>> {
   await sql.connect(sqlConfig);

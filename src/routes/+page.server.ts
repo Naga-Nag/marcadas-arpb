@@ -8,7 +8,7 @@ export const load: PageServerLoad = async () => {
 
     try {
         // Fetch initial data for the default date (yesterday)
-        let records = await fetchMarcadaDelDia(new Date(defaultDate));
+        let records = await fetchMarcadaDelDia(defaultDate);
         const departamentos = await getDepartamentos();
         return {
             fechaMarcada: defaultDate,

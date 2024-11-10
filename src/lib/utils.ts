@@ -49,13 +49,43 @@ export function formatTime(dateString: string): string {
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-export function compareTime(a: string, b: string, sortOrder: 'asc' | 'desc' | undefined) {
+export function sortTime(a: string, b: string, sortOrder: 'asc' | 'desc' | undefined) {
   // Check for null or empty values
-  if (a === '') return sortOrder === 'asc' ? -1 : 1;  // Empty values go to the bottom for ascending sort
-  if (b === '') return sortOrder === 'asc' ? 1 : -1;  // Empty values go to the bottom for descending sort
+  if (a === '') return sortOrder === 'asc' ? 1 : sortOrder === 'desc' ? -1 : 1; // Empty values go to the bottom for ascending sort
+  if (b === '') return sortOrder === 'asc' ? -1 : sortOrder === 'desc' ? 1 : -1; // Empty values go to the bottom for descending sort
 
   // Compare non-null dates
   return new Date(a).getTime() - new Date(b).getTime();
+}
+
+export function sortEstado(a: { Estado: string }, b: { Estado: string }, sortOrder: 'asc' | 'desc' | undefined) {
+  const estadoOrder = ['Sin datos', 'Falta entrada', 'Falta salida', 'Completa'];
+  if (sortOrder === 'asc') {
+    return estadoOrder.indexOf(a.Estado) - estadoOrder.indexOf(b.Estado);
+  }
+  else if (sortOrder === 'desc') {
+    return estadoOrder.indexOf(b.Estado) - estadoOrder.indexOf(a.Estado);
+  }
+  else {
+    return 0;
+  }
+
+}
+
+export function sortNumber(a: { MR: number }, b: { MR: number }, sortOrder: 'asc' | 'desc' | undefined) {
+  if (sortOrder === 'asc') {
+    return a.MR - b.MR;
+  } else {
+    return b.MR - a.MR;
+  }
+}
+
+export function sortString(a: string, b: string, sortOrder: 'asc' | 'desc' | undefined) {
+  if (sortOrder === 'asc') {
+    return a.localeCompare(b);
+  } else {
+    return b.localeCompare(a);
+  }
 }
 
 
