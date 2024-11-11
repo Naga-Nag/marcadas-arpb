@@ -2,7 +2,7 @@
 	export let departamentos: string[];
 	export let selectedDepartamento: string;
 	
-	import { updateSelectedDepartamento} from '$lib/stores/globalStore';
+	import { updateSelectedDepartamento} from '$lib/globalStore';
 
 	function selectDepartamento(departamento: string) {
 		if (selectedDepartamento !== departamento) {

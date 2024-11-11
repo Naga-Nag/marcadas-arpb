@@ -4,7 +4,7 @@
 	import { createTable, Subscribe, Render } from 'svelte-headless-table';
 	import { addHiddenColumns, addPagination, addSortBy } from 'svelte-headless-table/plugins';
 	import { writable } from 'svelte/store';
-	import { globalStore } from '$lib/stores/globalStore';
+	import { globalStore } from '$lib/globalStore';
 
 	export let registros: Array<Marcada>;
 	let showExtraColumns: boolean;

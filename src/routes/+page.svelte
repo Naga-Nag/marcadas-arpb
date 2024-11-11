@@ -7,7 +7,7 @@
 	import MainOptions from '$lib/components/MainOptions.svelte';
 	import DatePicker from '$lib/components/DatePicker.svelte';
 	import { getEstado } from '$lib/utils.js';
-	import { globalStore, toggleEntreFechas } from '$lib/stores/globalStore';
+	import { globalStore, toggleEntreFechas } from '$lib/globalStore';
 	import { onMount } from 'svelte';
 
 	// Variables para búsqueda y departamentos
