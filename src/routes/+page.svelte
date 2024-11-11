@@ -14,7 +14,7 @@
 	let registros = data.records;
 	let searchText: string = '';
 	let departamentos: string[] = String(data.departamentos).split(',') ?? [];
-	let selectedDepartamento: string = '';
+	let selectedDepartamento: string = data.hostname;
 	let showEntreFechas: boolean;
 
 	globalStore.subscribe((value) => {
@@ -118,10 +118,6 @@
 		filteredData = [];
 		registros = [];
 	}
-
-	onMount(() => {
-		fechaListener(data.fechaMarcada);
-	})
 </script>
 
 <body>

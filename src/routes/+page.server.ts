@@ -5,13 +5,14 @@ import { globalStore } from '$lib/globalStore';
 
 export const load: PageServerLoad = async () => {
     let defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    let defaultDateDev = '2024-02-14';
+    
     try {
         // Fetch initial data for the default date (yesterday)
-        let records = await fetchMarcadaDelDia(defaultDateDev);
+        let records = await fetchMarcadaDelDia(defaultDate);
         const departamentos = await getDepartamentos();
+        console.log('fechaMarcada:', defaultDate, 'hostname:', getDepartamentoHost());
         return {
-            fechaMarcada: defaultDateDev,
+            fechaMarcada: defaultDate,
             records,
             departamentos,
             hostname: getDepartamentoHost(),

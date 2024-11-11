@@ -31,7 +31,7 @@ export function downloadExcel(data: Array<any>, fileName = 'marcada') {
 
 export function getDepartamentoHost() {
   if (Bun.env.build === 'dev') {
-    return 'PEAP';
+    return 'TAAP';
   } else {
     const hostname = os.hostname();
     return hostname.substring(0, 4);
