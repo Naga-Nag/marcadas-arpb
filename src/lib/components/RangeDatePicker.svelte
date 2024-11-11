@@ -4,8 +4,8 @@
 
 <script>
 	import { writable } from 'svelte/store';
-	import { updatefechaFinal, updatefechaInicial } from '$lib/stores/fechaStore';
 	import { createEventDispatcher } from 'svelte';
+	
 	const dispatch = createEventDispatcher();
 
 	let fechaInicial = writable('');
@@ -13,9 +13,6 @@
 
 	function handleDateChange() {
 		console.log('RangeDatepicker selected range:', $fechaInicial, $fechaFinal);
-		updatefechaInicial($fechaInicial);
-		updatefechaFinal($fechaFinal);
-
 		if ($fechaInicial !== '' && $fechaFinal !== '') {
 			dispatch('rangoFechaDefinido', {
 				fechaInicial: $fechaInicial,
@@ -23,6 +20,7 @@
 			});
 		}
 	}
+	
 </script>
 
 <div class="date-picker mt:2.5 color:white">

@@ -1,7 +1,4 @@
 import { writable } from 'svelte/store';
-import { getDepartamentoHost } from '$lib/utils';
-
-
 
 export const globalStore = writable({
     showEntreFechas: false,
@@ -17,4 +14,4 @@ export function toggleEntreFechas() {
 }
 
 
-globalStore.subscribe(value => console.log(value));
+globalStore.subscribe(value => console.log('globalStore data:', value));

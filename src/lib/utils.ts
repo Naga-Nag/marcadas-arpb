@@ -49,13 +49,29 @@ export function formatTime(dateString: string): string {
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-export function sortTime(a: string, b: string, sortOrder: 'asc' | 'desc' | undefined) {
-  // Check for null or empty values
-  if (a === '') return sortOrder === 'asc' ? 1 : sortOrder === 'desc' ? -1 : 1; // Empty values go to the bottom for ascending sort
-  if (b === '') return sortOrder === 'asc' ? -1 : sortOrder === 'desc' ? 1 : -1; // Empty values go to the bottom for descending sort
+function parseCustomDate(dateString: string) {
+  if (!dateString) return Number.NEGATIVE_INFINITY; // Handle empty strings or null
+  const [day, month, yearAndTime] = dateString.split('/');
+  const [year, time] = yearAndTime.split(' ');
+  const [hour, minute] = time ? time.split(':') : [0, 0];
+  
+  return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute)).getTime();
+}
 
-  // Compare non-null dates
-  return new Date(a).getTime() - new Date(b).getTime();
+export function sortTime(a: string, b: string, sortOrder: 'asc' | 'desc' | undefined) {
+  const isANull = !a;
+  const isBNull = !b;
+
+  // Place null or empty values at the end, regardless of sort order
+  if (isANull && isBNull) return 0;
+  if (isANull) return 1;
+  if (isBNull) return -1;
+
+  // Parse and compare non-null dates
+  const timeA = parseCustomDate(a);
+  const timeB = parseCustomDate(b);
+
+  return sortOrder === 'asc' ? timeA - timeB : timeB - timeA;
 }
 
 export function sortEstado(a: { Estado: string }, b: { Estado: string }, sortOrder: 'asc' | 'desc' | undefined) {

@@ -14,7 +14,8 @@
 		page: addPagination(),
 		hideCols: addHiddenColumns(),
 		sort: addSortBy({
-			serverSide: true
+			serverSide: true,
+			toggleOrder: ['asc', 'desc']
 		})
 	});
 
@@ -28,23 +29,13 @@
 		table.column({ header: 'MR', accessor: 'MR' }),
 		table.column({ header: 'Nombre', accessor: 'Nombre' }),
 		table.column({ header: 'Departamento', accessor: 'Departamento' }),
-		table.column({
-			header: 'Marcada',
-			accessor: 'Marcada'
-		}),
-		table.column({
-			header: 'Entrada',
-			accessor: 'Entrada'
-		}),
-		table.column({
-			header: 'Salida',
-			accessor: 'Salida'
-		}),
+		table.column({ header: 'Marcada', accessor: 'Marcada' }),
+		table.column({ header: 'Entrada', accessor: 'Entrada' }),
+		table.column({ header: 'Salida', accessor: 'Salida' }),
 		table.column({ header: 'Estado', accessor: 'Estado' })
 	]);
 
-	const { flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates } =
-		table.createViewModel(columns);
+	const { flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
 	const { pageIndex, pageCount, pageSize, hasNextPage, hasPreviousPage } = pluginStates.page;
 
 	$pageSize = 40;
@@ -75,20 +66,23 @@
 
 	function toggleSortOrder(sortOrder: 'asc' | 'desc' | undefined, sortCol: string) {
 		console.log('DataTable: toggleSortOrder', sortOrder, sortCol);
+
 		if (sortCol === 'Entrada' || sortCol === 'Salida' || sortCol === 'Marcada') {
 			registros = registros.sort((a, b) => sortTime(a[sortCol], b[sortCol], sortOrder));
 		}
-		if (sortCol === 'Estado') {
+		else if (sortCol === 'Estado') {
 			registros = registros.sort((a, b) => {
 				return sortEstado(a, b, sortOrder);
 			});
 		}
-		if (sortCol === 'MR' || sortCol === 'CUIL' || sortCol === 'DNI') {
+		else if (sortCol === 'MR' || sortCol === 'CUIL' || sortCol === 'DNI') {
 			registros = registros.sort((a, b) => sortNumber(a, b, sortOrder));
 		}
-		if (sortCol === 'Departamento' || sortCol === 'Nombre') {
+		else if (sortCol === 'Departamento' || sortCol === 'Nombre') {
 			registros = registros.sort((a, b) => sortString(a[sortCol], b[sortCol], sortOrder));
 		}
+		
+		dataToDisplay.set([...registros]); // Force update with sorted array
 	}
 
 	$: dataToDisplay.set(registros);

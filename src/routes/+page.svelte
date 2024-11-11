@@ -8,6 +8,7 @@
 	import DatePicker from '$lib/components/DatePicker.svelte';
 	import { getEstado } from '$lib/utils.js';
 	import { globalStore, toggleEntreFechas } from '$lib/stores/globalStore';
+	import { onMount } from 'svelte';
 
 	// Variables para búsqueda y departamentos
 	let registros = data.records;
@@ -114,8 +115,13 @@
 
 	function toggleEntreFechasResetData() {
 		toggleEntreFechas();
+		filteredData = [];
 		registros = [];
 	}
+
+	onMount(() => {
+		fechaListener(data.fechaMarcada);
+	})
 </script>
 
 <body>

@@ -6,7 +6,7 @@
 	import { createEventDispatcher } from 'svelte';
 
 	export let fechaMarcada: string = '';
-
+	
 	const dispatch = createEventDispatcher();
 
 	function onFechaDefinida(fechaMarcada: string) {
@@ -34,6 +34,7 @@
 			onFechaDefinida(yesterday.toISOString().split('T')[0]);
 		}
 	}
+
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
