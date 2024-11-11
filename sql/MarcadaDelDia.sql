@@ -35,3 +35,5 @@ BEGIN
     ui.Userid, ui.UserCode, ui.Name, d.DeptName, p.CUIL, p.DNI, p.ACTIVO
   RETURN
 END
+
+-- ej: SELECT * FROM dbo.MarcadaDelDia('ADAP', '2023-08-01')
