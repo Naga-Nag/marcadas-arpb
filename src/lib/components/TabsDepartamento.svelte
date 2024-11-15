@@ -2,7 +2,9 @@
 	export let departamentos: string[];
 	export let selectedDepartamento: string;
 	
+	
 	import { updateSelectedDepartamento} from '$lib/globalStore';
+	import { onMount } from 'svelte';
 
 	function selectDepartamento(departamento: string) {
 		if (selectedDepartamento !== departamento) {
@@ -19,6 +21,16 @@
 			return 1; // 'ARPB' should come first
 		}
 		return a.localeCompare(b); // Sort the remaining elements alphabetically
+	});
+
+	async function getDepartamentos() {
+		let res = await fetch('/api/fetchDepartamentos/');
+		return res.json()
+	}
+
+	onMount(async () => {
+		let departamentosRaw = await getDepartamentos();
+		departamentos = String(departamentosRaw).split(',') ?? []
 	});
 	
 </script>

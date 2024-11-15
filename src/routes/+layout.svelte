@@ -5,7 +5,10 @@
 <head>
     <title>Presentismo</title>
 </head>
-<slot></slot>
+<body>
+    <slot></slot>
+</body>
+
 
 <style>
     @font-face {
@@ -14,4 +17,9 @@
         font-weight: 500;
         src: url('/Comfortaa.ttf');
     }
+
+    body {
+		background: linear-gradient(-180deg, #306cce, #2eb7e9);
+		background-size: 400% 400%;
+	}
 </style>

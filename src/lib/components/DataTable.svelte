@@ -15,7 +15,8 @@
 		hideCols: addHiddenColumns(),
 		sort: addSortBy({
 			serverSide: true,
-			toggleOrder: ['asc', 'desc']
+			toggleOrder: ['asc', 'desc'],
+			initialSortKeys: [{ id: 'Estado', order: 'asc' }]
 		})
 	});
 
@@ -24,18 +25,22 @@
 	});
 
 	const columns = table.createColumns([
+		table.column({ header: 'MR', accessor: 'MR' }),
 		table.column({ header: 'CUIL', accessor: 'CUIL' }),
 		table.column({ header: 'DNI', accessor: 'DNI' }),
-		table.column({ header: 'MR', accessor: 'MR' }),
 		table.column({ header: 'Nombre', accessor: 'Nombre' }),
 		table.column({ header: 'Departamento', accessor: 'Departamento' }),
 		table.column({ header: 'Marcada', accessor: 'Marcada' }),
 		table.column({ header: 'Entrada', accessor: 'Entrada' }),
 		table.column({ header: 'Salida', accessor: 'Salida' }),
-		table.column({ header: 'Estado', accessor: 'Estado' })
+		table.column({ header: 'Estado', accessor: 'Estado' }),
+		table.column({ header: 'Jornada', accessor: 'JORNADA' }),
+		table.column({ header: 'En Actividad', accessor: 'ACTIVO' })
+		/* table.column({ header: 'VARBIN', accessor: 'Info'}) */
 	]);
 
-	const { flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
+	const { flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates } =
+		table.createViewModel(columns);
 	const { pageIndex, pageCount, pageSize, hasNextPage, hasPreviousPage } = pluginStates.page;
 
 	$pageSize = 40;
@@ -45,7 +50,6 @@
 	let hideForId = Object.fromEntries(ids.map((id) => [id, false]));
 
 	$: {
-		// Toggle columns based on `showExtraColumns`
 		hideForId.Entrada = showExtraColumns;
 		hideForId.Salida = showExtraColumns;
 		hideForId.Estado = showExtraColumns;
@@ -69,23 +73,21 @@
 
 		if (sortCol === 'Entrada' || sortCol === 'Salida' || sortCol === 'Marcada') {
 			registros = registros.sort((a, b) => sortTime(a[sortCol], b[sortCol], sortOrder));
-		}
-		else if (sortCol === 'Estado') {
+		} else if (sortCol === 'Estado') {
 			registros = registros.sort((a, b) => {
 				return sortEstado(a, b, sortOrder);
 			});
-		}
-		else if (sortCol === 'MR' || sortCol === 'CUIL' || sortCol === 'DNI') {
+		} else if (sortCol === 'MR' || sortCol === 'CUIL' || sortCol === 'DNI') {
 			registros = registros.sort((a, b) => sortNumber(a, b, sortOrder));
-		}
-		else if (sortCol === 'Departamento' || sortCol === 'Nombre') {
+		} else if (sortCol === 'Departamento' || sortCol === 'Nombre') {
 			registros = registros.sort((a, b) => sortString(a[sortCol], b[sortCol], sortOrder));
 		}
-		
+
 		dataToDisplay.set([...registros]); // Force update with sorted array
 	}
 
 	$: dataToDisplay.set(registros);
+	toggleSortOrder('asc', 'Estado')
 </script>
 
 <!-- {#each ids as id}

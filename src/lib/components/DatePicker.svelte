@@ -3,38 +3,48 @@
 -->
 
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { writable } from 'svelte/store';
+	import { createEventDispatcher, onMount } from 'svelte';
+	import { updateFechaMarcada } from '$lib/globalStore';
 
-	export let fechaMarcada: string = '';
-	
+	export let fechaMarcada = writable('');
 	const dispatch = createEventDispatcher();
 
-	function onFechaDefinida(fechaMarcada: string) {
+	function handleDateChange(e: any) {
+		console.log('DatePicker fecha definida:', e.target.value);
+		updateFechaMarcada(e.target.value);
 		dispatch('fechaDefinida', {
-			fecha: fechaMarcada
+			fecha: e.target.value
 		});
-	}
-	function handleInputChange(e: any) {
-		console.log('DatePicker selected date:', e.target.value);
-		onFechaDefinida(e.target.value);
 	}
 
 	function setDateAyer() {
 		if (fechaMarcada !== null) {
-			let tomorrow = new Date(fechaMarcada);
-			tomorrow.setDate(tomorrow.getDate() - 1);
-			onFechaDefinida(tomorrow.toISOString().split('T')[0]);
+			let ayer = new Date($fechaMarcada);
+			ayer.setDate(ayer.getDate() - 1);
+			$fechaMarcada = ayer.toISOString().split('T')[0];
+
+			updateFechaMarcada($fechaMarcada);
+
+			dispatch('fechaDefinida', {
+				fecha: ayer.toISOString().split('T')[0]
+			});
 		}
 	}
 
 	function setDateMañana() {
 		if (fechaMarcada !== null) {
-			let yesterday = new Date(fechaMarcada);
-			yesterday.setDate(yesterday.getDate() + 1);
-			onFechaDefinida(yesterday.toISOString().split('T')[0]);
+			let mañana = new Date($fechaMarcada);
+			mañana.setDate(mañana.getDate() + 1);
+			$fechaMarcada = mañana.toISOString().split('T')[0];
+
+			updateFechaMarcada($fechaMarcada);
+
+			dispatch('fechaDefinida', {
+				fecha: mañana.toISOString().split('T')[0]
+			});
 		}
 	}
-
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -45,8 +55,8 @@
 	<input
 		class="b:1|solid|#ccc p:5 mr:10 ml:10 w:99% r:15 w:fit-content"
 		type="date"
-		value={fechaMarcada}
-		on:change={handleInputChange}
+		bind:value={$fechaMarcada}
+		on:change={handleDateChange}
 	/>
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->

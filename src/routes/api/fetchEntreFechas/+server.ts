@@ -1,4 +1,3 @@
-// /src/routes/api/fetchRecords/[fecha].ts
 import { fetchMarcadaEntreFechas } from '$lib/server/db';
 
 
@@ -6,19 +5,20 @@ import { json } from '@sveltejs/kit';
 
 export async function POST({ request }) {
     try {
-        const { fechaInicial, fechaFinal } = await request.json();
-        console.log('POST || Fetching records for fechaMarcadaEntreFechas:', fechaInicial, fechaFinal);
+        const { departamento, fechaInicial, fechaFinal } = await request.json();
+        //TODO: implementar departamento
+        console.log('POST || Buscando rango de registros para: ', departamento, fechaInicial, fechaFinal);
 
         let registros = [];
 
         if (fechaInicial !== '' && fechaFinal !== '') {
-            registros = await fetchMarcadaEntreFechas(fechaInicial, fechaFinal);
+            registros = await fetchMarcadaEntreFechas(departamento, fechaInicial, fechaFinal);
         } else {
-            return json({ error: 'Los parametros de fechas son invalidos' }, { status: 400 });
+            throw new Error('Los parametros de fechas son invalidos');
         }
         return json(registros);
     } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error descargando registros:', error);
         return json({ error: 'Failed to fetch records' }, { status: 500 });
     }
 }

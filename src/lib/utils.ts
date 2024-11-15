@@ -31,7 +31,7 @@ export function downloadExcel(data: Array<any>, fileName = 'marcada') {
 
 export function getDepartamentoHost() {
   if (Bun.env.build === 'dev') {
-    return 'TAAP';
+    return 'PEAP';
   } else {
     const hostname = os.hostname();
     return hostname.substring(0, 4);
@@ -49,12 +49,12 @@ export function formatTime(dateString: string): string {
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-function parseCustomDate(dateString: string) {
+export function parseCustomDate(dateString: string) {
   if (!dateString) return Number.NEGATIVE_INFINITY; // Handle empty strings or null
   const [day, month, yearAndTime] = dateString.split('/');
   const [year, time] = yearAndTime.split(' ');
   const [hour, minute] = time ? time.split(':') : [0, 0];
-  
+
   return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute)).getTime();
 }
 
@@ -115,4 +115,16 @@ export function getEstado(persona: { Entrada: any; Salida: any }) {
   } else {
     return 'Sin datos';
   }
+}
+
+export function fromHex(hexData: any): Array<string> {
+  if (hexData != null) {
+    var output = Buffer.from(hexData, 'hex');
+    return output.toString().split(",");
+  }
+  return []
+}
+
+export function toHex() {
+
 }

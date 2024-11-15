@@ -1,4 +1,4 @@
-CREATE OR ALTER FUNCTION MarcadaDelDia(@Departamento NVARCHAR(50), @FechaHoy DATE) 
+CREATE OR ALTER FUNCTION MarcadaDelDiaTodas(@Departamento NVARCHAR(50), @FechaHoy DATE) 
 RETURNS @Resultado TABLE 
 (
   UID INT,
@@ -30,5 +30,3 @@ BEGIN
     ui.Userid, ui.UserCode, ui.Name, d.DeptName, ui.OtherInfo
   RETURN
 END
-
--- ej: SELECT * FROM dbo.MarcadaDelDia('ADAP', '2023-08-01')

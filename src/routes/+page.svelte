@@ -6,9 +6,10 @@
 	import RangeDatePicker from '$lib/components/RangeDatePicker.svelte';
 	import MainOptions from '$lib/components/MainOptions.svelte';
 	import DatePicker from '$lib/components/DatePicker.svelte';
-	import { getEstado } from '$lib/utils.js';
-	import { globalStore, toggleEntreFechas } from '$lib/globalStore';
+	import { getDepartamentoHost, getEstado } from '$lib/utils.js';
+	import { globalStore, toggleEntreFechas, updateFechaMarcada, setloadingData } from '$lib/globalStore';
 	import { onMount } from 'svelte';
+	import LoadingIcon from '$lib/components/LoadingIcon.svelte';
 
 	// Variables para búsqueda y departamentos
 	let registros = data.records;
@@ -16,10 +17,15 @@
 	let departamentos: string[] = String(data.departamentos).split(',') ?? [];
 	let selectedDepartamento: string = data.hostname;
 	let showEntreFechas: boolean;
+	let hostname = data.hostname;
+	let fechaMarcada = '';
+	let loading: boolean;
 
 	globalStore.subscribe((value) => {
 		selectedDepartamento = value.selectedDepartamento;
 		showEntreFechas = value.showEntreFechas;
+		fechaMarcada = value.fechaMarcada;
+		loading = value.loading;
 	});
 
 	// Computamos los datos filtrados en función del departamento seleccionado, el texto de búsqueda y la ordenación
@@ -70,8 +76,9 @@
 	}
 
 	async function rangoFechalistener(fechaInicial: string, fechaFinal: string) {
+		setloadingData(true);
 		let url = `/api/fetchEntreFechas/`;
-		let payload = { fechaInicial, fechaFinal };
+		let payload = { departamento: hostname, fechaInicial, fechaFinal };
 		try {
 			console.log('Fetching data... MarcadaEntreFechas:', fechaInicial, fechaFinal);
 			const response = await fetch(url, {
@@ -89,13 +96,15 @@
 		} catch (error) {
 			console.error('Fetch error:', error);
 		}
+		setloadingData(false);
 	}
 
 	async function fechaListener(fechaMarcada: string) {
+		setloadingData(true);
 		let url = `/api/fetchMarcadas/`;
-		let payload = { fechaMarcada };
+		let payload = { departamento: hostname, fechaMarcada };
 		try {
-			console.log('Fetching data... MarcadaDelDia:', fechaMarcada);
+			console.log('Descargando registros MarcadaDelDia:', hostname, fechaMarcada);
 			const response = await fetch(url, {
 				method: 'POST',
 				headers: {
@@ -111,6 +120,7 @@
 		} catch (error) {
 			console.error('Fetch error:', error);
 		}
+		setloadingData(false);
 	}
 
 	function toggleEntreFechasResetData() {
@@ -118,6 +128,12 @@
 		filteredData = [];
 		registros = [];
 	}
+
+	onMount(async () => {
+		let defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+		updateFechaMarcada(defaultDate);
+		fechaListener(defaultDate);
+	});
 </script>
 
 <body>
@@ -133,6 +149,8 @@
 		{#if data.hostname === 'PEAP'}
 			<TabsDepartamento {departamentos} bind:selectedDepartamento />
 		{/if}
+
+		<LoadingIcon></LoadingIcon>
 
 		<!-- Campo de búsqueda -->
 		<input
@@ -150,12 +168,11 @@
 
 			{#if showEntreFechas}
 				<RangeDatePicker
-					on:rangoFechaDefinido={(e) => rangoFechalistener(e.detail.fechaInicial, e.detail.fechaFinal)}
+					on:rangoFechaDefinido={(e) =>
+						rangoFechalistener(e.detail.fechaInicial, e.detail.fechaFinal)}
 				></RangeDatePicker>
 			{:else}
-				<DatePicker
-					fechaMarcada={data.fechaMarcada} on:fechaDefinida={(e) => fechaListener(e.detail.fecha)}
-				></DatePicker>
+				<DatePicker on:fechaDefinida={(e) => fechaListener(e.detail.fecha)}></DatePicker>
 			{/if}
 
 			<BtnDescargar
@@ -178,20 +195,20 @@
 		</div>
 
 		<!-- Tabla de datos filtrados -->
-		<DataTable registros={filteredData} />
-
-		<!-- Cuenta de registros -->
+		{#if registros.length > 0 && !loading}
+			<DataTable registros={filteredData} />
+			<!-- Cuenta de registros -->
 		<div class="d:flex flex:col">
 			<p class="font-size:18 bg:white r:10 p:10 w:fit-content">
 				Total Ausentes: {filterAusentesDepartamento(selectedDepartamento).length}
 			</p>
 		</div>
+		{/if}
+
+		
 	</main>
 </body>
 
 <style>
-	body {
-		background: linear-gradient(-180deg, #306cce, #2eb7e9);
-		background-size: 200% 200%;
-	}
+	
 </style>
