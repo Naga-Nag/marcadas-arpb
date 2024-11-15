@@ -26,6 +26,6 @@ BEGIN
   INNER JOIN dbo.Dept d ON ui.Deptid = d.Deptid
   LEFT JOIN dbo.Checkinout ci ON ui.Userid = ci.Userid
   GROUP BY
-    ui.Userid, ui.UserCode, ui.Name, d.DeptName, ui.OtherInfo
+    ui.Userid, ui.UserCode, ui.Name, d.DeptName, CAST(ui.OtherInfo AS VARBINARY(MAX))
   RETURN
 END

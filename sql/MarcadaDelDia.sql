@@ -19,16 +19,13 @@ BEGIN
     d.DeptName AS Departamento,
     MAX(CASE WHEN DATEPART(HOUR, ci.CheckTime) >= 13 AND (CAST(ci.CheckTime AS DATE) = @FechaHoy) THEN ci.CheckTime END) AS Salida,
     MIN(CASE WHEN DATEPART(HOUR, ci.CheckTime) <= 10 AND (CAST(ci.CheckTime AS DATE) = @FechaHoy) THEN ci.CheckTime END) AS Entrada,
-    ui.OtherInfo AS Info
-    
+    CAST(ui.OtherInfo AS VARBINARY(MAX)) AS Info
   FROM
     dbo.Userinfo ui
   INNER JOIN dbo.Dept d ON ui.Deptid = d.Deptid
   LEFT JOIN dbo.Checkinout ci ON ui.Userid = ci.Userid
   WHERE d.DeptName = @Departamento
   GROUP BY
-    ui.Userid, ui.UserCode, ui.Name, d.DeptName, ui.OtherInfo
+    ui.Userid, ui.UserCode, ui.Name, d.DeptName, CAST(ui.OtherInfo AS VARBINARY(MAX))
   RETURN
 END
-
--- ej: SELECT * FROM dbo.MarcadaDelDia('ADAP', '2023-08-01')
