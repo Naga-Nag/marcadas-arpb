@@ -54,7 +54,7 @@
 		hideForId.Salida = showExtraColumns;
 		hideForId.Estado = showExtraColumns;
 
-		hideForId.Marcada = !showExtraColumns;
+		hideForId.Marcada = showExtraColumns;
 
 		$hiddenColumnIds = Object.entries(hideForId)
 			.filter(([, hide]) => hide)

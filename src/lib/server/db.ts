@@ -1,5 +1,5 @@
 import { formatTime, fromHex, getDepartamentoHost } from '$lib/utils';
-import { differenceInMinutes, format, parseISO } from 'date-fns';
+import { differenceInMilliseconds, differenceInMinutes, format, parseISO } from 'date-fns';
 import sql from 'mssql';
 
 const sqlConfig = {
@@ -25,6 +25,8 @@ export async function fetchMarcadaDelDia(
   fecha: string,
   onBatch: (batch: Array<Record<string, any>>) => void
 ): Promise<void> {
+  let startTime = new Date();
+  let rowCount = 0;
   await sql.connect(sqlConfig);
 
   return new Promise((resolve, reject) => {
@@ -34,8 +36,8 @@ export async function fetchMarcadaDelDia(
     // Set up the query based on the department host
     const query =
       departamento === 'PEAP'
-        ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDiaPEAP('${fecha}');`
-        : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDia('${departamento}', '${fecha}');`;
+        ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDetallePEAP('${fecha}');`
+        : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDiaDetalle('${departamento}', '${fecha}');`;
 
     request.stream = true; // Enable streaming
     request.query(query);
@@ -45,7 +47,7 @@ export async function fetchMarcadaDelDia(
       // Process the row (e.g., formatting)
       row.Entrada = formatTime(row.Entrada);
       row.Salida = formatTime(row.Salida);
-
+      row.Marcada = formatTime(row.Marcada);
       const Info = fromHex(row.Info);
       row.CUIL = Info[0] ?? '';
       row.DNI = Info[1] ?? '';
@@ -57,6 +59,7 @@ export async function fetchMarcadaDelDia(
       // Send the batch when it reaches 20 rows
       if (rows.length === 20) {
         onBatch([...rows]); // Send a copy of the batch
+        rowCount += rows.length;
         rows.length = 0; // Clear rows array for the next batch
       }
     });
@@ -73,6 +76,9 @@ export async function fetchMarcadaDelDia(
       if (rows.length > 0) {
         onBatch([...rows]);
       }
+      let endTime = new Date();
+      console.log("INFO || "+'Tiempo de consulta MarcadaDelDia:', differenceInMilliseconds(endTime, startTime) + 'ms');
+      console.log("INFO || "+rowCount + " registros encontrados");
       resolve(); // Resolve the promise to indicate completion
     });
   });
@@ -152,6 +158,7 @@ export async function fetchMarcadaDetalle(uid: number, fecha: Date) {
 }
 
 export async function fetchMarcadaEntreFechas(departamento: string, startDate: string, endDate: string): Promise<Array<Record<string, any>>> {
+  let startTime = new Date();
   await sql.connect(sqlConfig);
 
   return new Promise((resolve, reject) => {
@@ -187,6 +194,9 @@ export async function fetchMarcadaEntreFechas(departamento: string, startDate: s
 
     request.on('done', () => {
       const sanitizedData = JSON.parse(JSON.stringify(rows));
+      let endTime = new Date();
+      console.log("INFO || "+'Tiempo de consulta MarcadaEntreFechas:', differenceInMilliseconds(endTime, startTime) + 'ms');
+      console.log("INFO || "+ rows.length + " registros encontrados");
       resolve(sanitizedData);
     });
   });

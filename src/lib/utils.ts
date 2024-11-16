@@ -105,8 +105,8 @@ export function sortString(a: string, b: string, sortOrder: 'asc' | 'desc' | und
 }
 
 
-export function getEstado(persona: { Entrada: any; Salida: any }) {
-  if (persona.Entrada && persona.Salida) {
+export function getEstado(persona) {
+  if (persona.Entrada && persona.Salida || persona.Marcada) {
     return 'Completa';
   } else if (persona.Entrada && !persona.Salida) {
     return 'Falta salida';
