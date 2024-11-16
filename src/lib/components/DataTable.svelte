@@ -2,7 +2,7 @@
 	import type { Marcada } from '$lib/types';
 	import { sortTime, sortString, sortNumber, sortEstado } from '$lib/utils';
 	import { createTable, Subscribe, Render } from 'svelte-headless-table';
-	import { addHiddenColumns, addPagination, addSortBy } from 'svelte-headless-table/plugins';
+	import { addHiddenColumns, addPagination, addSortBy, addGroupBy } from 'svelte-headless-table/plugins';
 	import { writable } from 'svelte/store';
 	import { globalStore } from '$lib/globalStore';
 
@@ -17,7 +17,8 @@
 			serverSide: true,
 			toggleOrder: ['asc', 'desc'],
 			initialSortKeys: [{ id: 'Estado', order: 'asc' }]
-		})
+		}),
+		group: addGroupBy({}),
 	});
 
 	globalStore.subscribe(($value) => {

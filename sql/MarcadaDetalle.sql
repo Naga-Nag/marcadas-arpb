@@ -1,6 +1,6 @@
-CREATE OR ALTER FUNCTION MarcadaDelDiaDetalle(
-    @Departamento NVARCHAR(50), 
-    @FechaHoy DATE
+CREATE OR ALTER FUNCTION MarcadaDetalle(
+    @FechaHoy DATE,
+    @Departamento NVARCHAR(50)
 )
 RETURNS @Resultado TABLE 
 (
