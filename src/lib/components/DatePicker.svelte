@@ -6,8 +6,15 @@
 	import { writable } from 'svelte/store';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { updateFechaMarcada } from '$lib/globalStore';
+	import { globalStore } from '$lib/globalStore';
 
 	export let fechaMarcada = writable('');
+	let isloading: boolean;
+
+	globalStore.subscribe((value) => {
+		isloading = value.loading;
+	});
+
 	const dispatch = createEventDispatcher();
 
 	function handleDateChange(e: any) {
@@ -48,10 +55,10 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="bg:white r:10 p:5 text:center">
+<div class="bg:white r:10 p:5 text:center noselect">
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<span class="font-size:20 cursor:pointer" on:click={setDateAyer}>◄</span>
+	<button class="font-size:20 nakedbtn" on:click={setDateAyer} disabled={isloading}>◄</button>
 	<input
 		class="b:1|solid|#ccc p:5 mr:10 ml:10 w:99% r:15 w:fit-content"
 		type="date"
@@ -60,5 +67,5 @@
 	/>
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<span class="font-size:20 cursor:pointer" on:click={setDateMañana}>►</span>
+	<button class="font-size:20 nakedbtn" on:click={setDateMañana} disabled={isloading}>►</button>
 </div>

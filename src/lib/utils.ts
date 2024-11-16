@@ -75,7 +75,7 @@ export function sortTime(a: string, b: string, sortOrder: 'asc' | 'desc' | undef
 }
 
 export function sortEstado(a: { Estado: string }, b: { Estado: string }, sortOrder: 'asc' | 'desc' | undefined) {
-  const estadoOrder = ['Sin datos', 'Falta entrada', 'Falta salida', 'Completa'];
+  const estadoOrder = ['Sin datos', 'Falta salida', 'Falta entrada', 'Completa'];
   if (sortOrder === 'asc') {
     return estadoOrder.indexOf(a.Estado) - estadoOrder.indexOf(b.Estado);
   }
@@ -105,7 +105,7 @@ export function sortString(a: string, b: string, sortOrder: 'asc' | 'desc' | und
 }
 
 
-export function getEstado(persona) {
+export function getEstado(persona: { Entrada: any; Salida: any; Marcada?: any; }) {
   if (persona.Entrada && persona.Salida || persona.Marcada) {
     return 'Completa';
   } else if (persona.Entrada && !persona.Salida) {

@@ -2,18 +2,23 @@
 	import type { Marcada } from '$lib/types';
 	import { sortTime, sortString, sortNumber, sortEstado } from '$lib/utils';
 	import { createTable, Subscribe, Render } from 'svelte-headless-table';
-	import { addHiddenColumns, addPagination, addSortBy, addGroupBy } from 'svelte-headless-table/plugins';
+	import {
+		addHiddenColumns,
+		addPagination,
+		addSortBy,
+		addGroupBy
+	} from 'svelte-headless-table/plugins';
 	import { writable } from 'svelte/store';
 	import { globalStore } from '$lib/globalStore';
 
 	export let registros: Array<Marcada>;
 
-
 	let showMarcadaDetalle: boolean;
+	let showEntreFechas: boolean;
 	globalStore.subscribe(($value) => {
 		showMarcadaDetalle = $value.showMarcadaDetalle;
+		showEntreFechas = $value.showEntreFechas;
 	});
-
 
 	const dataToDisplay = writable(registros);
 
@@ -25,10 +30,8 @@
 			serverSide: true,
 			toggleOrder: ['asc', 'desc'],
 			initialSortKeys: [{ id: 'Estado', order: 'asc' }]
-		}),
+		})
 	});
-
-	
 
 	const columns = table.createColumns([
 		table.column({ header: 'MR', accessor: 'MR' }),
@@ -56,6 +59,9 @@
 	let hideForId = Object.fromEntries(ids.map((id) => [id, false]));
 
 	$: {
+		if (showEntreFechas) {
+			showMarcadaDetalle = true;
+		}
 		hideForId.Entrada = showMarcadaDetalle;
 		hideForId.Salida = showMarcadaDetalle;
 		hideForId.Estado = showMarcadaDetalle;
@@ -93,7 +99,7 @@
 	}
 
 	$: dataToDisplay.set(registros);
-	toggleSortOrder('asc', 'Estado')
+	toggleSortOrder('asc', 'Estado');
 </script>
 
 <!-- {#each ids as id}

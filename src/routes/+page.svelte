@@ -8,11 +8,7 @@
 	import DatePicker from '$lib/components/DatePicker.svelte';
 	import { getEstado } from '$lib/utils.js';
 	import { fetchMarcadaDetalle, fetchMarcada } from '$lib/mainController';
-	import {
-		globalStore,
-		updateFechaMarcada,
-		setloadingData,
-	} from '$lib/globalStore';
+	import { globalStore, updateFechaMarcada, setloadingData } from '$lib/globalStore';
 	import { onMount } from 'svelte';
 	import LoadingIcon from '$lib/components/LoadingIcon.svelte';
 
@@ -20,14 +16,15 @@
 	let registros = data.records;
 	let searchText: string = '';
 	let departamentos: string[] = String(data.departamentos).split(',') ?? [];
-	
+
 	let hostname = data.hostname;
-	
+
 	let selectedDepartamento: string = data.hostname;
 	let fechaMarcada = '';
 	let loading: boolean;
 	let showEntreFechas: boolean;
 	let showFechaDetalle: boolean;
+	
 	globalStore.subscribe((value) => {
 		selectedDepartamento = value.selectedDepartamento;
 		fechaMarcada = value.fechaMarcada;
@@ -109,23 +106,24 @@
 
 	async function fechaListener(fechaMarcada: string) {
 		setloadingData(true);
-		
+
 		registros = []; // Clear previous records
 
 		try {
 			if (showFechaDetalle) {
-				registros = await fetchMarcadaDetalle(hostname, fechaMarcada)
-			}
-			else {
+				registros = await fetchMarcadaDetalle(hostname, fechaMarcada);
+			} else {
 				fetchMarcada(hostname, fechaMarcada, (batch) => {
-				registros = [...registros, ...batch]; // Update registros incrementally
-			});
+					registros = [...registros, ...batch]; // Update registros incrementally
+				});
 			}
-		} catch (error) {
-			console.error('Error fetching data:', error);
-			error = error.message;
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				console.error('Error fetching data:', error.message);
+			} else {
+				console.error('Unknown error:', error);
+			}
 		} finally {
-
 		}
 		setloadingData(false);
 	}
@@ -143,19 +141,17 @@
 			<h1 class="text:center bg:white r:10 p:10 w:fit-content shadow:4|4|3|gray-70">
 				Presentismo - {data.hostname}
 			</h1>
-			
+
 			<a href="/aut" class="font-size:9">👻</a>
 		</div>
 
 		<!-- Tabs de departamentos -->
 		{#if data.hostname === 'PEAP'}
-		<div class="d:flex flex:row justify-content:space-between">
-			<TabsDepartamento {departamentos} bind:selectedDepartamento />
-			<LoadingIcon />
-		</div>
+			<div class="d:flex flex:row justify-content:space-between">
+				<TabsDepartamento {departamentos} bind:selectedDepartamento />
+				<LoadingIcon />
+			</div>
 		{/if}
-
-		
 
 		<!-- Campo de búsqueda -->
 		<input
@@ -168,13 +164,16 @@
 		<!-- DatePicker y Botones para exportar datos -->
 		<div class="d:flex mb:10">
 			<span> </span>
-			<MainOptions />
+			<MainOptions on:resetRegistros={() => (registros = [])} />
 			<span></span>
 
 			{#if showEntreFechas}
-				<RangeDatePicker on:rangoFechaDefinido={(e) => rangoFechalistener(e.detail.fechaInicial, e.detail.fechaFinal)}/>
+				<RangeDatePicker
+					on:rangoFechaDefinido={(e) =>
+						rangoFechalistener(e.detail.fechaInicial, e.detail.fechaFinal)}
+				/>
 			{:else}
-				<DatePicker on:fechaDefinida={(e) => fechaListener(e.detail.fecha)}/>
+				<DatePicker on:fechaDefinida={(e) => fechaListener(e.detail.fecha)} />
 			{/if}
 
 			<BtnDescargar
@@ -197,7 +196,7 @@
 		</div>
 
 		<!-- Tabla de datos filtrados -->
-		{#if registros.length > 0 }
+		{#if registros.length > 0}
 			<DataTable registros={filteredData} />
 
 			<!-- Cuenta de registros -->

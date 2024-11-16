@@ -1,6 +1,13 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-	import { globalStore, toggleEntreFechas, toggleMarcadaDetalle } from '$lib/globalStore';
+	import {
+		globalStore,
+		toggleEntreFechas as TEF,
+		toggleMarcadaDetalle as TMD
+	} from '$lib/globalStore';
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
 
 	let showEntreFechas: boolean;
 	let showMarcadaDetalle: boolean;
@@ -9,8 +16,8 @@
 		showEntreFechas = $value.showEntreFechas;
 		showMarcadaDetalle = $value.showMarcadaDetalle;
 		if (showEntreFechas) {
-		showMarcadaDetalle = true;
-	}
+			showMarcadaDetalle = true;
+		}
 	});
 
 	let menuAbierto = false;
@@ -18,6 +25,15 @@
 		menuAbierto = !menuAbierto;
 	}
 
+	function toggleMarcadaDetalle() {
+		dispatch('resetRegistros');
+		TMD();
+	}
+
+	function toggleEntreFechas() {
+		dispatch('resetRegistros');
+		TEF();
+	}
 </script>
 
 <main on:mouseleave={() => (menuAbierto = false)}>
@@ -43,7 +59,7 @@
 				<input
 					type="checkbox"
 					checked={showMarcadaDetalle}
-					disabled={showEntreFechas} 
+					disabled={showEntreFechas}
 					on:change={toggleMarcadaDetalle}
 				/>Marcadas Unicas
 			</div>
