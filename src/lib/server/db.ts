@@ -19,66 +19,64 @@ const sqlConfig = {
   stream: true,  // Enable streaming
 };
 
-/* let socket = Bun.serve({
-  fetch(req, server) {
-    if (server.upgrade(req)) {
-      return;
-    }
-    return new Response("Upgrade failed", { status: 500 });
-  },
-  websocket: {
-    message(ws, message) { },
-    open(ws) { },
-    close(ws, code, reason) { },
-    drain(ws) { },
-  },
-}); */
 
-export async function fetchMarcadaDelDia(departamento: string, fecha: string): Promise<Array<Record<string, any>>> { 
+export async function fetchMarcadaDelDia(
+  departamento: string,
+  fecha: string,
+  onBatch: (batch: Array<Record<string, any>>) => void
+): Promise<void> {
   await sql.connect(sqlConfig);
 
   return new Promise((resolve, reject) => {
     const rows: Array<Record<string, any>> = [];
     const request = new sql.Request();
-        // Set up the query based on the department host
+
+    // Set up the query based on the department host
     const query =
       departamento === 'PEAP'
         ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDiaPEAP('${fecha}');`
         : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDia('${departamento}', '${fecha}');`;
 
+    request.stream = true; // Enable streaming
     request.query(query);
 
-    // Event handler para cada fila
+    // Event handler for each row
     request.on('row', (row) => {
+      // Process the row (e.g., formatting)
       row.Entrada = formatTime(row.Entrada);
       row.Salida = formatTime(row.Salida);
 
-      let Info = fromHex(row.Info);
-      row.Info = fromHex(row.Info)
-      row.CUIL = Info[0];
-      row.DNI = Info[1];
-      if (Info[0] != undefined) { row.CUIL = Info[0] } else { row.CUIL = '' }
-      if (Info[1] != undefined) { row.DNI = Info[1] } else { row.DNI = '' }
-      if (Info[2] != undefined) { row.JORNADA = Info[2] + ' horas' } else { row.JORNADA = '' }
-      if (Info[3] != undefined) { row.ACTIVO = Info[3] } else { row.ACTIVO = '' }
-      rows.push(row); // Acumulamos las filas
+      const Info = fromHex(row.Info);
+      row.CUIL = Info[0] ?? '';
+      row.DNI = Info[1] ?? '';
+      row.JORNADA = Info[2] ? `${Info[2]} horas` : '';
+      row.ACTIVO = Info[3] ?? '';
+
+      rows.push(row);
+
+      // Send the batch when it reaches 20 rows
+      if (rows.length === 20) {
+        onBatch([...rows]); // Send a copy of the batch
+        rows.length = 0; // Clear rows array for the next batch
+      }
     });
 
-    // Manejo de errores
+    // Error handler
     request.on('error', (err) => {
       console.error('Error fetching data:', err);
       reject(err);
     });
 
-    // Finalizamos al completar
+    // Completion handler
     request.on('done', () => {
-      const sanitizedData = JSON.parse(JSON.stringify(rows));
-      resolve(sanitizedData);
+      // Send any remaining rows
+      if (rows.length > 0) {
+        onBatch([...rows]);
+      }
+      resolve(); // Resolve the promise to indicate completion
     });
   });
 }
-
-/* console.log(await fetchMarcadaDelDia('PEAP','2023-08-03')); */
 
 export async function fetchDepartamentos(): Promise<Array<Record<string, any>>> {
   await sql.connect(sqlConfig);

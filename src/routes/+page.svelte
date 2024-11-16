@@ -6,8 +6,14 @@
 	import RangeDatePicker from '$lib/components/RangeDatePicker.svelte';
 	import MainOptions from '$lib/components/MainOptions.svelte';
 	import DatePicker from '$lib/components/DatePicker.svelte';
-	import { getDepartamentoHost, getEstado } from '$lib/utils.js';
-	import { globalStore, toggleEntreFechas, updateFechaMarcada, setloadingData } from '$lib/globalStore';
+	import { getEstado } from '$lib/utils.js';
+	import { fetchMarcadas } from '$lib/mainController';
+	import {
+		globalStore,
+		toggleEntreFechas,
+		updateFechaMarcada,
+		setloadingData
+	} from '$lib/globalStore';
 	import { onMount } from 'svelte';
 	import LoadingIcon from '$lib/components/LoadingIcon.svelte';
 
@@ -100,27 +106,17 @@
 	}
 
 	async function fechaListener(fechaMarcada: string) {
-		setloadingData(true);
-		let url = `/api/fetchMarcadas/`;
-		let payload = { departamento: hostname, fechaMarcada };
+		registros = []; // Clear previous records
+
 		try {
-			console.log('Descargando registros MarcadaDelDia:', hostname, fechaMarcada);
-			const response = await fetch(url, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(payload)
+			fetchMarcadas(hostname, fechaMarcada, (batch) => {
+				registros = [...registros, ...batch]; // Update registros incrementally
 			});
-			if (response.ok) {
-				registros = await response.json();
-			} else {
-				console.error('Error fetching data:', await response.json());
-			}
 		} catch (error) {
-			console.error('Fetch error:', error);
+			console.error('Error fetching data:', error);
+			error = error.message;
+		} finally {
 		}
-		setloadingData(false);
 	}
 
 	function toggleEntreFechasResetData() {
@@ -198,17 +194,14 @@
 		{#if registros.length > 0 && !loading}
 			<DataTable registros={filteredData} />
 			<!-- Cuenta de registros -->
-		<div class="d:flex flex:col">
-			<p class="font-size:18 bg:white r:10 p:10 w:fit-content">
-				Total Ausentes: {filterAusentesDepartamento(selectedDepartamento).length}
-			</p>
-		</div>
+			<div class="d:flex flex:col">
+				<p class="font-size:18 bg:white r:10 p:10 w:fit-content">
+					Total Ausentes: {filterAusentesDepartamento(selectedDepartamento).length}
+				</p>
+			</div>
 		{/if}
-
-		
 	</main>
 </body>
 
 <style>
-	
 </style>

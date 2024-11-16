@@ -1,33 +1,47 @@
-// /src/routes/api/fetchRecords/[fecha].ts
 import { fetchMarcadaDelDia } from '$lib/server/db';
-import { setloadingData } from '$lib/globalStore.js';
-
-import {json } from '@sveltejs/kit';
 
 export async function POST({ request }) {
 	try {
 		const { departamento, fechaMarcada } = await request.json();
-		if (departamento === undefined || departamento === null || departamento === '') {
-			throw new Error('Departamento no definido')
-		}
-		if (fechaMarcada === null) {
-			throw new Error('Fecha para la marcada no definida')
-		}
-		console.log('POST || Buscando registros para:', departamento, fechaMarcada);
 
-		let registros = [];
-
-		// Logic to handle different date scenarios
-		if (fechaMarcada !== '') {
-			// Fetch records for a single date (fechaMarcada)
-			registros = await fetchMarcadaDelDia(departamento, fechaMarcada);
-		} else {
-			return json({ error: 'Los parametros de fechas son invalidos' }, { status: 400 });
+		// Validate input
+		if (!departamento || !fechaMarcada) {
+			throw new Error('Parámetros inválidos: departamento o fechaMarcada no definidos');
 		}
-		
-		return json(registros);
+
+		console.log('POST || Streaming registros para:', departamento, fechaMarcada);
+
+		// Create a readable stream
+		const stream = new ReadableStream({
+			async start(controller) {
+				try {
+					// Fetch data in batches
+					await fetchMarcadaDelDia(departamento, fechaMarcada, (batch) => {
+						// Send each batch to the stream
+						controller.enqueue(JSON.stringify(batch) + '\n');
+					});
+
+					// Close the stream when done
+					controller.close();
+				} catch (err) {
+					console.error('Error streaming registros:', err);
+					controller.error(err);
+				}
+			}
+		});
+
+		// Return the streaming response
+		return new Response(stream, {
+			headers: {
+				'Content-Type': 'application/json',
+				'Transfer-Encoding': 'chunked'
+			}
+		});
 	} catch (error) {
-		console.error('Error descargando registros:', error);
-		return json({ error: 'Failed to fetch records' }, { status: 500 });
+		console.error('Error procesando POST:', error);
+		return new Response(
+			JSON.stringify({ error: 'Failed to fetch records' }),
+			{ status: 500, headers: { 'Content-Type': 'application/json' } }
+		);
 	}
 }
