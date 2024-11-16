@@ -3,6 +3,7 @@ import { writable } from 'svelte/store';
 export const globalStore = writable({
     loading: false,
     showEntreFechas: false,
+    showMarcadaDetalle: true,
     selectedDepartamento: '',
     fechaMarcada:'',
 });
@@ -13,6 +14,10 @@ export function updateSelectedDepartamento(departamento: string) {
 
 export function updateFechaMarcada(fecha: string) {
     globalStore.update((state) => ({ ...state, fechaMarcada: fecha }));
+}
+
+export function toggleMarcadaDetalle() {
+    globalStore.update((state) => ({ ...state, showMarcadaDetalle: !state.showMarcadaDetalle }));
 }
 
 export function toggleEntreFechas() {

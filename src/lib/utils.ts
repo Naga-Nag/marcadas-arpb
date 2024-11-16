@@ -117,6 +117,10 @@ export function getEstado(persona) {
   }
 }
 
+export function getEstadoMarcada() {
+  
+}
+
 export function fromHex(hexData: any): Array<string> {
   if (hexData != null) {
     var output = Buffer.from(hexData, 'hex');

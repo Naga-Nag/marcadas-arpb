@@ -1,12 +1,20 @@
-export async function fetchMarcadas(
+import { globalStore } from "./globalStore";
+
+let showMarcadaDetalle: boolean;
+
+globalStore.subscribe((value) => {
+    showMarcadaDetalle = value.showMarcadaDetalle;
+});
+
+export async function fetchMarcada(
     departamento: string,
-    fechaMarcada: string,
+    fecha: string,
     onBatch?: (batch: Array<Record<string, any>>) => void
 ): Promise<Array<Record<string, any>>> {
-    const response = await fetch('/api/fetchMarcadas', {
+    const response = await fetch('/api/fetchMarcada', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ departamento, fechaMarcada })
+        body: JSON.stringify({ departamento, fecha })
     });
 
     if (!response.ok || !response.body) {
@@ -64,4 +72,29 @@ export async function fetchMarcadas(
 
     // Return the accumulated records
     return registros;
+}
+
+export async function fetchMarcadaDetalle(departamento: string, fecha: string): Promise<Array<Record<string, any>>> {
+    const response = await fetch('/api/fetchMarcadaDetalle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ departamento, fecha})
+    });
+
+    if (!response.ok || !response.body) {
+        throw new Error('Failed to fetch records');
+    }
+    return response.json();
+}
+
+export async function fetchDepartamentos(): Promise<Array<Record<string, any>>> {
+    const response = await fetch('/api/fetchDepartamentos', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!response.ok || !response.body) {
+        throw new Error('Failed to fetch records');
+    }
+    return response.json();
 }

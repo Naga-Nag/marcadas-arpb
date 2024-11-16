@@ -2,21 +2,21 @@ import { fetchMarcadaDelDia } from '$lib/server/db';
 
 export async function POST({ request }) {
 	try {
-		const { departamento, fechaMarcada } = await request.json();
+		const { departamento, fecha } = await request.json();
 
 		// Validate input
-		if (!departamento || !fechaMarcada) {
+		if (!departamento || !fecha) {
 			throw new Error('Parámetros inválidos: departamento o fechaMarcada no definidos');
 		}
 
-		console.log('POST || Streaming registros para:', departamento, fechaMarcada);
+		console.log('POST || Streaming registros para:', departamento, fecha);
 
 		// Create a readable stream
 		const stream = new ReadableStream({
 			async start(controller) {
 				try {
 					// Fetch data in batches
-					await fetchMarcadaDelDia(departamento, fechaMarcada, (batch) => {
+					await fetchMarcadaDelDia(departamento, fecha, (batch) => {
 						// Send each batch to the stream
 						controller.enqueue(JSON.stringify(batch) + '\n');
 					});

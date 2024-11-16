@@ -8,15 +8,9 @@
 </script>
 
 {#if loading}
-    <h1>Cargando datos</h1>
+    <!-- svelte-ignore a11y-missing-attribute -->
+    <img src="/loading.gif" width="40" height="40" class="mt:16 mr:10 ml:10">
 {/if}
 
 <style>
-	h1 {
-		color: white;
-		position: absolute;
-		z-index: 2;
-		top: 50%;
-		right: 50%;
-	}
 </style>

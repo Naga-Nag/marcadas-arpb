@@ -36,24 +36,15 @@ export async function fetchMarcadaDelDia(
     // Set up the query based on the department host
     const query =
       departamento === 'PEAP'
-        ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDetallePEAP('${fecha}');`
-        : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDiaDetalle('${departamento}', '${fecha}');`;
+        ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDiaPEAP('${fecha}');`
+        : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDia('${departamento}', '${fecha}');`;
 
     request.stream = true; // Enable streaming
     request.query(query);
 
     // Event handler for each row
     request.on('row', (row) => {
-      // Process the row (e.g., formatting)
-      row.Entrada = formatTime(row.Entrada);
-      row.Salida = formatTime(row.Salida);
-      row.Marcada = formatTime(row.Marcada);
-      const Info = fromHex(row.Info);
-      row.CUIL = Info[0] ?? '';
-      row.DNI = Info[1] ?? '';
-      row.JORNADA = Info[2] ? `${Info[2]} horas` : '';
-      row.ACTIVO = Info[3] ?? '';
-
+      processRow(row);
       rows.push(row);
 
       // Send the batch when it reaches 20 rows
@@ -77,8 +68,8 @@ export async function fetchMarcadaDelDia(
         onBatch([...rows]);
       }
       let endTime = new Date();
-      console.log("INFO || "+'Tiempo de consulta MarcadaDelDia:', differenceInMilliseconds(endTime, startTime) + 'ms');
-      console.log("INFO || "+rowCount + " registros encontrados");
+      console.log("INFO || " + 'Tiempo de consulta MarcadaDelDia:', differenceInMilliseconds(endTime, startTime) + 'ms');
+      console.log("INFO || " + rowCount + " registros encontrados");
       resolve(); // Resolve the promise to indicate completion
     });
   });
@@ -111,7 +102,7 @@ export async function fetchDepartamentos(): Promise<Array<Record<string, any>>> 
   });
 }
 
-export async function fetchMarcadaDetalle(uid: number, fecha: Date) {
+export async function fetchMarcadaDetalle(departamento: string, fecha: string): Promise<Array<Record<string, any>>> {
   await sql.connect(sqlConfig);
 
   return new Promise((resolve, reject) => {
@@ -119,10 +110,15 @@ export async function fetchMarcadaDetalle(uid: number, fecha: Date) {
     const request = new sql.Request();
 
     // Set up the query for detailed data
-    const query = `USE ${Bun.env.DB}; SELECT * FROM dbo.MarcadaDetalle(${uid}, '${fecha.toISOString().substring(0, 10)}');`;
+    const query =
+      departamento === 'PEAP'
+        ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDetallePEAP('${fecha}');`
+        : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDetalle('${departamento}', '${fecha}');`;
+
     request.query(query);
 
     request.on('row', (row) => {
+      processRow(row);
       rows.push(row);
     });
 
@@ -132,27 +128,7 @@ export async function fetchMarcadaDetalle(uid: number, fecha: Date) {
     });
 
     request.on('done', () => {
-      // Process rows with filtering logic for time differences
-      const resultCurado = [];
-      for (let i = 0; i < rows.length; i++) {
-        const currentRecord = rows[i];
-
-        // Always add the last record
-        if (i === rows.length - 1) {
-          resultCurado.push(currentRecord);
-          continue;
-        }
-
-        const nextRecord = rows[i + 1];
-        const timeDiff = differenceInMinutes(parseISO(nextRecord.Marcada), parseISO(currentRecord.Marcada));
-
-        // Skip records within 5 minutes of each other
-        if (timeDiff >= 5) {
-          resultCurado.push(currentRecord);
-        }
-      }
-
-      resolve(resultCurado);
+      resolve(rows);
     });
   });
 }
@@ -175,15 +151,7 @@ export async function fetchMarcadaEntreFechas(departamento: string, startDate: s
     request.query(query);
 
     request.on('row', (row) => {
-      row.Marcada = formatTime(row.Marcada);
-      let Info = fromHex(row.Info);
-      row.Info = fromHex(row.Info)
-      row.CUIL = Info[0];
-      row.DNI = Info[1];
-      if (Info[0] != undefined) { row.CUIL = Info[0] } else { row.CUIL = '' }
-      if (Info[1] != undefined) { row.DNI = Info[1] } else { row.DNI = '' }
-      if (Info[2] != undefined) { row.JORNADA = Info[2] + ' horas' } else { row.JORNADA = '' }
-      if (Info[3] != undefined) { row.ACTIVO = Info[3] } else { row.ACTIVO = '' }
+      processRow(row);
       rows.push(row);
     });
 
@@ -193,13 +161,25 @@ export async function fetchMarcadaEntreFechas(departamento: string, startDate: s
     });
 
     request.on('done', () => {
-      const sanitizedData = JSON.parse(JSON.stringify(rows));
       let endTime = new Date();
       console.log("INFO || "+'Tiempo de consulta MarcadaEntreFechas:', differenceInMilliseconds(endTime, startTime) + 'ms');
       console.log("INFO || "+ rows.length + " registros encontrados");
-      resolve(sanitizedData);
+      resolve(rows);
     });
   });
+}
+
+function processRow(row: any) {
+  row.Entrada = formatTime(row.Entrada);
+  row.Salida = formatTime(row.Salida);
+  row.Marcada = formatTime(row.Marcada);
+  let Info = fromHex(row.Info);
+  row.Info = fromHex(row.Info)
+  if (Info[0] != undefined) { row.CUIL = Info[0] } else { row.CUIL = '' }
+  if (Info[1] != undefined) { row.DNI = Info[1] } else { row.DNI = '' }
+  if (Info[2] != undefined) { row.JORNADA = Info[2] + ' horas' } else { row.JORNADA = '' }
+  if (Info[3] != undefined) { row.ACTIVO = Info[3] } else { row.ACTIVO = '' }
+  return row;
 }
 
 /* console.log(await fetchMarcadaEntreFechas('PEAP', '2024-01-01', '2024-01-04')); */

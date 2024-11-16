@@ -7,23 +7,28 @@
 	import { globalStore } from '$lib/globalStore';
 
 	export let registros: Array<Marcada>;
-	let showExtraColumns: boolean;
+
+
+	let showMarcadaDetalle: boolean;
+	globalStore.subscribe(($value) => {
+		showMarcadaDetalle = $value.showMarcadaDetalle;
+	});
+
+
 	const dataToDisplay = writable(registros);
 
 	const table = createTable(dataToDisplay, {
 		page: addPagination(),
 		hideCols: addHiddenColumns(),
+		group: addGroupBy({}),
 		sort: addSortBy({
 			serverSide: true,
 			toggleOrder: ['asc', 'desc'],
 			initialSortKeys: [{ id: 'Estado', order: 'asc' }]
 		}),
-		group: addGroupBy({}),
 	});
 
-	globalStore.subscribe(($value) => {
-		showExtraColumns = $value.showEntreFechas;
-	});
+	
 
 	const columns = table.createColumns([
 		table.column({ header: 'MR', accessor: 'MR' }),
@@ -51,11 +56,11 @@
 	let hideForId = Object.fromEntries(ids.map((id) => [id, false]));
 
 	$: {
-		hideForId.Entrada = showExtraColumns;
-		hideForId.Salida = showExtraColumns;
-		hideForId.Estado = showExtraColumns;
+		hideForId.Entrada = showMarcadaDetalle;
+		hideForId.Salida = showMarcadaDetalle;
+		hideForId.Estado = showMarcadaDetalle;
 
-		hideForId.Marcada = showExtraColumns;
+		hideForId.Marcada = !showMarcadaDetalle;
 
 		$hiddenColumnIds = Object.entries(hideForId)
 			.filter(([, hide]) => hide)

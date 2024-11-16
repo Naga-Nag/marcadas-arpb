@@ -2,7 +2,6 @@ FROM oven/bun
 
 WORKDIR /app
 COPY package.json package.json
-COPY .env .env
 RUN bun install
 
 COPY . .

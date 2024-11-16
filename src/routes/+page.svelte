@@ -7,12 +7,11 @@
 	import MainOptions from '$lib/components/MainOptions.svelte';
 	import DatePicker from '$lib/components/DatePicker.svelte';
 	import { getEstado } from '$lib/utils.js';
-	import { fetchMarcadas } from '$lib/mainController';
+	import { fetchMarcadaDetalle, fetchMarcada } from '$lib/mainController';
 	import {
 		globalStore,
-		toggleEntreFechas,
 		updateFechaMarcada,
-		setloadingData
+		setloadingData,
 	} from '$lib/globalStore';
 	import { onMount } from 'svelte';
 	import LoadingIcon from '$lib/components/LoadingIcon.svelte';
@@ -21,17 +20,20 @@
 	let registros = data.records;
 	let searchText: string = '';
 	let departamentos: string[] = String(data.departamentos).split(',') ?? [];
-	let selectedDepartamento: string = data.hostname;
-	let showEntreFechas: boolean;
+	
 	let hostname = data.hostname;
+	
+	let selectedDepartamento: string = data.hostname;
 	let fechaMarcada = '';
 	let loading: boolean;
-
+	let showEntreFechas: boolean;
+	let showFechaDetalle: boolean;
 	globalStore.subscribe((value) => {
 		selectedDepartamento = value.selectedDepartamento;
-		showEntreFechas = value.showEntreFechas;
 		fechaMarcada = value.fechaMarcada;
 		loading = value.loading;
+		showEntreFechas = value.showEntreFechas;
+		showFechaDetalle = value.showMarcadaDetalle;
 	});
 
 	// Computamos los datos filtrados en función del departamento seleccionado, el texto de búsqueda y la ordenación
@@ -106,23 +108,26 @@
 	}
 
 	async function fechaListener(fechaMarcada: string) {
+		setloadingData(true);
+		
 		registros = []; // Clear previous records
 
 		try {
-			fetchMarcadas(hostname, fechaMarcada, (batch) => {
+			if (showFechaDetalle) {
+				registros = await fetchMarcadaDetalle(hostname, fechaMarcada)
+			}
+			else {
+				fetchMarcada(hostname, fechaMarcada, (batch) => {
 				registros = [...registros, ...batch]; // Update registros incrementally
 			});
+			}
 		} catch (error) {
 			console.error('Error fetching data:', error);
 			error = error.message;
 		} finally {
-		}
-	}
 
-	function toggleEntreFechasResetData() {
-		toggleEntreFechas();
-		filteredData = [];
-		registros = [];
+		}
+		setloadingData(false);
 	}
 
 	onMount(async () => {
@@ -133,20 +138,24 @@
 </script>
 
 <body>
-	<main class="main shadow:8|8|3|blue">
+	<main class="main shadow:8|8|3|blue min-h:93vh">
 		<div class="d:flex flex:row justify-content:space-between">
 			<h1 class="text:center bg:white r:10 p:10 w:fit-content shadow:4|4|3|gray-70">
 				Presentismo - {data.hostname}
 			</h1>
+			
 			<a href="/aut" class="font-size:9">👻</a>
 		</div>
 
 		<!-- Tabs de departamentos -->
 		{#if data.hostname === 'PEAP'}
+		<div class="d:flex flex:row justify-content:space-between">
 			<TabsDepartamento {departamentos} bind:selectedDepartamento />
+			<LoadingIcon />
+		</div>
 		{/if}
 
-		<LoadingIcon></LoadingIcon>
+		
 
 		<!-- Campo de búsqueda -->
 		<input
@@ -159,40 +168,38 @@
 		<!-- DatePicker y Botones para exportar datos -->
 		<div class="d:flex mb:10">
 			<span> </span>
-			<MainOptions {showEntreFechas} on:showEntreFechas={toggleEntreFechasResetData} />
+			<MainOptions />
 			<span></span>
 
 			{#if showEntreFechas}
-				<RangeDatePicker
-					on:rangoFechaDefinido={(e) =>
-						rangoFechalistener(e.detail.fechaInicial, e.detail.fechaFinal)}
-				></RangeDatePicker>
+				<RangeDatePicker on:rangoFechaDefinido={(e) => rangoFechalistener(e.detail.fechaInicial, e.detail.fechaFinal)}/>
 			{:else}
-				<DatePicker on:fechaDefinida={(e) => fechaListener(e.detail.fecha)}></DatePicker>
+				<DatePicker on:fechaDefinida={(e) => fechaListener(e.detail.fecha)}/>
 			{/if}
 
 			<BtnDescargar
 				data={filteredData}
 				placeholder="Descargar Vista Actual"
-				filename="marcadas VA - {selectedDepartamento} {data.fechaMarcada}"
+				filename="marcadas VA - {selectedDepartamento} {fechaMarcada}"
 			/>
 			<BtnDescargar
 				data={filteredAusentesDepartamento}
 				placeholder="Descargar Ausentes del Departamento"
-				filename="marcadas AD - {selectedDepartamento} {data.fechaMarcada}"
+				filename="marcadas AD - {selectedDepartamento} {fechaMarcada}"
 			/>
 			{#if data.hostname === 'PEAP'}
 				<BtnDescargar
 					data={filterAusentes()}
 					placeholder="Descargar Todos los Ausentes"
-					filename="marcadas TD {data.fechaMarcada}"
+					filename="marcadas TD {fechaMarcada}"
 				/>
 			{/if}
 		</div>
 
 		<!-- Tabla de datos filtrados -->
-		{#if registros.length > 0 && !loading}
+		{#if registros.length > 0 }
 			<DataTable registros={filteredData} />
+
 			<!-- Cuenta de registros -->
 			<div class="d:flex flex:col">
 				<p class="font-size:18 bg:white r:10 p:10 w:fit-content">

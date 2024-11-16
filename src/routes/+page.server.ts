@@ -1,4 +1,3 @@
-import { fetchMarcadaDelDia, fetchDepartamentos } from '$lib/server/db';
 import { getDepartamentoHost } from '$lib/utils';
 import type { PageServerLoad } from './$types';
 
