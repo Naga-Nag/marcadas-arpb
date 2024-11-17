@@ -8,9 +8,11 @@
 	import { updateFechaMarcada } from '$lib/globalStore';
 	import { globalStore } from '$lib/globalStore';
 
-	export let fechaMarcada = writable('');
-	let isloading: boolean;
 
+	let hoy = new Date().toISOString().split('T')[0];
+	export let fechaMarcada = writable(hoy);
+	
+	let isloading: boolean;
 	globalStore.subscribe((value) => {
 		isloading = value.loading;
 	});
@@ -26,8 +28,19 @@
 	}
 
 	function setDateAyer() {
-		if (fechaMarcada !== null) {
+		if ($fechaMarcada !== '') {
 			let ayer = new Date($fechaMarcada);
+			ayer.setDate(ayer.getDate() - 1);
+			$fechaMarcada = ayer.toISOString().split('T')[0];
+
+			updateFechaMarcada($fechaMarcada);
+
+			dispatch('fechaDefinida', {
+				fecha: ayer.toISOString().split('T')[0]
+			});
+		}
+		else {
+			let ayer = new Date();
 			ayer.setDate(ayer.getDate() - 1);
 			$fechaMarcada = ayer.toISOString().split('T')[0];
 
@@ -40,7 +53,7 @@
 	}
 
 	function setDateMañana() {
-		if (fechaMarcada !== null) {
+		if ($fechaMarcada !== '') {
 			let mañana = new Date($fechaMarcada);
 			mañana.setDate(mañana.getDate() + 1);
 			$fechaMarcada = mañana.toISOString().split('T')[0];
@@ -67,5 +80,5 @@
 	/>
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<button class="font-size:20 nakedbtn" on:click={setDateMañana} disabled={isloading}>►</button>
+	<button class="font-size:20 nakedbtn" on:click={setDateMañana} disabled={isloading || $fechaMarcada === hoy}>►</button>
 </div>
