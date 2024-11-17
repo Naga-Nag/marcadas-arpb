@@ -1,6 +1,6 @@
 <script>
 	import { globalStore } from '$lib/globalStore';
-	let loading = false;
+	$: loading = false;
 
 	globalStore.subscribe((value) => {
 		loading = value.loading;
