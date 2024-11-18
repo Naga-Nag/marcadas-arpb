@@ -10,6 +10,7 @@
 	import { fetchMarcadaDetalle, fetchMarcada } from '$lib/mainController';
 	import { globalStore, updateFechaMarcada, setloadingData } from '$lib/globalStore';
 	import { onMount } from 'svelte';
+	import type { Marcada } from '$lib/types';
 	import LoadingIcon from '$lib/components/LoadingIcon.svelte';
 
 	// Variables para búsqueda y departamentos
@@ -35,47 +36,47 @@
 
 	// Computamos los datos filtrados en función del departamento seleccionado, el texto de búsqueda y la ordenación
 	$: filteredData = registros
-		.filter((persona: { Nombre: string; Departamento: string; MR: number }) => {
+		.filter((marcada: Marcada) => {
 			// Si el hostname es PEAP, filtramos por departamento, si no, ignoramos el departamento
 			if (data.hostname === 'PEAP') {
 				if (selectedDepartamento === 'ARPB') {
 					return (
-						persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
-						persona.MR.toString().includes(searchText)
+						marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
+						marcada.MR.toString().includes(searchText)
 					);
 				} else {
 					return (
-						persona.Departamento === selectedDepartamento &&
-						(persona.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
-							persona.MR.toString().includes(searchText))
+						marcada.Departamento === selectedDepartamento &&
+						(marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
+							marcada.MR.toString().includes(searchText))
 					);
 				}
 			} else {
 				// Si no es PEAP, solo filtramos por el texto de búsqueda
 				return (
-					(persona.Departamento === selectedDepartamento &&
-						persona.Nombre.toLowerCase().includes(searchText.toLowerCase())) ||
-					persona.MR.toString().includes(searchText)
+					(marcada.Departamento === selectedDepartamento &&
+						marcada.Nombre.toLowerCase().includes(searchText.toLowerCase())) ||
+					marcada.MR.toString().includes(searchText)
 				);
 			}
 		}) //Agregamos estado a cada marcada
-		.map((persona: { Entrada: string; Salida: string }) => ({
-			...persona,
-			Estado: getEstado(persona)
+		.map((marcada: { Entrada: string; Salida: string }) => ({
+			...marcada,
+			Estado: getEstado(marcada)
 		}));
 
 	let filteredAusentesDepartamento = filterAusentesDepartamento(selectedDepartamento);
 
 	function filterAusentes() {
 		return data.records.filter(
-			(persona: { Entrada: any; Salida: any }) => !persona.Entrada || !persona.Salida
+			(marcada: { Entrada: any; Salida: any }) => !marcada.Entrada || !marcada.Salida
 		);
 	}
 
 	function filterAusentesDepartamento(dep: String) {
 		let datos = data.records.filter(
-			(persona: { Departamento: string; Entrada: any; Salida: any }) =>
-				persona.Departamento === selectedDepartamento && (!persona.Entrada || !persona.Salida)
+			(marcada: { Departamento: string; Entrada: any; Salida: any }) =>
+				marcada.Departamento === selectedDepartamento && (!marcada.Entrada || !marcada.Salida)
 		);
 		return datos;
 	}
