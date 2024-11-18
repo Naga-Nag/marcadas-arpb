@@ -21,5 +21,6 @@
     body {
 		background: linear-gradient(-180deg, #306cce, #2eb7e9);
 		background-size: 400% 400%;
+        margin: 0 auto;
 	}
 </style>
