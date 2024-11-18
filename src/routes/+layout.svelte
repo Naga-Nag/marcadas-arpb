@@ -17,7 +17,7 @@
 		src: url('/Comfortaa.ttf');
 	}
 
-	html::-webkit-scrollbar {
+	body::-webkit-scrollbar {
 		display: none;
 	}
 
@@ -25,6 +25,5 @@
 		background: linear-gradient(-180deg, #306cce, #2eb7e9);
 		background-size: 400% 400%;
 		margin: 0 auto;
-		overflow: hidden;
 	}
 </style>
