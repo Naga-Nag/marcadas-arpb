@@ -16,14 +16,4 @@
 		font-weight: 500;
 		src: url('/Comfortaa.ttf');
 	}
-
-	body::-webkit-scrollbar {
-		display: none;
-	}
-
-	body {
-		background: linear-gradient(-180deg, #306cce, #2eb7e9);
-		background-size: 400% 400%;
-		margin: 0 auto;
-	}
 </style>

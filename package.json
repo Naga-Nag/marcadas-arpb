@@ -36,6 +36,7 @@
 		"@castlenine/svelte-qrcode": "^2.3.0",
 		"@master/css": "^1.37.8",
 		"@sveltejs/adapter-static": "^3.0.6",
+		"@tauri-apps/api": "^2.1.1",
 		"@types/bun": "^1.1.10",
 		"@types/mssql": "^9.1.5",
 		"date-fns": "^4.1.0",
