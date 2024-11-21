@@ -75,6 +75,8 @@ export async function fetchMarcadaDelDia(
   });
 }
 
+/* console.log(await fetchMarcadaDelDia('TAAP', '2023-08-03' , (batch) => {console.log(batch)})); */
+
 export async function fetchDepartamentos(): Promise<Array<Record<string, any>>> {
   await sql.connect(sqlConfig);
 
@@ -123,7 +125,7 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
     });
 
     request.on('error', (err) => {
-      console.error('Error fetching data:', err);
+      console.error('db.ts || Error fetching data:', err);
       reject(err);
     });
 
@@ -132,6 +134,8 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
     });
   });
 }
+
+console.log(await fetchMarcadaDetalle('TAAP', '2023-08-03'));
 
 export async function fetchMarcadaEntreFechas(departamento: string, startDate: string, endDate: string): Promise<Array<Record<string, any>>> {
   let startTime = new Date();

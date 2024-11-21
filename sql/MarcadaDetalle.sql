@@ -20,7 +20,7 @@ BEGIN
     ui.Name AS Nombre,
     d.DeptName AS Departamento,
     ci.CheckTime AS Marcada,
-    ui.OtherInfo AS Info
+    CAST(OtherInfo AS VARBINARY(MAX)) AS Info
   FROM
     dbo.Userinfo ui
   INNER JOIN dbo.Dept d ON ui.Deptid = d.Deptid

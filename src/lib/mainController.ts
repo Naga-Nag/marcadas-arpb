@@ -74,6 +74,8 @@ export async function fetchMarcada(
     return registros;
 }
 
+/* console.log(await fetchMarcada('TAAP', '2023-08-03' , (batch) => {console.log(batch)})); */
+
 export async function fetchMarcadaDetalle(departamento: string, fecha: string): Promise<Array<Record<string, any>>> {
     const response = await fetch('/api/fetchMarcadaDetalle', {
         method: 'POST',
