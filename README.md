@@ -1,7 +1,7 @@
 👻  🔥Presentismo🔥  👻
 =========
 
-## **Crear .env file con los siguientes datos**
+## **Crear .env con los siguientes datos**
 
 ```
 DB= #Nombre de la base de datos
