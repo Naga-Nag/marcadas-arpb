@@ -10,7 +10,8 @@
 
 
 	let hoy = new Date().toISOString().split('T')[0];
-	export let fechaMarcada = writable(hoy);
+	let ayer = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+	export let fechaMarcada = writable(ayer);
 	
 	let isloading: boolean;
 	globalStore.subscribe((value) => {
