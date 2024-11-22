@@ -1,5 +1,6 @@
 CREATE OR ALTER FUNCTION MarcadaDetallePEAP(
     @FechaHoy DATE
+    
 )
 RETURNS @Resultado TABLE 
 (

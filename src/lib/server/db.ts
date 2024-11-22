@@ -135,7 +135,7 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
   });
 }
 
-console.log(await fetchMarcadaDetalle('TAAP', '2023-08-03'));
+/* console.log(await fetchMarcadaDetalle('TAAP', '2023-08-03')); */
 
 export async function fetchMarcadaEntreFechas(departamento: string, startDate: string, endDate: string): Promise<Array<Record<string, any>>> {
   let startTime = new Date();
