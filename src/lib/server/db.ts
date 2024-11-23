@@ -1,4 +1,4 @@
-import { formatTime, fromHex, getDepartamentoHost } from '$lib/utils';
+import { formatTime, fromHex, getDepartamentoHost } from '$lib/utils/utils';
 import { differenceInMilliseconds, differenceInMinutes, format, parseISO } from 'date-fns';
 import sql from 'mssql';
 
@@ -105,6 +105,7 @@ export async function fetchDepartamentos(): Promise<Array<Record<string, any>>> 
 }
 
 export async function fetchMarcadaDetalle(departamento: string, fecha: string): Promise<Array<Record<string, any>>> {
+  let startTime = new Date();
   await sql.connect(sqlConfig);
 
   return new Promise((resolve, reject) => {
@@ -130,6 +131,9 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
     });
 
     request.on('done', () => {
+      let endTime = new Date();
+      console.log("INFO || "+'Tiempo de consulta MarcadaDetalle:', differenceInMilliseconds(endTime, startTime) + 'ms');
+      console.log("INFO || "+ rows.length + " registros encontrados");
       resolve(rows);
     });
   });

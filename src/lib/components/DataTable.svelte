@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Marcada } from '$lib/types';
-	import { sortTime, sortString, sortNumber, sortEstado } from '$lib/utils';
+	import type { Marcada } from '$lib/utils/types';
+	import { sortTime, sortString, sortNumber, sortEstado } from '$lib/utils/utils';
 	import { createTable, Subscribe, Render } from 'svelte-headless-table';
 	import {
 		addHiddenColumns,
@@ -9,7 +9,7 @@
 		addGroupBy
 	} from 'svelte-headless-table/plugins';
 	import { writable } from 'svelte/store';
-	import { globalStore } from '$lib/globalStore';
+	import { globalStore } from '$lib/utils/globalStore';
 
 	export let registros: Array<Marcada>;
 

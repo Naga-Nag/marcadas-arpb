@@ -5,8 +5,8 @@
 <script lang="ts">
 	import { writable } from 'svelte/store';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { updateFechaMarcada } from '$lib/globalStore';
-	import { globalStore } from '$lib/globalStore';
+	import { updateFechaMarcada } from '$lib/utils/globalStore';
+	import { globalStore } from '$lib/utils/globalStore';
 
 
 	let hoy = new Date().toISOString().split('T')[0];

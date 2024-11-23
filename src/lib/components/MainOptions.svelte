@@ -4,7 +4,7 @@
 		globalStore,
 		toggleEntreFechas as TEF,
 		toggleMarcadaDetalle as TMD
-	} from '$lib/globalStore';
+	} from '$lib/utils/globalStore';
 	import { createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher();

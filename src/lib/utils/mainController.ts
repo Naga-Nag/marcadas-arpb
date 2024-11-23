@@ -1,4 +1,4 @@
-import { globalStore } from "./globalStore";
+import { globalStore } from "$lib/utils/globalStore";
 
 let showMarcadaDetalle: boolean;
 

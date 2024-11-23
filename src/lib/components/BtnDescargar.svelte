@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { downloadExcel } from '$lib/utils';
+	import { downloadExcel } from '$lib/utils/utils';
 	export let data: any;
 	export let placeholder = 'Descargar Excel';
 	export let className = '';

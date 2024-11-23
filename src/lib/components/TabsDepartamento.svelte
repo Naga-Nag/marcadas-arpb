@@ -3,7 +3,7 @@
 	export let selectedDepartamento: string;
 	
 	
-	import { updateSelectedDepartamento} from '$lib/globalStore';
+	import { updateSelectedDepartamento} from '$lib/utils/globalStore';
 	import { onMount } from 'svelte';
 
 	function selectDepartamento(departamento: string) {

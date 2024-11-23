@@ -1,4 +1,4 @@
-import { getDepartamentoHost } from '$lib/utils';
+import { getDepartamentoHost } from '$lib/utils/utils';
 import type { PageServerLoad } from './$types';
 
 

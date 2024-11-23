@@ -1,11 +1,11 @@
 <script lang="ts">
 	export let data: any;
-	import {BtnDescargar, MainOptions, TabsDepartamento, DatePicker, RangeDatePicker, LoadingIcon, DataTable} from '$lib/components';
-	import { getEstado } from '$lib/utils.js';
-	import { fetchMarcadaDetalle, fetchMarcada } from '$lib/mainController';
-	import { globalStore, updateFechaMarcada, setloadingData } from '$lib/globalStore';
+	import {BtnDescargar, MainOptions, TabsDepartamento, DatePicker, RangeDatePicker, LoadingIcon, DataTable} from '$lib/components/components';
+	import { getEstado } from '$lib/utils/utils';
+	import { fetchMarcadaDetalle, fetchMarcada } from '$lib/utils/mainController';
+	import { globalStore, updateFechaMarcada, setloadingData } from '$lib/utils/globalStore';
 	import { onMount } from 'svelte';
-	import type { Marcada } from '$lib/types';
+	import type { Marcada } from '$lib/utils/types';
 	
 
 	// Variables para búsqueda y departamentos
@@ -109,7 +109,7 @@
 			if (showFechaDetalle) {
 				registros = await fetchMarcadaDetalle(hostname, fechaMarcada);
 			} else {
-				fetchMarcada(hostname, fechaMarcada, (batch) => {
+				await fetchMarcada(hostname, fechaMarcada, (batch) => {
 					registros = [...registros, ...batch]; // Update registros incrementally
 				});
 			}
