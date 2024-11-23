@@ -1,5 +1,5 @@
 export type Marcada = {
-    MR: number;
+    MR: string;
     Nombre: string;
     Departamento: string;
     Marcada: string;

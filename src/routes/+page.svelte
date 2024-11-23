@@ -1,17 +1,12 @@
 <script lang="ts">
 	export let data: any;
-	import BtnDescargar from '$lib/components/BtnDescargar.svelte';
-	import TabsDepartamento from '$lib/components/TabsDepartamento.svelte';
-	import DataTable from '$lib/components/DataTable.svelte';
-	import RangeDatePicker from '$lib/components/RangeDatePicker.svelte';
-	import MainOptions from '$lib/components/MainOptions.svelte';
-	import DatePicker from '$lib/components/DatePicker.svelte';
+	import {BtnDescargar, MainOptions, TabsDepartamento, DatePicker, RangeDatePicker, LoadingIcon, DataTable} from '$lib/components';
 	import { getEstado } from '$lib/utils.js';
 	import { fetchMarcadaDetalle, fetchMarcada } from '$lib/mainController';
 	import { globalStore, updateFechaMarcada, setloadingData } from '$lib/globalStore';
 	import { onMount } from 'svelte';
 	import type { Marcada } from '$lib/types';
-	import LoadingIcon from '$lib/components/LoadingIcon.svelte';
+	
 
 	// Variables para búsqueda y departamentos
 	let registros = data.records;
@@ -25,7 +20,7 @@
 	let loading: boolean;
 	let showEntreFechas: boolean;
 	let showFechaDetalle: boolean;
-	
+
 	globalStore.subscribe((value) => {
 		selectedDepartamento = value.selectedDepartamento;
 		fechaMarcada = value.fechaMarcada;
@@ -42,17 +37,17 @@
 				if (selectedDepartamento === 'ARPB') {
 					return (
 						marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
-						marcada.MR.toString().includes(searchText)
+						marcada.MR.toString().includes(searchText) || 
+						marcada.CUIL.includes(searchText)
 					);
 				} else {
 					return (
 						marcada.Departamento === selectedDepartamento &&
 						(marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
-							marcada.MR.toString().includes(searchText))
+							marcada.MR.includes(searchText))
 					);
 				}
 			} else {
-				// Si no es PEAP, solo filtramos por el texto de búsqueda
 				return (
 					(marcada.Departamento === selectedDepartamento &&
 						marcada.Nombre.toLowerCase().includes(searchText.toLowerCase())) ||
@@ -165,7 +160,18 @@
 		<!-- DatePicker y Botones para exportar datos -->
 		<div class="d:flex mb:10">
 			<span> </span>
-			<MainOptions on:resetRegistros={() => (registros = [])} />
+			<MainOptions
+				on:toggleMarcadaDetalle={() => {
+					registros = [];
+					fechaListener(fechaMarcada);
+				}}
+				on:toggleEntreFechas={() => {
+					registros = [];
+					if (showEntreFechas) {
+						fechaListener(fechaMarcada);
+					}
+				}}
+			/>
 			<span></span>
 
 			{#if showEntreFechas}

@@ -21,7 +21,14 @@ export function toggleMarcadaDetalle() {
 }
 
 export function toggleEntreFechas() {
-    globalStore.update((state) => ({ ...state, showEntreFechas: !state.showEntreFechas }));
+    globalStore.update((state) => {
+        const newShowEntreFechas = !state.showEntreFechas;
+        return { 
+            ...state, 
+            showEntreFechas: newShowEntreFechas, 
+            showMarcadaDetalle: newShowEntreFechas ? true : state.showMarcadaDetalle 
+        };
+    });
 }
 
 export function setloadingData(loading: boolean) {

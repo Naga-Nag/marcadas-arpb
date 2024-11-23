@@ -15,9 +15,6 @@
 	globalStore.subscribe(($value) => {
 		showEntreFechas = $value.showEntreFechas;
 		showMarcadaDetalle = $value.showMarcadaDetalle;
-		if (showEntreFechas) {
-			showMarcadaDetalle = true;
-		}
 	});
 
 	let menuAbierto = false;
@@ -26,12 +23,12 @@
 	}
 
 	function toggleMarcadaDetalle() {
-		dispatch('resetRegistros');
+		dispatch('toggleMarcadaDetalle');
 		TMD();
 	}
 
 	function toggleEntreFechas() {
-		dispatch('resetRegistros');
+		dispatch('toggleEntreFechas');
 		TEF();
 	}
 </script>

@@ -59,9 +59,6 @@
 	let hideForId = Object.fromEntries(ids.map((id) => [id, false]));
 
 	$: {
-		if (showEntreFechas) {
-			showMarcadaDetalle = true;
-		}
 		hideForId.Entrada = showMarcadaDetalle;
 		hideForId.Salida = showMarcadaDetalle;
 		hideForId.Estado = showMarcadaDetalle;

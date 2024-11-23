@@ -8,7 +8,7 @@ const sqlConfig = {
   database: Bun.env.DB!,
   server: Bun.env.DB_IP!,
   pool: {
-    max: 10,
+    max: 20,
     min: 0,
     idleTimeoutMillis: 3000
   },
