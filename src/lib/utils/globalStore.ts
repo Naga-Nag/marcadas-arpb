@@ -1,10 +1,12 @@
 import { writable } from 'svelte/store';
+import { getDepartamentoHost } from './utils';
 
 export const globalStore = writable({
     loading: false,
     showEntreFechas: false,
     showMarcadaDetalle: true,
     selectedDepartamento: '',
+    hostname: '',
     fechaMarcada:'',
 });
 
@@ -33,6 +35,10 @@ export function toggleEntreFechas() {
 
 export function setloadingData(loading: boolean) {
     globalStore.update((state) => ({...state, loading: loading}));
+}
+
+export function setHostname(hostname: string) {
+    globalStore.update((state) => ({...state, hostname: hostname}));
 }
 
 globalStore.subscribe(value => console.log('globalStore data:', value));

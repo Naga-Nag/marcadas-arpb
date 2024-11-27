@@ -1,10 +1,10 @@
 import { getDepartamentoHost } from '$lib/utils/utils';
+import { setHostname } from '$lib/utils/globalStore';
 import type { PageServerLoad } from './$types';
 
 
 export const load: PageServerLoad = async () => {
     let defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    let hostname = getDepartamentoHost();
     try {
         /* // Fetch initial data for the default date (yesterday)
         let records = await fetchMarcadaDelDia(hostname, defaultDate); */
@@ -15,7 +15,7 @@ export const load: PageServerLoad = async () => {
             fechaMarcada: defaultDate,
             records,
             departamentos,
-            hostname,
+            hostname: getDepartamentoHost(),
         };
     } catch (error) {
         console.error('Error al cargar los datos:', error);
@@ -24,7 +24,7 @@ export const load: PageServerLoad = async () => {
             fechaMarcada: null,
             records: [],
             departamentos: [],
-            hostname: null
+            hostname: '',
         };
     }
 };
