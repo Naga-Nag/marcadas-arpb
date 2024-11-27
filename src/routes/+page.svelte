@@ -1,80 +1,84 @@
 <script lang="ts">
 	export let data: any;
-	import {BtnDescargar, MainOptions, TabsDepartamento, DatePicker, RangeDatePicker, LoadingIcon, DataTable} from '$lib/components/components';
-	import { getEstado } from '$lib/utils/utils';
+	import {
+		BtnDescargar,
+		MainOptions,
+		TabsDepartamento,
+		DatePicker,
+		RangeDatePicker,
+		LoadingIcon,
+		DataTable
+	} from '$lib/components/components';
+
+	import { getEstado, matchesFilters } from '$lib/utils/utils';
 	import { fetchMarcadaDetalle, fetchMarcada } from '$lib/utils/mainController';
-	import { globalStore, updateFechaMarcada, setloadingData } from '$lib/utils/globalStore';
+	import {
+		globalStore,
+		updateFechaMarcada,
+		setloadingData,
+		setHostname
+	} from '$lib/utils/globalStore';
 	import { onMount } from 'svelte';
 	import type { Marcada } from '$lib/utils/types';
-	
+
+	import { fade } from 'svelte/transition';
 
 	// Variables para búsqueda y departamentos
-	let registros = data.records;
+	let debouncedSearchText = '';
+	let registros: Marcada[] = [];
 	let searchText: string = '';
 	let departamentos: string[] = String(data.departamentos).split(',') ?? [];
-
-	let hostname = data.hostname;
-
+	let hostname: string;
 	let selectedDepartamento: string = data.hostname;
 	let fechaMarcada = '';
 	let loading: boolean;
 	let showEntreFechas: boolean;
-	let showFechaDetalle: boolean;
+	let showMarcadaDetalle: boolean;
 
 	globalStore.subscribe((value) => {
 		selectedDepartamento = value.selectedDepartamento;
 		fechaMarcada = value.fechaMarcada;
 		loading = value.loading;
 		showEntreFechas = value.showEntreFechas;
-		showFechaDetalle = value.showMarcadaDetalle;
+		showMarcadaDetalle = value.showMarcadaDetalle;
+		hostname = value.hostname;
 	});
 
+	let timeout: ReturnType<typeof setTimeout>;
+	$: {
+		clearTimeout(timeout);
+		timeout = setTimeout(() => {
+			searchText = debouncedSearchText;
+		}, 50); // *ms debounce
+	}
+	//ANCHOR - Datos Filtrados
 	// Computamos los datos filtrados en función del departamento seleccionado, el texto de búsqueda y la ordenación
+
 	$: filteredData = registros
-		.filter((marcada: Marcada) => {
-			// Si el hostname es PEAP, filtramos por departamento, si no, ignoramos el departamento
-			if (data.hostname === 'PEAP') {
-				if (selectedDepartamento === 'ARPB') {
-					return (
-						marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
-						marcada.MR.toString().includes(searchText) || 
-						marcada.CUIL.includes(searchText)
-					);
-				} else {
-					return (
-						marcada.Departamento === selectedDepartamento &&
-						(marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
-							marcada.MR.includes(searchText))
-					);
-				}
-			} else {
-				return (
-					(marcada.Departamento === selectedDepartamento &&
-						marcada.Nombre.toLowerCase().includes(searchText.toLowerCase())) ||
-					marcada.MR.toString().includes(searchText)
-				);
-			}
-		}) //Agregamos estado a cada marcada
-		.map((marcada: { Entrada: string; Salida: string }) => ({
+		.filter((marcada) => matchesFilters(marcada, searchText, selectedDepartamento))
+		.map((marcada) => ({
 			...marcada,
 			Estado: getEstado(marcada)
 		}));
 
-	let filteredAusentesDepartamento = filterAusentesDepartamento(selectedDepartamento);
+	$: Ausentes = registros.filter((marcada) => {
+		if (showMarcadaDetalle) {
+			return !marcada.Marcada;
+		} else {
+			return !marcada.Entrada || !marcada.Salida;
+		}
+	});
 
-	function filterAusentes() {
-		return data.records.filter(
-			(marcada: { Entrada: any; Salida: any }) => !marcada.Entrada || !marcada.Salida
-		);
-	}
-
-	function filterAusentesDepartamento(dep: String) {
-		let datos = data.records.filter(
-			(marcada: { Departamento: string; Entrada: any; Salida: any }) =>
-				marcada.Departamento === selectedDepartamento && (!marcada.Entrada || !marcada.Salida)
-		);
-		return datos;
-	}
+	$: AusentesDepartamento = registros.filter((marcada) => {
+		if (marcada.Departamento === selectedDepartamento) {
+			if (showMarcadaDetalle) {
+				return !marcada.Marcada;
+			} else {
+				return !marcada.Entrada || !marcada.Salida;
+			}
+		}
+		return false;
+	});
 
 	async function rangoFechalistener(fechaInicial: string, fechaFinal: string) {
 		setloadingData(true);
@@ -106,7 +110,7 @@
 		registros = []; // Clear previous records
 
 		try {
-			if (showFechaDetalle) {
+			if (showMarcadaDetalle) {
 				registros = await fetchMarcadaDetalle(hostname, fechaMarcada);
 			} else {
 				await fetchMarcada(hostname, fechaMarcada, (batch) => {
@@ -125,9 +129,10 @@
 	}
 
 	onMount(async () => {
-		let defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+		setHostname(data.hostname);
+		const defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 		updateFechaMarcada(defaultDate);
-		fechaListener(defaultDate);
+		await fechaListener(defaultDate);
 	});
 </script>
 
@@ -141,77 +146,87 @@
 			<a href="/aut" class="font-size:9">👻</a>
 		</div>
 
-		<!-- Tabs de departamentos -->
+		<!-- // ANCHOR Tabs de departamentos -->
+		<!-- Esto solo se muestra si el hostname es PEAP -->
+
 		{#if data.hostname === 'PEAP'}
 			<div class="d:flex flex:row justify-content:space-between">
 				<TabsDepartamento {departamentos} bind:selectedDepartamento />
-				<LoadingIcon />
 			</div>
 		{/if}
 
-		<!-- Campo de búsqueda -->
-		<input
-			type="text"
-			placeholder="Buscar por nombre o MR"
-			bind:value={searchText}
-			class="b:1|solid|#ccc mb:10 p:8 w:99% r:4"
-		/>
+		{#if selectedDepartamento}
+			<!-- // ANCHOR Input buscar por MR -->
+			<input
+				type="text"
+				placeholder="Buscar por nombre o MR"
+				bind:value={debouncedSearchText}
+				class="b:1|solid|#ccc mb:10 p:8 w:99% r:4"
+			/>
 
-		<!-- DatePicker y Botones para exportar datos -->
-		<div class="d:flex mb:10">
-			<span> </span>
-			<MainOptions
-				on:toggleMarcadaDetalle={() => {
-					registros = [];
-					fechaListener(fechaMarcada);
-				}}
-				on:toggleEntreFechas={() => {
-					registros = [];
-					if (showEntreFechas) {
+			<!-- // ANCHOR DatePicker y Botones de exportacion -->
+
+			<div class="d:flex mb:10">
+				<span> </span>
+				<MainOptions
+					on:toggleMarcadaDetalle={() => {
+						registros = [];
 						fechaListener(fechaMarcada);
-					}
-				}}
-			/>
-			<span></span>
-
-			{#if showEntreFechas}
-				<RangeDatePicker
-					on:rangoFechaDefinido={(e) =>
-						rangoFechalistener(e.detail.fechaInicial, e.detail.fechaFinal)}
+					}}
+					on:toggleEntreFechas={() => {
+						registros = [];
+						if (showEntreFechas) {
+							fechaListener(fechaMarcada);
+						}
+					}}
 				/>
-			{:else}
-				<DatePicker on:fechaDefinida={(e) => fechaListener(e.detail.fecha)} />
-			{/if}
+				<span></span>
 
-			<BtnDescargar
-				data={filteredData}
-				placeholder="Descargar Vista Actual"
-				filename="marcadas VA - {selectedDepartamento} {fechaMarcada}"
-			/>
-			<BtnDescargar
-				data={filteredAusentesDepartamento}
-				placeholder="Descargar Ausentes del Departamento"
-				filename="marcadas AD - {selectedDepartamento} {fechaMarcada}"
-			/>
-			{#if data.hostname === 'PEAP'}
+				{#if showEntreFechas}
+					<RangeDatePicker
+						on:rangoFechaDefinido={(e) =>
+							rangoFechalistener(e.detail.fechaInicial, e.detail.fechaFinal)}
+					/>
+				{:else}
+					<DatePicker on:fechaDefinida={(e) => fechaListener(e.detail.fecha)} />
+				{/if}
+
 				<BtnDescargar
-					data={filterAusentes()}
-					placeholder="Descargar Todos los Ausentes"
-					filename="marcadas TD {fechaMarcada}"
+					data={filteredData}
+					placeholder="Descargar Vista Actual"
+					filename="marcadas VA - {selectedDepartamento} {fechaMarcada}"
 				/>
-			{/if}
-		</div>
+				<BtnDescargar
+					data={AusentesDepartamento}
+					placeholder="Descargar Ausentes del Departamento"
+					filename="marcadas AD - {selectedDepartamento} {fechaMarcada}"
+				/>
 
-		<!-- Tabla de datos filtrados -->
-		{#if registros.length > 0}
-			<DataTable registros={filteredData} />
-
-			<!-- Cuenta de registros -->
-			<div class="d:flex flex:col">
-				<p class="font-size:18 bg:white r:10 p:10 w:fit-content">
-					Total Ausentes: {filterAusentesDepartamento(selectedDepartamento).length}
-				</p>
+				{#if data.hostname === 'PEAP' && selectedDepartamento === 'ARPB'}
+					<BtnDescargar
+						data={Ausentes}
+						placeholder="Descargar Todos los Ausentes"
+						filename="marcadas TD {fechaMarcada}"
+					/>
+				{/if}
 			</div>
+
+			<!-- // ANCHOR Tabla de datos filtrados -->
+			{#if registros.length > 0 && selectedDepartamento}
+				<div>
+					<DataTable registros={filteredData} />
+				</div>
+				<!-- Cuenta de registros -->
+				<div class="d:flex flex:col">
+					<p class="font-size:18 bg:white r:10 p:10 w:fit-content">
+						Total Ausentes: {AusentesDepartamento.length}
+					</p>
+				</div>
+			{:else}
+				<div class="d:flex flex:col justify-content:center align-items:center">
+					<LoadingIcon />
+				</div>
+			{/if}
 		{/if}
 	</main>
 </body>
