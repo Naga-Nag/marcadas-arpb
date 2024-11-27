@@ -87,7 +87,7 @@
 				return sortEstado(a, b, sortOrder);
 			});
 		} else if (sortCol === 'MR' || sortCol === 'CUIL' || sortCol === 'DNI') {
-			registros = registros.sort((a, b) => sortNumber(a, b, sortOrder));
+			registros = registros.sort((a, b) => sortNumber(parseInt(a[sortCol]), parseInt(b[sortCol]), sortOrder));
 		} else if (sortCol === 'Departamento' || sortCol === 'Nombre') {
 			registros = registros.sort((a, b) => sortString(a[sortCol], b[sortCol], sortOrder));
 		}
@@ -157,8 +157,7 @@
 
 <style>
 	.table-container {
-		min-height: 550px;
-		max-height: 550px;
+		max-height: 30em;
 		overflow-y: auto;
 	}
 

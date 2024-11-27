@@ -1,5 +1,13 @@
 import os from 'os';
 import * as XLSX from 'xlsx';
+import type { Marcada } from './types';
+import { globalStore } from '$lib/utils/globalStore';
+
+let hostname = '';
+
+globalStore.subscribe((value) => {
+  hostname = value.hostname;
+});
 
 export function downloadExcel(data: Array<any>, fileName = 'marcada') {
   if (!Array.isArray(data) || data.length === 0) {
@@ -88,11 +96,11 @@ export function sortEstado(a: { Estado: string }, b: { Estado: string }, sortOrd
 
 }
 
-export function sortNumber(a: { MR: number }, b: { MR: number }, sortOrder: 'asc' | 'desc' | undefined) {
+export function sortNumber(a: number, b: number, sortOrder: 'asc' | 'desc' | undefined) {
   if (sortOrder === 'asc') {
-    return a.MR - b.MR;
+    return a - b;
   } else {
-    return b.MR - a.MR;
+    return b - a;
   }
 }
 
@@ -117,8 +125,25 @@ export function getEstado(persona: { Entrada: any; Salida: any; Marcada?: any; }
   }
 }
 
+// Filtering Helpers
+export function matchesFilters(marcada: Marcada, searchText: string, selectedDepartamento: string): boolean {
+  const matchesSearchText =
+    marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
+    marcada.MR.toString().includes(searchText) ||
+    marcada.CUIL.includes(searchText);
+
+  const matchesDepartamento = marcada.Departamento === selectedDepartamento;
+
+  if (hostname === 'PEAP') {
+    return selectedDepartamento === 'ARPB'
+      ? matchesSearchText
+      : matchesDepartamento && matchesSearchText;
+  }
+  return matchesDepartamento && marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) || matchesSearchText;
+}
+
 export function getEstadoMarcada() {
-  
+
 }
 
 export function fromHex(hexData: any): Array<string> {
