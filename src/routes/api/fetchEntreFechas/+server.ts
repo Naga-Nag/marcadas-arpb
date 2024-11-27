@@ -6,7 +6,6 @@ import { json } from '@sveltejs/kit';
 export async function POST({ request }) {
     try {
         const { departamento, fechaInicial, fechaFinal } = await request.json();
-        //TODO: implementar departamento
         console.log('POST || Buscando rango de registros para: ', departamento, fechaInicial, fechaFinal);
 
         let registros = [];

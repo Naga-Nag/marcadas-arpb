@@ -6,7 +6,6 @@ import { json } from '@sveltejs/kit';
 
 export async function GET() {
     try {
-        //TODO: implementar departamento
         console.log('GET || Departamentos');
         let registros = await fetchDepartamentos();
         return json(registros);
