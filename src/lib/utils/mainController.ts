@@ -1,4 +1,5 @@
 import { globalStore } from "$lib/utils/globalStore";
+import type { Marcada } from "./types";
 
 let showMarcadaDetalle: boolean;
 
@@ -9,8 +10,8 @@ globalStore.subscribe((value) => {
 export async function fetchMarcada(
     departamento: string,
     fecha: string,
-    onBatch?: (batch: Array<Record<string, any>>) => void
-): Promise<Array<Record<string, any>>> {
+    onBatch?: (batch: Array<Marcada>) => void
+): Promise<Array<Marcada>> {
     const response = await fetch('/api/fetchMarcada', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -24,7 +25,7 @@ export async function fetchMarcada(
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
     let buffer = ''; // Buffer to accumulate chunks
-    const registros: Array<Record<string, any>> = []; // Final array of records
+    const registros: Array<Marcada> = []; // Final array of records
 
     while (true) {
         const { done, value } = await reader.read();
@@ -76,7 +77,7 @@ export async function fetchMarcada(
 
 /* console.log(await fetchMarcada('TAAP', '2023-08-03' , (batch) => {console.log(batch)})); */
 
-export async function fetchMarcadaDetalle(departamento: string, fecha: string): Promise<Array<Record<string, any>>> {
+export async function fetchMarcadaDetalle(departamento: string, fecha: string): Promise<Array<Marcada>> {
     const response = await fetch('/api/fetchMarcadaDetalle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -89,7 +90,7 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
     return response.json();
 }
 
-export async function fetchDepartamentos(): Promise<Array<Record<string, any>>> {
+export async function fetchDepartamentos(): Promise<Array<Marcada>> {
     const response = await fetch('/api/fetchDepartamentos', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
