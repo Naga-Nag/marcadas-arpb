@@ -1,4 +1,4 @@
-CREATE OR ALTER FUNCTION MarcadaEntreFechas(@Departamento NVARCHAR(50), @FechaInicio DATE, @FechaFin DATE) 
+)CREATE OR ALTER FUNCTION MarcadaEntreFechas(@Departamento NVARCHAR(50), @FechaInicio DATE, @FechaFin DATE) 
 RETURNS @Resultado TABLE 
 (
     UID INT,
