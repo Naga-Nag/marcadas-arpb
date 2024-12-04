@@ -1,3 +1,4 @@
+
 import { fetchMarcadaDelDia } from '$lib/server/db';
 
 export async function POST({ request }) {

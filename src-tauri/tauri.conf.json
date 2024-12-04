@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "presentismo-arpb",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.arpb.presentismo",
   "build": {
     "frontendDist": "../build",
     "devUrl": "http://localhost:5173",
@@ -27,17 +27,11 @@
   "bundle": {
     "windows": {
       "allowDowngrades": true,
-      "certificateThumbprint": null,
-      "digestAlgorithm": null,
-      "nsis": null,
-      "signCommand": null,
-      "timestampUrl": null,
       "tsp": false,
       "webviewInstallMode": {
         "silent": true,
         "type": "offlineInstaller"
-      },
-      "wix": null
+      }
     },
     "active": true,
     "targets": "all",
