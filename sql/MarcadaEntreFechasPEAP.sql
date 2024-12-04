@@ -23,6 +23,6 @@ BEGIN
         INNER JOIN dbo.Dept d ON ui.Deptid = d.Deptid
         LEFT JOIN dbo.Checkinout ci ON ui.Userid = ci.Userid
     WHERE
-        ci.CheckTime BETWEEN @FechaInicio AND (ci.CheckTime BETWEEN @FechaFin AND DATEADD(DAY, +1, @FechaFin))
+        ci.CheckTime BETWEEN @FechaInicio AND DATEADD(DAY, +1, @FechaFin)
     RETURN
 END;
