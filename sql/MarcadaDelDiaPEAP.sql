@@ -31,6 +31,7 @@ BEGIN
   LEFT JOIN dbo.Checkinout ci ON ui.Userid = ci.Userid
   
   GROUP BY
-    ui.Userid, ui.UserCode, ui.Name, d.DeptName, CAST(ui.OtherInfo AS VARBINARY(MAX))
+    ui.Userid, ui.UserCode, ui.Name, d.DeptName, ui.CUIL, ui.Jornada, ui.Activo
+
   RETURN
 END

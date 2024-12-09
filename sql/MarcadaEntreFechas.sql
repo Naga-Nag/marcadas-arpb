@@ -19,7 +19,10 @@ BEGIN
         ui.Name,
         d.DeptName,
         ci.CheckTime,
-        ui.OtherInfo
+        
+        ui.CUIL,
+        ui.Jornada,
+        ui.Activo
     FROM
         dbo.Userinfo ui
         INNER JOIN dbo.Dept d ON ui.Deptid = d.Deptid
