@@ -7,7 +7,9 @@ RETURNS @Resultado TABLE
   Departamento VARCHAR(100),
   Salida DATETIME,
   Entrada DATETIME,
-  Info VARBINARY(MAX)
+  CUIL VARCHAR(50),
+  Jornada TINYINT,
+  Activo BIT
 )
 AS
 BEGIN
@@ -19,7 +21,10 @@ BEGIN
     d.DeptName AS Departamento,
     MAX(CASE WHEN DATEPART(HOUR, ci.CheckTime) >= 13 AND (CAST(ci.CheckTime AS DATE) = @FechaHoy) THEN ci.CheckTime END) AS Salida,
     MIN(CASE WHEN DATEPART(HOUR, ci.CheckTime) <= 10 AND (CAST(ci.CheckTime AS DATE) = @FechaHoy) THEN ci.CheckTime END) AS Entrada,
-    CAST(ui.OtherInfo AS VARBINARY(MAX)) AS Info
+    
+    ui.CUIL AS CUIL,
+    ui.Jornada AS Jornada,
+    ui.Activo AS Activo
   FROM
     dbo.Userinfo ui
   INNER JOIN dbo.Dept d ON ui.Deptid = d.Deptid

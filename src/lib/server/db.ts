@@ -1,3 +1,4 @@
+import type { Marcada } from '$lib/utils/types';
 import { formatTime, getDepartamentoHost } from '$lib/utils/utils';
 import { differenceInMilliseconds, differenceInMinutes, format, parseISO } from 'date-fns';
 import sql from 'mssql';
@@ -104,12 +105,12 @@ export async function fetchDepartamentos(): Promise<Array<Record<string, any>>> 
   });
 }
 
-export async function fetchMarcadaDetalle(departamento: string, fecha: string): Promise<Array<Record<string, any>>> {
+export async function fetchMarcadaDetalle(departamento: string, fecha: string): Promise<Array<Marcada>> {
   let startTime = new Date();
   await sql.connect(sqlConfig);
 
   return new Promise((resolve, reject) => {
-    const rows: Array<Record<string, any>> = [];
+    const rows: Array<Marcada> = [];
     const request = new sql.Request();
 
     // Set up the query for detailed data
@@ -139,14 +140,14 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
   });
 }
 
-/* console.log(await fetchMarcadaDetalle('TAAP', '2023-08-03')); */
+console.log(await fetchMarcadaDetalle('TAAP', '2023-08-05'));
 
-export async function fetchMarcadaEntreFechas(departamento: string, startDate: string, endDate: string): Promise<Array<Record<string, any>>> {
+export async function fetchMarcadaEntreFechas(departamento: string, startDate: string, endDate: string): Promise<Array<Marcada>> {
   let startTime = new Date();
   await sql.connect(sqlConfig);
 
   return new Promise((resolve, reject) => {
-    const rows: Array<Record<string, any>> = [];
+    const rows: Array<Marcada> = [];
     const request = new sql.Request();
     request.stream = true;
 
@@ -230,7 +231,6 @@ function processRow(row: any) {
   row.Entrada = formatTime(row.Entrada);
   row.Salida = formatTime(row.Salida);
   row.Marcada = formatTime(row.Marcada);
-  row.CUIL = row.CUIL ? row.CUIL : '';
   row.Jornada = row.Jornada ? row.Jornada : '';
   row.Activo = row.Activo ? row.Activo : '';
   return row;

@@ -1,12 +1,14 @@
 CREATE OR ALTER FUNCTION MarcadaEntreFechas(@Departamento NVARCHAR(50), @FechaInicio DATE, @FechaFin DATE) 
 RETURNS @Resultado TABLE 
 (
-    UID INT,
-    MR INT,
-    Nombre VARCHAR(100),
-    Departamento VARCHAR(100),
-    Marcada DATETIME,
-    Info VARBINARY(MAX)
+  UID INT,
+  MR INT,
+  Nombre VARCHAR(100),
+  Departamento VARCHAR(100),
+  Marcada DATETIME,
+  CUIL VARCHAR(50),
+  Jornada TINYINT,
+  Activo BIT
 )
 AS
 BEGIN
