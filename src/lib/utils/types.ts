@@ -6,11 +6,7 @@ export type Marcada = {
     Entrada: string;
     Salida: string;
     Estado: string;
-    
-    Info: string;
-
     CUIL: string;
-    DNI: string;
-    JORNADA: string;
-    ACTIVO: string;
+    Jornada: string;
+    Activo: string;
 };

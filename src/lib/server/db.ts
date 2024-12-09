@@ -1,4 +1,4 @@
-import { formatTime, fromHex, getDepartamentoHost } from '$lib/utils/utils';
+import { formatTime, getDepartamentoHost } from '$lib/utils/utils';
 import { differenceInMilliseconds, differenceInMinutes, format, parseISO } from 'date-fns';
 import sql from 'mssql';
 
@@ -132,8 +132,8 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
 
     request.on('done', () => {
       let endTime = new Date();
-      console.log("INFO || "+'Tiempo de consulta MarcadaDetalle:', differenceInMilliseconds(endTime, startTime) + 'ms');
-      console.log("INFO || "+ rows.length + " registros encontrados");
+      console.log("INFO || " + 'Tiempo de consulta MarcadaDetalle:', differenceInMilliseconds(endTime, startTime) + 'ms');
+      console.log("INFO || " + rows.length + " registros encontrados");
       resolve(rows);
     });
   });
@@ -170,23 +170,70 @@ export async function fetchMarcadaEntreFechas(departamento: string, startDate: s
 
     request.on('done', () => {
       let endTime = new Date();
-      console.log("INFO || "+'Tiempo de consulta MarcadaEntreFechas:', differenceInMilliseconds(endTime, startTime) + 'ms');
-      console.log("INFO || "+ rows.length + " registros encontrados");
+      console.log("INFO || " + 'Tiempo de consulta MarcadaEntreFechas:', differenceInMilliseconds(endTime, startTime) + 'ms');
+      console.log("INFO || " + rows.length + " registros encontrados");
       resolve(rows);
     });
   });
 }
 
+export async function updateUsuario(MR: string, CUIL?: string, Jornada?: string, Activo?: string, Nombre?: string) {
+  await sql.connect(sqlConfig);
+
+  return new Promise((resolve, reject) => {
+    const request = new sql.Request();
+
+    // Set up the query for detailed data
+    const query = `USE ${Bun.env.DB}; UPDATE UserInfo SET 
+      ${CUIL ? `CUIL = '${CUIL}',` : ''}
+      ${Jornada ? `Jornada = '${Jornada}',` : ''}
+      ${Activo ? `Activo = '${Activo}',` : ''}
+      ${Nombre ? `Name = '${Nombre}'` : ''}
+      WHERE UserCode = '${MR}';`;
+
+    request.query(query);
+
+    request.on('error', (err) => {
+      console.error('Error fetching data:', err);
+      reject(err);
+    });
+
+    request.on('done', () => {
+      resolve(true);
+    });
+  });
+}
+
+updateUsuario('2364', '27-43532946-3', '8', '1', 'Leandro facha');
+
+async function MRfromUID(uid: string): Promise<Record<string, any>> {
+  await sql.connect(sqlConfig);
+
+  return new Promise((resolve, reject) => {
+    const request = new sql.Request();
+    request.arrayRowMode = true;
+    // Set up the query for detailed data
+    const query = `USE ${Bun.env.DB}; SELECT UserCode FROM UserInfo WHERE Userid = '${uid}';`;
+
+    request.query(query);
+
+    request.on('row', (row) => {
+      resolve(row[0]);
+    });
+
+    request.on('error', (err) => {
+      console.error('Error fetching data:', err);
+      reject(err);
+    });
+  });
+}
+
+console.log(await MRfromUID('2'));
+
 function processRow(row: any) {
   row.Entrada = formatTime(row.Entrada);
   row.Salida = formatTime(row.Salida);
   row.Marcada = formatTime(row.Marcada);
-  let Info = fromHex(row.Info);
-  row.Info = fromHex(row.Info)
-  if (Info[0] != undefined) { row.CUIL = Info[0] } else { row.CUIL = '' }
-  if (Info[1] != undefined) { row.DNI = Info[1] } else { row.DNI = '' }
-  if (Info[2] != undefined) { row.JORNADA = Info[2] + ' horas' } else { row.JORNADA = '' }
-  if (Info[3] != undefined) { row.ACTIVO = Info[3] } else { row.ACTIVO = '' }
   return row;
 }
 

@@ -21,19 +21,17 @@
 	import { onMount } from 'svelte';
 	import type { Marcada } from '$lib/utils/types';
 
-	import { fade } from 'svelte/transition';
-
 	// Variables para búsqueda y departamentos
 	let debouncedSearchText = '';
 	let registros: Marcada[] = [];
 	let searchText: string = '';
-	let departamentos: string[] = String(data.departamentos).split(',') ?? [];
+	let departamentos: string[] = [];
 	let hostname: string;
-	let selectedDepartamento: string = data.hostname;
+	let selectedDepartamento: string = '';
 	let fechaMarcada = '';
-	let loading: boolean;
-	let showEntreFechas: boolean;
-	let showMarcadaDetalle: boolean;
+	let loading: boolean = false;
+	let showEntreFechas: boolean = false;
+	let showMarcadaDetalle: boolean = true;
 
 	globalStore.subscribe((value) => {
 		selectedDepartamento = value.selectedDepartamento;
@@ -133,6 +131,7 @@
 		const defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 		updateFechaMarcada(defaultDate);
 		await fechaListener(defaultDate);
+		selectedDepartamento = data.hostname;
 	});
 </script>
 
@@ -219,7 +218,11 @@
 				<!-- Cuenta de registros -->
 				<div class="d:flex flex:col">
 					<p class="font-size:18 bg:white r:10 p:10 w:fit-content">
+						{#if selectedDepartamento === 'ARPB'}
+						Total Ausentes: {Ausentes.length}
+						{:else}
 						Total Ausentes: {AusentesDepartamento.length}
+						{/if}
 					</p>
 				</div>
 			{:else}

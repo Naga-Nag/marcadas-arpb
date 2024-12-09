@@ -36,16 +36,14 @@
 	const columns = table.createColumns([
 		table.column({ header: 'MR', accessor: 'MR' }),
 		table.column({ header: 'CUIL', accessor: 'CUIL' }),
-		table.column({ header: 'DNI', accessor: 'DNI' }),
 		table.column({ header: 'Nombre', accessor: 'Nombre' }),
 		table.column({ header: 'Departamento', accessor: 'Departamento' }),
 		table.column({ header: 'Marcada', accessor: 'Marcada' }),
 		table.column({ header: 'Entrada', accessor: 'Entrada' }),
 		table.column({ header: 'Salida', accessor: 'Salida' }),
 		table.column({ header: 'Estado', accessor: 'Estado' }),
-		table.column({ header: 'Jornada', accessor: 'JORNADA' }),
-		table.column({ header: 'En Actividad', accessor: 'ACTIVO' })
-		/* table.column({ header: 'VARBIN', accessor: 'Info'}) */
+		table.column({ header: 'Jornada', accessor: 'Jornada' }),
+		table.column({ header: 'En Actividad', accessor: 'Activo' })
 	]);
 
 	const { flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates } =
@@ -86,7 +84,7 @@
 			registros = registros.sort((a, b) => {
 				return sortEstado(a, b, sortOrder);
 			});
-		} else if (sortCol === 'MR' || sortCol === 'CUIL' || sortCol === 'DNI') {
+		} else if (sortCol === 'MR' || sortCol === 'CUIL' /* || sortCol === 'DNI' */) {
 			registros = registros.sort((a, b) => sortNumber(parseInt(a[sortCol]), parseInt(b[sortCol]), sortOrder));
 		} else if (sortCol === 'Departamento' || sortCol === 'Nombre') {
 			registros = registros.sort((a, b) => sortString(a[sortCol], b[sortCol], sortOrder));

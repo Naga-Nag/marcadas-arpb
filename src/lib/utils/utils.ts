@@ -15,25 +15,47 @@ export function downloadExcel(data: Array<any>, fileName = 'marcada') {
     return;
   }
 
-  // Crear una hoja de cálculo a partir de los datos
-  const worksheet = XLSX.utils.json_to_sheet(data);
+  // Create a worksheet with the desired column arrangement
+  const worksheet = XLSX.utils.json_to_sheet(data.map((row) => ({
+    'M.R': row.MR,
+    'Marcada': row.Marcada,
+    'Nombre': row.Nombre,
+    'CUIL': row.CUIL,
+    'CAUSA': '',
+    'COD AUS': '',
+    'Horas': '',
+    'Observaciones': '',
+  })));
+
+  // Create a header range and set the font to bold
+  const headerRange = XLSX.utils.decode_range("A1:H1");
+  for (let R = headerRange.s.r; R <= headerRange.e.r; ++R) {
+    for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
+      const cell = worksheet[XLSX.utils.encode_cell({ r: R, c: C })];
+      if (cell) {
+        cell.s = { font: { bold: true } };
+      }
+    }
+  }
+
+  // Create a workbook and add the worksheet
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Datos");
 
-  // Crear un archivo Excel
+  // Create an Excel file
   const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
 
-  // Crear un blob para descargar
+  // Create a blob for downloading
   const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
   const url = window.URL.createObjectURL(blob);
 
-  // Crear un enlace y simular un clic para descargar el archivo
+  // Create a link and simulate a click to download the file
   const link = document.createElement('a');
   link.href = url;
   link.download = `${fileName}.xlsx`;
   link.click();
 
-  // Liberar el objeto URL
+  // Release the object URL
   window.URL.revokeObjectURL(url);
 }
 
@@ -140,20 +162,4 @@ export function matchesFilters(marcada: Marcada, searchText: string, selectedDep
       : matchesDepartamento && matchesSearchText;
   }
   return matchesDepartamento && marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) || matchesSearchText;
-}
-
-export function getEstadoMarcada() {
-
-}
-
-export function fromHex(hexData: any): Array<string> {
-  if (hexData != null) {
-    var output = Buffer.from(hexData, 'hex');
-    return output.toString().split(",");
-  }
-  return []
-}
-
-export function toHex() {
-
 }
