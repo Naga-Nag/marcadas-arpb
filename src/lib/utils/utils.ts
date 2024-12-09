@@ -148,6 +148,7 @@ export function getEstado(persona: { Entrada: any; Salida: any; Marcada?: any; }
 }
 
 // Filtering Helpers
+// Si algun campo sale undefined, esto no funca
 export function matchesFilters(marcada: Marcada, searchText: string, selectedDepartamento: string): boolean {
   const matchesSearchText =
     marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||

@@ -204,16 +204,14 @@ export async function updateUsuario(MR: string, CUIL?: string, Jornada?: string,
   });
 }
 
-updateUsuario('2364', '27-43532946-3', '8', '1', 'Leandro facha');
-
-async function MRfromUID(uid: string): Promise<Record<string, any>> {
+async function UserfromUID(uid: string): Promise<Record<string, any>> {
   await sql.connect(sqlConfig);
 
   return new Promise((resolve, reject) => {
     const request = new sql.Request();
     request.arrayRowMode = true;
     // Set up the query for detailed data
-    const query = `USE ${Bun.env.DB}; SELECT UserCode FROM UserInfo WHERE Userid = '${uid}';`;
+    const query = `USE ${Bun.env.DB}; SELECT * FROM UserInfo WHERE Userid = '${uid}';`;
 
     request.query(query);
 
@@ -228,12 +226,13 @@ async function MRfromUID(uid: string): Promise<Record<string, any>> {
   });
 }
 
-console.log(await MRfromUID('2'));
-
 function processRow(row: any) {
   row.Entrada = formatTime(row.Entrada);
   row.Salida = formatTime(row.Salida);
   row.Marcada = formatTime(row.Marcada);
+  row.CUIL = row.CUIL ? row.CUIL : '';
+  row.Jornada = row.Jornada ? row.Jornada : '';
+  row.Activo = row.Activo ? row.Activo : '';
   return row;
 }
 
