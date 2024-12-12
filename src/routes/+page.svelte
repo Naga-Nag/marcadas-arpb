@@ -11,13 +11,8 @@
 	} from '$lib/components/components';
 
 	import { getEstado, matchesFilters } from '$lib/utils/utils';
-	import { fetchMarcadaDetalle, fetchMarcada } from '$lib/utils/mainController';
-	import {
-		globalStore,
-		updateFechaMarcada,
-		setloadingData,
-		setHostname
-	} from '$lib/utils/globalStore';
+	import { fetchMarcadaDetalle, fetchMarcada, fetchDepartamentos } from '$lib/utils/mainController';
+	import { globalStore, updateFechaMarcada, setloadingData, setHostname, updateSelectedDepartamento } from '$lib/utils/globalStore';
 	import { onMount } from 'svelte';
 	import type { Marcada } from '$lib/utils/types';
 
@@ -25,15 +20,16 @@
 	let debouncedSearchText = '';
 	let registros: Marcada[] = [];
 	let searchText: string = '';
-	let departamentos: string[] = [];
-	let hostname: string;
-	let selectedDepartamento: string = '';
+	let departamentos: string[] = data.departamentos;
+	let hostname: string = '';
+	let selectedDepartamento = data.hostname;
 	let fechaMarcada = '';
 	let loading: boolean = false;
 	let showEntreFechas: boolean = false;
 	let showMarcadaDetalle: boolean = true;
 
 	globalStore.subscribe((value) => {
+		hostname = value.hostname;
 		selectedDepartamento = value.selectedDepartamento;
 		fechaMarcada = value.fechaMarcada;
 		loading = value.loading;
@@ -128,10 +124,10 @@
 
 	onMount(async () => {
 		setHostname(data.hostname);
+		updateSelectedDepartamento(data.hostname);
 		const defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 		updateFechaMarcada(defaultDate);
 		await fechaListener(defaultDate);
-		selectedDepartamento = data.hostname;
 	});
 </script>
 
@@ -148,7 +144,7 @@
 		<!-- // ANCHOR Tabs de departamentos -->
 		<!-- Esto solo se muestra si el hostname es PEAP -->
 
-		{#if data.hostname === 'PEAP'}
+		{#if data.hostname === 'PEAP' || data.hostname === 'IFAP'}
 			<div class="d:flex flex:row justify-content:space-between">
 				<TabsDepartamento {departamentos} bind:selectedDepartamento />
 			</div>
@@ -219,9 +215,9 @@
 				<div class="d:flex flex:col">
 					<p class="font-size:18 bg:white r:10 p:10 w:fit-content">
 						{#if selectedDepartamento === 'ARPB'}
-						Total Ausentes: {Ausentes.length}
+							Total Ausentes: {Ausentes.length}
 						{:else}
-						Total Ausentes: {AusentesDepartamento.length}
+							Total Ausentes: {AusentesDepartamento.length}
 						{/if}
 					</p>
 				</div>

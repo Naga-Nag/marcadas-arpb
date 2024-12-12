@@ -1,21 +1,28 @@
-import { getDepartamentoHost } from '$lib/utils/utils';
+import { formatIP, reverseDnsLookup } from '$lib/utils/utils';
 import { setHostname } from '$lib/utils/globalStore';
 import type { PageServerLoad } from './$types';
+import { fetchDepartamentos } from '$lib/server/db';
 
-
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async (event) => {
     let defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    let requestIp;
+    let hostname;
     try {
-        /* // Fetch initial data for the default date (yesterday)
-        let records = await fetchMarcadaDelDia(hostname, defaultDate); */
+        requestIp = formatIP(event.getClientAddress()); // IP from Client Request
+        console.log('IP Address from Client Request: ::', requestIp+' ::');
+
+        hostname = await reverseDnsLookup(requestIp);
+        hostname = hostname.toUpperCase().substring(0, 4);
+
         let records: any[] = [];
-        let departamentos: Array<string> = [];
-        console.log('[PAGESERVERLOAD] fechaMarcada:', defaultDate, 'hostname:', getDepartamentoHost());
+        let departamentos: Record<string, any> = await fetchDepartamentos();
+        console.log('[PAGESERVERLOAD] fechaMarcada: '+defaultDate+' || '+'Hostname: '+ hostname);
         return {
+            hostname,
+            ipAddress: requestIp,
             fechaMarcada: defaultDate,
             records,
             departamentos,
-            hostname: getDepartamentoHost(),
         };
     } catch (error) {
         console.error('Error al cargar los datos:', error);
@@ -24,7 +31,6 @@ export const load: PageServerLoad = async () => {
             fechaMarcada: null,
             records: [],
             departamentos: [],
-            hostname: '',
         };
     }
 };

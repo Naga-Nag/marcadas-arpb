@@ -1,13 +1,18 @@
-import os from 'os';
 import * as XLSX from 'xlsx';
 import type { Marcada } from './types';
 import { globalStore } from '$lib/utils/globalStore';
 
-let hostname = '';
+let hostname: string;
 
 globalStore.subscribe((value) => {
   hostname = value.hostname;
 });
+
+let dnsPromises: any;
+
+if (import.meta.env.SSR) { // Only run on the server side
+  dnsPromises = await import('dns/promises'); // Dynamically import dns/promises
+}
 
 export function downloadExcel(data: Array<any>, fileName = 'marcada') {
   if (!Array.isArray(data) || data.length === 0) {
@@ -59,13 +64,22 @@ export function downloadExcel(data: Array<any>, fileName = 'marcada') {
   window.URL.revokeObjectURL(url);
 }
 
-export function getDepartamentoHost() {
-  if (Bun.env.build === 'dev') {
-    return 'PEAP';
-  } else {
-    const hostname = os.hostname();
-    return hostname.substring(0, 4);
-  }
+
+
+export async function reverseDnsLookup(ip: string): Promise<string> {
+  const ipAddress = ip.startsWith('::ffff:') ? ip.slice(7) : ip;
+    try {
+      const result = await dnsPromises.reverse(ipAddress);
+      return result[0];
+    } catch(error) {
+      console.log(error);
+      return '';
+    }
+}
+
+export function formatIP(ip: string) {
+  ip = ip.startsWith('::ffff:') ? ip.slice(7) : ip;
+  return ip;
 }
 
 export function formatTime(dateString: string): string {
@@ -157,7 +171,8 @@ export function matchesFilters(marcada: Marcada, searchText: string, selectedDep
 
   const matchesDepartamento = marcada.Departamento === selectedDepartamento;
 
-  if (hostname === 'PEAP') {
+  //Esto define como se separan los datos filtrados en distintas tabs (estaria bueno cambiarlo)
+  if (hostname === 'PEAP' || hostname === 'IFAP') {
     return selectedDepartamento === 'ARPB'
       ? matchesSearchText
       : matchesDepartamento && matchesSearchText;

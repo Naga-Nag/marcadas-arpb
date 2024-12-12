@@ -90,7 +90,8 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
     return response.json();
 }
 
-export async function fetchDepartamentos(): Promise<Array<Marcada>> {
+
+export async function fetchDepartamentos(): Promise<Array<string>> {
     const response = await fetch('/api/fetchDepartamentos', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }

@@ -1,5 +1,4 @@
 import { writable } from 'svelte/store';
-import { getDepartamentoHost } from './utils';
 
 export const globalStore = writable({
     loading: false,

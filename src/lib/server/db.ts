@@ -1,5 +1,5 @@
-import type { Marcada } from '$lib/utils/types';
-import { formatTime, getDepartamentoHost } from '$lib/utils/utils';
+import type { Marcada, Usuario } from '$lib/utils/types';
+import { formatTime } from '$lib/utils/utils';
 import { differenceInMilliseconds, differenceInMinutes, format, parseISO } from 'date-fns';
 import sql from 'mssql';
 
@@ -36,7 +36,7 @@ export async function fetchMarcadaDelDia(
 
     // Set up the query based on the department host
     const query =
-      departamento === 'PEAP'
+      departamento === 'PEAP' || departamento === 'IFAP'
         ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDiaPEAP('${fecha}');`
         : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDia('${departamento}', '${fecha}');`;
 
@@ -91,7 +91,7 @@ export async function fetchDepartamentos(): Promise<Array<Record<string, any>>> 
     request.query(query);
 
     request.on('row', (row) => {
-      rows.push(row);
+      rows.push(row[0]);
     });
 
     request.on('error', (err) => {
@@ -115,7 +115,7 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
 
     // Set up the query for detailed data
     const query =
-      departamento === 'PEAP'
+      departamento === 'PEAP' || departamento === 'IFAP'
         ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDetallePEAP('${fecha}');`
         : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDetalle('${departamento}', '${fecha}');`;
 
@@ -140,7 +140,34 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
   });
 }
 
-console.log(await fetchMarcadaDetalle('TAAP', '2023-08-05'));
+
+export async function modUsuario(Usuario: Usuario) {
+  await sql.connect(sqlConfig);
+
+  return new Promise((resolve, reject) => {
+    const request = new sql.Request();
+
+    // Foto aun no implementado
+    const query = `USE ${Bun.env.DB}; UPDATE UserInfo SET 
+      Name = '${Usuario.Nombre}',
+      Departamento = '${Usuario.Departamento}',
+      CUIL = '${Usuario.CUIL}',
+      Jornada = '${Usuario.Jornada}',
+      Activo = '${Usuario.Activo}'
+      WHERE Userid = '${Usuario.UID}';`;
+
+    request.query(query);
+
+    request.on('error', (err) => {
+      console.error('Error fetching data:', err);
+      reject(err);
+    });
+
+    request.on('done', () => {
+      resolve(true);
+    });
+  });
+}
 
 export async function fetchMarcadaEntreFechas(departamento: string, startDate: string, endDate: string): Promise<Array<Marcada>> {
   let startTime = new Date();
@@ -152,7 +179,7 @@ export async function fetchMarcadaEntreFechas(departamento: string, startDate: s
     request.stream = true;
 
     const query =
-      departamento === 'PEAP'
+      departamento === 'PEAP' || departamento === 'IFAP'
         ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechasPEAP('${startDate}', '${endDate}');`
         : `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechas('${departamento}', '${startDate}', '${endDate}');`;
 

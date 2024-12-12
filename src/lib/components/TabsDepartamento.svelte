@@ -29,8 +29,7 @@
 	}
 
 	onMount(async () => {
-		let departamentosRaw = await getDepartamentos();
-		departamentos = String(departamentosRaw).split(',') ?? []
+		departamentos = await getDepartamentos();
 	});
 	
 </script>
