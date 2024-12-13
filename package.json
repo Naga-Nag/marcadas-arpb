@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"dev": "bunx --bun vite --host --port=80",
+		"dev": "bunx --bun vite --host",
 		"build": "bunx --bun vite build",
 		"preview": "bunx --bun vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
