@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { Marcada } from '$lib/utils/types';
+	import EditableCell from '$lib/components/DataTable/EditableCell.svelte';
 	import { sortTime, sortString, sortNumber, sortEstado } from '$lib/utils/utils';
-	import { createTable, Subscribe, Render } from 'svelte-headless-table';
+	import { createTable, createRender, Subscribe, Render, type DataLabel } from 'svelte-headless-table';
 	import {
 		addHiddenColumns,
 		addPagination,
@@ -10,17 +11,66 @@
 	} from 'svelte-headless-table/plugins';
 	import { writable } from 'svelte/store';
 	import { globalStore } from '$lib/utils/globalStore';
+	import BtnDescargar from '../BtnDescargar.svelte';
+	import { updateUsuarioFromMarcada } from '$lib/utils/mainController';
 
 	export let registros: Array<Marcada>;
 
 	let showMarcadaDetalle: boolean;
 	let showEntreFechas: boolean;
+	let departamentos: string[] = [];
 	globalStore.subscribe(($value) => {
 		showMarcadaDetalle = $value.showMarcadaDetalle;
 		showEntreFechas = $value.showEntreFechas;
+		departamentos = $value.departamentos;
 	});
 
 	const dataToDisplay = writable(registros);
+
+	const updateData = (rowId: string, columnId: string, newValue: string) => {
+		console.log('updateData', JSON.stringify({ rowId, columnId, newValue }));
+
+		if (columnId === 'Departamento') {
+			if (!departamentos.includes(newValue)) {
+				console.log('DataTable :: EditableCell :: Departamento no valido');
+				// If newValue is not valid, refresh data to reset invalid values
+				$dataToDisplay = $dataToDisplay;
+				return;
+			}
+		}
+
+		if (columnId === 'Activo') {
+			if (['Si', 'true', 'si', '1'].includes(newValue)) {
+				newValue = "1";
+			}
+			else if (['No', 'false', 'no', '0'].includes(newValue)) {
+				newValue = "0";
+			}
+			else {
+				console.log('DataTable :: EditableCell :: Activo no valido :: ', newValue);
+				// If newValue is not valid, refresh data to reset invalid values
+				$dataToDisplay = $dataToDisplay;
+				return;
+			}
+		}
+
+		const idx = parseInt(rowId);
+		const currentItem = $dataToDisplay[idx];
+		const key = columnId; // Cast as `keyof YourDataItem`
+		const newItem = { ...currentItem, [key]: newValue };
+		updateUsuarioFromMarcada(newItem);
+		console.log('DataTable :: Mod Item :: ', newItem);
+		$dataToDisplay[idx] = newItem;
+		$dataToDisplay = $dataToDisplay;
+	};
+
+	const EditableCellLabel: DataLabel<Marcada> = ({ column, row, value }) =>
+		createRender(EditableCell, {
+			row,
+			column,
+			value,
+			onUpdateValue: updateData
+		});
 
 	const table = createTable(dataToDisplay, {
 		page: addPagination(),
@@ -34,16 +84,16 @@
 	});
 
 	const columns = table.createColumns([
-		table.column({ header: 'MR', accessor: 'MR' }),
-		table.column({ header: 'CUIL', accessor: 'CUIL' }),
+		table.column({ header: 'MR', accessor: 'MR', cell: EditableCellLabel }),
+		table.column({ header: 'CUIL', accessor: 'CUIL', cell: EditableCellLabel }),
 		table.column({ header: 'Nombre', accessor: 'Nombre' }),
-		table.column({ header: 'Departamento', accessor: 'Departamento' }),
+		table.column({ header: 'Departamento', accessor: 'Departamento', cell: EditableCellLabel }),
 		table.column({ header: 'Marcada', accessor: 'Marcada' }),
 		table.column({ header: 'Entrada', accessor: 'Entrada' }),
 		table.column({ header: 'Salida', accessor: 'Salida' }),
 		table.column({ header: 'Estado', accessor: 'Estado' }),
-		table.column({ header: 'Jornada', accessor: 'Jornada' }),
-		table.column({ header: 'En Actividad', accessor: 'Activo' })
+		table.column({ header: 'Jornada', accessor: 'Jornada', cell: EditableCellLabel }),
+		table.column({ header: 'En Actividad', accessor: 'Activo', cell: EditableCellLabel })
 	]);
 
 	const { flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates } =
@@ -85,7 +135,9 @@
 				return sortEstado(a, b, sortOrder);
 			});
 		} else if (sortCol === 'MR' || sortCol === 'CUIL' /* || sortCol === 'DNI' */) {
-			registros = registros.sort((a, b) => sortNumber(parseInt(a[sortCol]), parseInt(b[sortCol]), sortOrder));
+			registros = registros.sort((a, b) =>
+				sortNumber(parseInt(a[sortCol]), parseInt(b[sortCol]), sortOrder)
+			);
 		} else if (sortCol === 'Departamento' || sortCol === 'Nombre') {
 			registros = registros.sort((a, b) => sortString(a[sortCol], b[sortCol], sortOrder));
 		}

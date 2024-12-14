@@ -90,6 +90,18 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
     return response.json();
 }
 
+export async function fetchEntreFechas(departamento: string, fechaInicial: string, fechaFinal: string): Promise<Array<Marcada>> {
+    const response = await fetch('/api/fetchEntreFechas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ departamento, fechaInicial, fechaFinal })
+    });
+
+    if (!response.ok || !response.body) {
+        throw new Error('Failed to fetch records');
+    }
+    return response.json();
+}
 
 export async function fetchDepartamentos(): Promise<Array<string>> {
     const response = await fetch('/api/fetchDepartamentos', {
@@ -101,4 +113,19 @@ export async function fetchDepartamentos(): Promise<Array<string>> {
         throw new Error('Failed to fetch records');
     }
     return response.json();
+}
+
+export async function updateUsuarioFromMarcada(marcadaRow: Marcada) {
+    const response = await fetch('/api/updateUsuario', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(marcadaRow)
+    });
+
+    if (!response.ok) {
+        throw new Error('mainController :: Failed to update usuario');
+    }
+    else {
+        console.log('mainController :: Usuario actualizado con exito', marcadaRow);
+    }
 }

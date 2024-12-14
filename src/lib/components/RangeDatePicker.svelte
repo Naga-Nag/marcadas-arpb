@@ -1,7 +1,3 @@
-<!-- 
-	events: rangoFechaDefinido
--->
-
 <script>
 	import { writable } from 'svelte/store';
 	import { createEventDispatcher } from 'svelte';
@@ -20,7 +16,7 @@
 			});
 		}
 	}
-	
+
 </script>
 
 <div class="date-picker mt:2.5 color:white">

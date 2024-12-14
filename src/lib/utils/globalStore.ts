@@ -3,10 +3,12 @@ import { writable } from 'svelte/store';
 export const globalStore = writable({
     loading: false,
     showEntreFechas: false,
+    omitirFinde: false,
     showMarcadaDetalle: true,
     selectedDepartamento: '',
     hostname: '',
     fechaMarcada:'',
+    departamentos: [] as string[],
 });
 
 export function updateSelectedDepartamento(departamento: string) {
@@ -38,6 +40,10 @@ export function setloadingData(loading: boolean) {
 
 export function setHostname(hostname: string) {
     globalStore.update((state) => ({...state, hostname: hostname}));
+}
+
+export function setDepartamentos(departamentos: string[]) {
+    globalStore.update((state) => ({...state, departamentos: departamentos}));
 }
 
 globalStore.subscribe(value => console.log('globalStore data:', value));

@@ -3,9 +3,11 @@ import type { Marcada } from './types';
 import { globalStore } from '$lib/utils/globalStore';
 
 let hostname: string;
+let showMarcadaDetalle: boolean;
 
 globalStore.subscribe((value) => {
   hostname = value.hostname;
+  showMarcadaDetalle = value.showMarcadaDetalle;
 });
 
 let dnsPromises: any;
@@ -14,7 +16,7 @@ if (import.meta.env.SSR) { // Only run on the server side
   dnsPromises = await import('dns/promises'); // Dynamically import dns/promises
 }
 
-export function downloadExcel(data: Array<any>, fileName = 'marcada') {
+export function downloadExcel(data: Array<Marcada>, fileName = 'marcada') {
   if (!Array.isArray(data) || data.length === 0) {
     console.warn("No hay datos para exportar a Excel");
     return;
@@ -23,15 +25,19 @@ export function downloadExcel(data: Array<any>, fileName = 'marcada') {
   // Create a worksheet with the desired column arrangement
   const worksheet = XLSX.utils.json_to_sheet(data.map((row) => ({
     'M.R': row.MR,
-    'Marcada': row.Marcada,
     'Nombre': row.Nombre,
     'CUIL': row.CUIL,
     'CAUSA': '',
     'COD AUS': '',
     'Horas': '',
     'Observaciones': '',
+    ...(showMarcadaDetalle ? {
+      'Marcada': row.Marcada || '',
+    } : {
+      'Entrada': row.Entrada,
+      'Salida': row.Salida,
+    }),
   })));
-
   // Create a header range and set the font to bold
   const headerRange = XLSX.utils.decode_range("A1:H1");
   for (let R = headerRange.s.r; R <= headerRange.e.r; ++R) {
@@ -64,17 +70,15 @@ export function downloadExcel(data: Array<any>, fileName = 'marcada') {
   window.URL.revokeObjectURL(url);
 }
 
-
-
 export async function reverseDnsLookup(ip: string): Promise<string> {
   const ipAddress = ip.startsWith('::ffff:') ? ip.slice(7) : ip;
-    try {
-      const result = await dnsPromises.reverse(ipAddress);
-      return result[0];
-    } catch(error) {
-      console.log(error);
-      return '';
-    }
+  try {
+    const result = await dnsPromises.reverse(ipAddress);
+    return result[0];
+  } catch (error) {
+    console.log(error);
+    return '';
+  }
 }
 
 export function formatIP(ip: string) {
@@ -178,4 +182,8 @@ export function matchesFilters(marcada: Marcada, searchText: string, selectedDep
       : matchesDepartamento && matchesSearchText;
   }
   return matchesDepartamento && marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) || matchesSearchText;
+}
+
+export function depAdmin(string: string): boolean {
+  return string === 'PEAP' || string === 'IFAP';
 }

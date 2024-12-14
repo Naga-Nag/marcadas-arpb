@@ -1,7 +1,7 @@
 import { formatIP, reverseDnsLookup } from '$lib/utils/utils';
-import { setHostname } from '$lib/utils/globalStore';
 import type { PageServerLoad } from './$types';
 import { fetchDepartamentos } from '$lib/server/db';
+import { setDepartamentos } from '$lib/utils/globalStore';
 
 export const load: PageServerLoad = async (event) => {
     let defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
@@ -9,13 +9,13 @@ export const load: PageServerLoad = async (event) => {
     let hostname;
     try {
         requestIp = formatIP(event.getClientAddress()); // IP from Client Request
-        console.log('IP Address from Client Request: ::', requestIp+' ::');
-
         hostname = await reverseDnsLookup(requestIp);
         hostname = hostname.toUpperCase().substring(0, 4);
 
+        console.log('IP Address from Client Request: ::', requestIp+' :: ' + hostname + '::');
         let records: any[] = [];
         let departamentos: Record<string, any> = await fetchDepartamentos();
+        
         console.log('[PAGESERVERLOAD] fechaMarcada: '+defaultDate+' || '+'Hostname: '+ hostname);
         return {
             hostname,

@@ -205,19 +205,21 @@ export async function fetchMarcadaEntreFechas(departamento: string, startDate: s
   });
 }
 
-export async function updateUsuario(MR: string, CUIL?: string, Jornada?: string, Activo?: string, Nombre?: string) {
+export async function updateUsuarioFromMarcada(marcadaRow: Marcada) {
   await sql.connect(sqlConfig);
 
   return new Promise((resolve, reject) => {
     const request = new sql.Request();
 
     // Set up the query for detailed data
-    const query = `USE ${Bun.env.DB}; UPDATE UserInfo SET 
+    const { UID, MR, CUIL, Jornada, Activo, Nombre } = marcadaRow;
+    const query = `USE ${Bun.env.DB}; UPDATE UserInfo SET
+      ${MR ? `UserCode = '${MR}',` : ''}
       ${CUIL ? `CUIL = '${CUIL}',` : ''}
       ${Jornada ? `Jornada = '${Jornada}',` : ''}
       ${Activo ? `Activo = '${Activo}',` : ''}
       ${Nombre ? `Name = '${Nombre}'` : ''}
-      WHERE UserCode = '${MR}';`;
+      WHERE Userid = '${UID}';`;
 
     request.query(query);
 
@@ -261,7 +263,7 @@ function processRow(row: any) {
   
   row.CUIL = row.CUIL ? row.CUIL : '';
   row.Jornada = row.Jornada ? row.Jornada : '';
-  row.Activo = row.Activo ? row.Activo : '';
+  row.Activo = row.Activo ? row.Activo : 'No definido';
   return row;
 }
 

@@ -18,6 +18,8 @@
 	});
 
 	let menuAbierto = false;
+	let omitirFinDeSemana = false; // Nuevo estado
+
 	function toggleMenu() {
 		menuAbierto = !menuAbierto;
 	}
@@ -52,6 +54,14 @@
 				<input type="checkbox" checked={showEntreFechas} on:change={toggleEntreFechas} />Entre
 				Fechas
 			</div>
+			{#if showEntreFechas}
+				<div class="flex:row ml:20"> <!-- Añade tabulación -->
+					<input
+						type="checkbox"
+						bind:checked={omitirFinDeSemana}
+					/>Omitir fin de semana
+				</div>
+			{/if}
 			<div class="flex:row">
 				<input
 					type="checkbox"

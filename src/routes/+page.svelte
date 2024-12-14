@@ -12,7 +12,16 @@
 
 	import { getEstado, matchesFilters } from '$lib/utils/utils';
 	import { fetchMarcadaDetalle, fetchMarcada, fetchDepartamentos } from '$lib/utils/mainController';
-	import { globalStore, updateFechaMarcada, setloadingData, setHostname, updateSelectedDepartamento } from '$lib/utils/globalStore';
+	import {
+		globalStore,
+		updateFechaMarcada,
+		setloadingData,
+		setHostname,
+		updateSelectedDepartamento,
+
+		setDepartamentos
+
+	} from '$lib/utils/globalStore';
 	import { onMount } from 'svelte';
 	import type { Marcada } from '$lib/utils/types';
 
@@ -21,6 +30,7 @@
 	let registros: Marcada[] = [];
 	let searchText: string = '';
 	let departamentos: string[] = data.departamentos;
+	setDepartamentos(departamentos);
 	let hostname: string = '';
 	let selectedDepartamento = data.hostname;
 	let fechaMarcada = '';
@@ -117,7 +127,6 @@
 			} else {
 				console.error('Unknown error:', error);
 			}
-		} finally {
 		}
 		setloadingData(false);
 	}
@@ -197,7 +206,7 @@
 					filename="marcadas AD - {selectedDepartamento} {fechaMarcada}"
 				/>
 
-				{#if data.hostname === 'PEAP' && selectedDepartamento === 'ARPB'}
+				{#if (data.hostname === 'PEAP' || data.hostname === 'IFAP') && selectedDepartamento === 'ARPB'}
 					<BtnDescargar
 						data={Ausentes}
 						placeholder="Descargar Todos los Ausentes"
