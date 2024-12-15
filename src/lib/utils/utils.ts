@@ -187,3 +187,22 @@ export function matchesFilters(marcada: Marcada, searchText: string, selectedDep
 export function depAdmin(string: string): boolean {
   return string === 'PEAP' || string === 'IFAP';
 }
+
+export function filtrarMarcadasFinde(marcadas: Marcada[]): Marcada[] {
+  marcadas.map((marcada) => {
+    let dateMarcada = new Date(marcada.Marcada);
+
+    if ([6, 0].includes(dateMarcada.getDay())) {
+      marcadas.splice(marcadas.indexOf(marcada), 1);
+      console.log('Eliminado: ', dateMarcada);
+    }
+  })
+
+  return marcadas
+}
+
+export function reemplazarMarcadas(registros: Marcada[], newItem: Marcada) {
+  return registros.map((item) =>
+      item.UID === newItem.UID ? { ...item, ...newItem } : item
+  );
+}

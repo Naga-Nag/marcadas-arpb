@@ -123,7 +123,7 @@ export async function updateUsuarioFromMarcada(marcadaRow: Marcada) {
     });
 
     if (!response.ok) {
-        throw new Error('mainController :: Failed to update usuario');
+        throw new Error('mainController :: Error al actualizar usuario');
     }
     else {
         console.log('mainController :: Usuario actualizado con exito', marcadaRow);

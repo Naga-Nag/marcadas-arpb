@@ -32,19 +32,19 @@
 <div>
 	{#if depAdmin(hostname)}
 		{#if !isEditing}
-			<span on:click={() => (isEditing = true)}>{value}</span>
+			<span role="button" on:click={() => (isEditing = true)}>
+				{value || 'No definido'}
+			</span>
 		{:else}
 			<form on:submit|preventDefault={handleSubmit}>
 				<input bind:this={inputElement} type="text" bind:value />
-				<button type="submit">✅</button>
+				<button type="submit">✔️</button>
 				<button type="button" on:click={handleCancel}>❌</button>
 			</form>
 		{/if}
 	{:else}
 		{value}
-
 	{/if}
-
 </div>
 
 <style>
@@ -58,7 +58,7 @@
 	}
 
 	input {
-		border: 1px solid #ccc;
+		border: 1px solid #000000;
 		padding: 4px;
 		font-size: 1rem;
 	}
@@ -68,5 +68,6 @@
 		border: none;
 		background: transparent;
 		cursor: pointer;
+		font-size: 1rem;
 	}
 </style>

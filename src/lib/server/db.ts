@@ -263,7 +263,7 @@ function processRow(row: any) {
   
   row.CUIL = row.CUIL ? row.CUIL : '';
   row.Jornada = row.Jornada ? row.Jornada : '';
-  row.Activo = row.Activo ? row.Activo : 'No definido';
+  row.Activo = row.Activo ? row.Activo : '';
   return row;
 }
 

@@ -1,3 +1,7 @@
+<!-- 
+	events: rangoFechaDefinido
+-->
+
 <script>
 	import { writable } from 'svelte/store';
 	import { createEventDispatcher } from 'svelte';

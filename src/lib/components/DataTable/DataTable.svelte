@@ -2,7 +2,13 @@
 	import type { Marcada } from '$lib/utils/types';
 	import EditableCell from '$lib/components/DataTable/EditableCell.svelte';
 	import { sortTime, sortString, sortNumber, sortEstado } from '$lib/utils/utils';
-	import { createTable, createRender, Subscribe, Render, type DataLabel } from 'svelte-headless-table';
+	import {
+		createTable,
+		createRender,
+		Subscribe,
+		Render,
+		type DataLabel
+	} from 'svelte-headless-table';
 	import {
 		addHiddenColumns,
 		addPagination,
@@ -11,10 +17,11 @@
 	} from 'svelte-headless-table/plugins';
 	import { writable } from 'svelte/store';
 	import { globalStore } from '$lib/utils/globalStore';
-	import BtnDescargar from '../BtnDescargar.svelte';
 	import { updateUsuarioFromMarcada } from '$lib/utils/mainController';
-
+	import {createEventDispatcher} from 'svelte';
 	export let registros: Array<Marcada>;
+
+	const dispatch = createEventDispatcher();
 
 	let showMarcadaDetalle: boolean;
 	let showEntreFechas: boolean;
@@ -39,14 +46,20 @@
 			}
 		}
 
+		if (columnId === 'Jornada') {
+			if (newValue === '' || parseInt(newValue) <= 0 || parseInt(newValue) > 12) {
+				console.log('DataTable :: EditableCell :: Jornada no valido');
+				$dataToDisplay = $dataToDisplay;
+				return;
+			}
+		}
+
 		if (columnId === 'Activo') {
 			if (['Si', 'true', 'si', '1'].includes(newValue)) {
-				newValue = "1";
-			}
-			else if (['No', 'false', 'no', '0'].includes(newValue)) {
-				newValue = "0";
-			}
-			else {
+				newValue = '1';
+			} else if (['No', 'false', 'no', '0'].includes(newValue)) {
+				newValue = '0';
+			} else {
 				console.log('DataTable :: EditableCell :: Activo no valido :: ', newValue);
 				// If newValue is not valid, refresh data to reset invalid values
 				$dataToDisplay = $dataToDisplay;
@@ -62,6 +75,7 @@
 		console.log('DataTable :: Mod Item :: ', newItem);
 		$dataToDisplay[idx] = newItem;
 		$dataToDisplay = $dataToDisplay;
+		dispatch('refreshParentData', {newItem});
 	};
 
 	const EditableCellLabel: DataLabel<Marcada> = ({ column, row, value }) =>
@@ -134,7 +148,7 @@
 			registros = registros.sort((a, b) => {
 				return sortEstado(a, b, sortOrder);
 			});
-		} else if (sortCol === 'MR' || sortCol === 'CUIL' /* || sortCol === 'DNI' */) {
+		} else if (sortCol === 'MR' || sortCol === 'CUIL' || sortCol === 'Jornada') {
 			registros = registros.sort((a, b) =>
 				sortNumber(parseInt(a[sortCol]), parseInt(b[sortCol]), sortOrder)
 			);

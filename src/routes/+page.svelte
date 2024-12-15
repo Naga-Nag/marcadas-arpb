@@ -10,8 +10,8 @@
 		DataTable
 	} from '$lib/components/components';
 
-	import { getEstado, matchesFilters } from '$lib/utils/utils';
-	import { fetchMarcadaDetalle, fetchMarcada, fetchDepartamentos } from '$lib/utils/mainController';
+	import { filtrarMarcadasFinde, getEstado, matchesFilters, reemplazarMarcadas } from '$lib/utils/utils';
+	import { fetchMarcadaDetalle, fetchMarcada, fetchDepartamentos, fetchEntreFechas } from '$lib/utils/mainController';
 	import {
 		globalStore,
 		updateFechaMarcada,
@@ -37,6 +37,7 @@
 	let loading: boolean = false;
 	let showEntreFechas: boolean = false;
 	let showMarcadaDetalle: boolean = true;
+	let omitirFinDeSemana = false;
 
 	globalStore.subscribe((value) => {
 		hostname = value.hostname;
@@ -45,6 +46,7 @@
 		loading = value.loading;
 		showEntreFechas = value.showEntreFechas;
 		showMarcadaDetalle = value.showMarcadaDetalle;
+		omitirFinDeSemana = value.omitirFinde;
 		hostname = value.hostname;
 	});
 
@@ -86,24 +88,13 @@
 
 	async function rangoFechalistener(fechaInicial: string, fechaFinal: string) {
 		setloadingData(true);
-		let url = `/api/fetchEntreFechas/`;
-		let payload = { departamento: hostname, fechaInicial, fechaFinal };
-		try {
-			console.log('Fetching data... MarcadaEntreFechas:', fechaInicial, fechaFinal);
-			const response = await fetch(url, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(payload)
-			});
-			if (response.ok) {
-				registros = await response.json();
-			} else {
-				console.error('Error fetching data:', await response.json());
-			}
-		} catch (error) {
-			console.error('Fetch error:', error);
+		registros = [];
+		if (omitirFinDeSemana) {
+			registros = await fetchEntreFechas(hostname, fechaInicial, fechaFinal);
+			registros = filtrarMarcadasFinde(registros);
+		}
+		else {
+			registros = await fetchEntreFechas(hostname, fechaInicial, fechaFinal);
 		}
 		setloadingData(false);
 	}
@@ -215,10 +206,10 @@
 				{/if}
 			</div>
 
-			<!-- // ANCHOR Tabla de datos filtrados -->
+			<!-- // ANCHOR DataTable -->
 			{#if registros.length > 0 && selectedDepartamento}
 				<div>
-					<DataTable registros={filteredData} />
+					<DataTable registros={filteredData} on:refreshParentData={(e) => (registros = reemplazarMarcadas(registros, e.detail.newItem))}/>
 				</div>
 				<!-- Cuenta de registros -->
 				<div class="d:flex flex:col">

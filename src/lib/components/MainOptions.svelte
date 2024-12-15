@@ -3,7 +3,9 @@
 	import {
 		globalStore,
 		toggleEntreFechas as TEF,
-		toggleMarcadaDetalle as TMD
+		toggleMarcadaDetalle as TMD,
+		toggleOmitirFinde as TOF
+
 	} from '$lib/utils/globalStore';
 	import { createEventDispatcher } from 'svelte';
 
@@ -33,6 +35,11 @@
 		dispatch('toggleEntreFechas');
 		TEF();
 	}
+
+	function toggleOmitirFinDeSemana() {
+		dispatch('toggleOmitirFinDeSemana');
+		TOF();
+	}
 </script>
 
 <main on:mouseleave={() => (menuAbierto = false)}>
@@ -59,6 +66,7 @@
 					<input
 						type="checkbox"
 						bind:checked={omitirFinDeSemana}
+						on:change={toggleOmitirFinDeSemana}
 					/>Omitir fin de semana
 				</div>
 			{/if}

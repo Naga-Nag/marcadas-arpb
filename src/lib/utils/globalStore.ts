@@ -34,6 +34,10 @@ export function toggleEntreFechas() {
     });
 }
 
+export function toggleOmitirFinde() {
+    globalStore.update((state) => ({ ...state, omitirFinde: !state.omitirFinde }));
+}
+
 export function setloadingData(loading: boolean) {
     globalStore.update((state) => ({...state, loading: loading}));
 }
