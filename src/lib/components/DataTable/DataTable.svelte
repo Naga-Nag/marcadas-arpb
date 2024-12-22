@@ -46,7 +46,7 @@
 					message: 'Departamento no valido',
 					duration: 3000,
 					type: 'error'
-				})
+				});
 				// If newValue is not valid, refresh data to reset invalid values
 				$dataToDisplay = $dataToDisplay;
 				return;
@@ -55,7 +55,13 @@
 
 		if (columnId === 'Jornada') {
 			if (newValue === '' || parseInt(newValue) <= 0 || parseInt(newValue) > 12) {
-				console.log('DataTable :: EditableCell :: Jornada no valido');
+				notify({
+					id: Date.now(),
+					title: 'Error al actualizar datos',
+					message: 'Jornada no valida',
+					duration: 3000,
+					type: 'error'
+				});
 				$dataToDisplay = $dataToDisplay;
 				return;
 			}
@@ -67,8 +73,43 @@
 			} else if (['No', 'false', 'no', '0'].includes(newValue)) {
 				newValue = '0';
 			} else {
-				console.log('DataTable :: EditableCell :: Activo no valido :: ', newValue);
+				notify({
+					id: Date.now(),
+					title: 'Error al actualizar datos',
+					message: 'Valor de Activo no valido',
+					duration: 3000,
+					type: 'error'
+				});
 				// If newValue is not valid, refresh data to reset invalid values
+				$dataToDisplay = $dataToDisplay;
+				return;
+			}
+		}
+
+		if (columnId === 'MR') {
+			//El check de tipos en isNaN es asi a proposito
+			if (newValue === '' || isNaN(newValue)) {
+				notify({
+					id: Date.now(),
+					title: 'Error al actualizar datos',
+					message: 'MR no valido',
+					duration: 3000,
+					type: 'error'
+				});
+				$dataToDisplay = $dataToDisplay;
+				return;
+			}
+		}
+
+		if (columnId === 'CUIL') {
+			if (!newValue.includes('-')) {
+				notify({
+					id: Date.now(),
+					title: 'Error al actualizar datos',
+					message: 'CUIL no valido',
+					duration: 3000,
+					type: 'error'
+				});
 				$dataToDisplay = $dataToDisplay;
 				return;
 			}

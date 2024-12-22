@@ -261,6 +261,7 @@ function processRow(row: any) {
   row.Salida = formatTime(row.Salida);
   row.Marcada = formatTime(row.Marcada);
   
+  row.MR = row.MR ? row.MR : '';
   row.CUIL = row.CUIL ? row.CUIL : '';
   row.Jornada = row.Jornada ? row.Jornada : '';
   row.Activo = row.Activo ? row.Activo : '';
