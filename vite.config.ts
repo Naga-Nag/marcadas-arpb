@@ -6,8 +6,8 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	server: {
         https: {
-            key: fs.readFileSync(`${__dirname}/cert/localhost-key.pem`),
-            cert: fs.readFileSync(`${__dirname}/cert/localhost.pem`)
+            key: fs.readFileSync(`${__dirname}/cert/cert-key.pem`),
+            cert: fs.readFileSync(`${__dirname}/cert/cert.pem`)
         },
 		proxy: {}
     }
