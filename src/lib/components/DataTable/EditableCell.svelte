@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { globalStore } from '$lib/utils/globalStore';
+	import { globalStore } from '$lib/stores/global';
 	import { depAdmin } from '$lib/utils/utils';
 
 	let hostname = '';

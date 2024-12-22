@@ -6,7 +6,7 @@
 		toggleMarcadaDetalle as TMD,
 		toggleOmitirFinde as TOF
 
-	} from '$lib/utils/globalStore';
+	} from '$lib/stores/global';
 	import { createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher();

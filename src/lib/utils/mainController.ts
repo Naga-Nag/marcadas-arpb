@@ -1,4 +1,4 @@
-import { globalStore } from "$lib/utils/globalStore";
+import { globalStore } from "$lib/stores/global";
 import type { Marcada } from "./types";
 
 let showMarcadaDetalle: boolean;

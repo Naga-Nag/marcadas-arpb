@@ -24,3 +24,11 @@ export type Usuario = {
     Activo: string;
     Foto: string;
 };
+
+export type Notification = {
+    id: number;
+    title: string;
+    message: string;
+    duration: number;
+    type: string;
+};

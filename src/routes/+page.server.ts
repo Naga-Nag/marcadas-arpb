@@ -1,7 +1,7 @@
 import { formatIP, reverseDnsLookup } from '$lib/utils/utils';
 import type { PageServerLoad } from './$types';
 import { fetchDepartamentos } from '$lib/server/db';
-import { setDepartamentos } from '$lib/utils/globalStore';
+import { setDepartamentos } from '$lib/stores/global';
 
 export const load: PageServerLoad = async (event) => {
     let defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];

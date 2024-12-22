@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
 import type { Marcada } from './types';
-import { globalStore } from '$lib/utils/globalStore';
+import { globalStore } from '$lib/stores/global';
 
 let hostname: string;
 let showMarcadaDetalle: boolean;

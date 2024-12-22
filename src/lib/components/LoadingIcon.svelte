@@ -1,5 +1,5 @@
 <script>
-	import { globalStore } from '$lib/utils/globalStore';
+	import { globalStore } from '$lib/stores/global';
 	$: loading = false;
 
 	globalStore.subscribe((value) => {

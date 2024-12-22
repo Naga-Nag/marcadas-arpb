@@ -16,9 +16,10 @@
 		addGroupBy
 	} from 'svelte-headless-table/plugins';
 	import { writable } from 'svelte/store';
-	import { globalStore } from '$lib/utils/globalStore';
+	import { globalStore } from '$lib/stores/global';
+	import { notify } from '$lib/stores/notifications';
 	import { updateUsuarioFromMarcada } from '$lib/utils/mainController';
-	import {createEventDispatcher} from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	export let registros: Array<Marcada>;
 
 	const dispatch = createEventDispatcher();
@@ -39,7 +40,13 @@
 
 		if (columnId === 'Departamento') {
 			if (!departamentos.includes(newValue)) {
-				console.log('DataTable :: EditableCell :: Departamento no valido');
+				notify({
+					id: Date.now(),
+					title: 'Error al actualizar datos',
+					message: 'Departamento no valido',
+					duration: 3000,
+					type: 'error'
+				})
 				// If newValue is not valid, refresh data to reset invalid values
 				$dataToDisplay = $dataToDisplay;
 				return;
@@ -71,11 +78,28 @@
 		const currentItem = $dataToDisplay[idx];
 		const key = columnId; // Cast as `keyof YourDataItem`
 		const newItem = { ...currentItem, [key]: newValue };
-		updateUsuarioFromMarcada(newItem);
+		try {
+			updateUsuarioFromMarcada(newItem);
+			notify({
+				id: 1,
+				title: 'Datos actualizados',
+				message: 'Los datos se actualizaron correctamente',
+				duration: 3000,
+				type: 'success'
+			});
+		} catch (error) {
+			notify({
+				id: 1,
+				title: 'Error',
+				message: 'Error al actualizar marcada: ' + error,
+				duration: 3000,
+				type: 'error'
+			});
+		}
 		console.log('DataTable :: Mod Item :: ', newItem);
 		$dataToDisplay[idx] = newItem;
 		$dataToDisplay = $dataToDisplay;
-		dispatch('refreshParentData', {newItem});
+		dispatch('refreshParentData', { newItem });
 	};
 
 	const EditableCellLabel: DataLabel<Marcada> = ({ column, row, value }) =>

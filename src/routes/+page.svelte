@@ -7,21 +7,33 @@
 		DatePicker,
 		RangeDatePicker,
 		LoadingIcon,
-		DataTable
+		DataTable,
+		NotificationContainer
 	} from '$lib/components/components';
 
-	import { filtrarMarcadasFinde, getEstado, matchesFilters, reemplazarMarcadas } from '$lib/utils/utils';
-	import { fetchMarcadaDetalle, fetchMarcada, fetchDepartamentos, fetchEntreFechas } from '$lib/utils/mainController';
+	import {
+		filtrarMarcadasFinde,
+		getEstado,
+		matchesFilters,
+		reemplazarMarcadas
+	} from '$lib/utils/utils';
+
+	import {
+		fetchMarcadaDetalle,
+		fetchMarcada,
+		fetchDepartamentos,
+		fetchEntreFechas
+	} from '$lib/utils/mainController';
+
 	import {
 		globalStore,
 		updateFechaMarcada,
 		setloadingData,
 		setHostname,
 		updateSelectedDepartamento,
-
 		setDepartamentos
+	} from '$lib/stores/global';
 
-	} from '$lib/utils/globalStore';
 	import { onMount } from 'svelte';
 	import type { Marcada } from '$lib/utils/types';
 
@@ -92,8 +104,7 @@
 		if (omitirFinDeSemana) {
 			registros = await fetchEntreFechas(hostname, fechaInicial, fechaFinal);
 			registros = filtrarMarcadasFinde(registros);
-		}
-		else {
+		} else {
 			registros = await fetchEntreFechas(hostname, fechaInicial, fechaFinal);
 		}
 		setloadingData(false);
@@ -140,6 +151,8 @@
 
 			<a href="/aut" class="font-size:9">👻</a>
 		</div>
+
+		<NotificationContainer />
 
 		<!-- // ANCHOR Tabs de departamentos -->
 		<!-- Esto solo se muestra si el hostname es PEAP -->
@@ -209,7 +222,11 @@
 			<!-- // ANCHOR DataTable -->
 			{#if registros.length > 0 && selectedDepartamento}
 				<div>
-					<DataTable registros={filteredData} on:refreshParentData={(e) => (registros = reemplazarMarcadas(registros, e.detail.newItem))}/>
+					<DataTable
+						registros={filteredData}
+						on:refreshParentData={(e) =>
+							(registros = reemplazarMarcadas(registros, e.detail.newItem))}
+					/>
 				</div>
 				<!-- Cuenta de registros -->
 				<div class="d:flex flex:col">
