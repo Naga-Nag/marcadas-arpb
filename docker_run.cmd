@@ -1,1 +1,0 @@
-docker run --env-file .env presentismo-arpb:latest
