@@ -68,9 +68,9 @@
 		}
 
 		if (columnId === 'Activo') {
-			if (['Si', 'true', 'si', '1'].includes(newValue)) {
+			if (['Si', 'true', 'si', '1', 'SI'].includes(newValue)) {
 				newValue = '1';
-			} else if (['No', 'false', 'no', '0'].includes(newValue)) {
+			} else if (['No', 'false', 'no', '0', 'NO'].includes(newValue)) {
 				newValue = '0';
 			} else {
 				notify({

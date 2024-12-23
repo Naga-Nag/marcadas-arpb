@@ -12,6 +12,7 @@
 	} from '$lib/components/components';
 
 	import {
+	depAdmin,
 		filtrarMarcadasFinde,
 		getEstado,
 		matchesFilters,
@@ -157,7 +158,7 @@
 		<!-- // ANCHOR Tabs de departamentos -->
 		<!-- Esto solo se muestra si el hostname es PEAP -->
 
-		{#if data.hostname === 'PEAP' || data.hostname === 'IFAP'}
+		{#if depAdmin(hostname)}
 			<div class="d:flex flex:row justify-content:space-between">
 				<TabsDepartamento {departamentos} bind:selectedDepartamento />
 			</div>
@@ -210,7 +211,7 @@
 					filename="marcadas AD - {selectedDepartamento} {fechaMarcada}"
 				/>
 
-				{#if (data.hostname === 'PEAP' || data.hostname === 'IFAP') && selectedDepartamento === 'ARPB'}
+				{#if (depAdmin(hostname)) && selectedDepartamento === 'ARPB'}
 					<BtnDescargar
 						data={Ausentes}
 						placeholder="Descargar Todos los Ausentes"

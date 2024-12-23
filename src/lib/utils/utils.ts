@@ -25,8 +25,8 @@ export function downloadExcel(data: Array<Marcada>, fileName = 'marcada') {
   // Create a worksheet with the desired column arrangement
   const worksheet = XLSX.utils.json_to_sheet(data.map((row) => ({
     'M.R': row.MR,
-    'Nombre': row.Nombre,
     'CUIL': row.CUIL,
+    'Nombre': row.Nombre,
     'CAUSA': '',
     'COD AUS': '',
     'Horas': '',
@@ -203,6 +203,6 @@ export function filtrarMarcadasFinde(marcadas: Marcada[]): Marcada[] {
 
 export function reemplazarMarcadas(registros: Marcada[], newItem: Marcada) {
   return registros.map((item) =>
-      item.UID === newItem.UID ? { ...item, ...newItem } : item
+    item.UID === newItem.UID ? { ...item, ...newItem } : item
   );
 }
