@@ -1,0 +1,1 @@
+ALTER TABLE dbo.OPinfo ADD WebPwd NVARCHAR(100);

@@ -88,6 +88,7 @@
 
 		if (columnId === 'MR') {
 			//El check de tipos en isNaN es asi a proposito
+			//@ts-ignore: Argument of type 'string' is not assignable to parameter of type 'number'.
 			if (newValue === '' || isNaN(newValue)) {
 				notify({
 					id: Date.now(),
