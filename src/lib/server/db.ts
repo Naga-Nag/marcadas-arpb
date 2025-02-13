@@ -2,6 +2,8 @@ import type { Marcada, Usuario } from '$lib/utils/types';
 import { formatTime } from '$lib/utils/utils';
 import { differenceInMilliseconds, differenceInMinutes, format, parseISO } from 'date-fns';
 import sql from 'mssql';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const sqlConfig = {
   user: Bun.env.DB_UID!,
@@ -21,6 +23,17 @@ const sqlConfig = {
 };
 
 
+/**
+ * Fetches MarcadaDelDia records from the database, streaming them to the provided
+ * onBatch callback in batches of 20 records. The callback is called with a copy of
+ * the batch array, which is then cleared for the next batch.
+ *
+ * @param {string} departamento - The department name to fetch records for
+ * @param {string} fecha - The date to fetch records for in ISO 8601 format
+ * @param {function} onBatch - The callback to call with each batch of records
+ * @returns {Promise<void>} A promise that resolves when all records have been
+ *   processed
+ */
 export async function fetchMarcadaDelDia(
   departamento: string,
   fecha: string,
@@ -78,6 +91,10 @@ export async function fetchMarcadaDelDia(
 
 /* console.log(await fetchMarcadaDelDia('TAAP', '2023-08-03' , (batch) => {console.log(batch)})); */
 
+/**
+ * Fetches an array of department names from the database.
+ * @returns {Promise<Array<Record<string, any>>>} A promise that resolves to an array of department names.
+ */
 export async function fetchDepartamentos(): Promise<Array<Record<string, any>>> {
   await sql.connect(sqlConfig);
 
@@ -105,6 +122,12 @@ export async function fetchDepartamentos(): Promise<Array<Record<string, any>>> 
   });
 }
 
+/**
+ * Fetches an array of detailed user records for a given department and date.
+ * @param {string} departamento The department name.
+ * @param {string} fecha The date in 'YYYY-MM-DD' format.
+ * @returns {Promise<Array<Marcada>>} A promise that resolves to an array of detailed user records.
+ */
 export async function fetchMarcadaDetalle(departamento: string, fecha: string): Promise<Array<Marcada>> {
   let startTime = new Date();
   await sql.connect(sqlConfig);
@@ -141,6 +164,11 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
 }
 
 
+/**
+ * Modifica un usuario en la base de datos.
+ * @param {Usuario} Usuario El objeto con los datos del usuario a modificar.
+ * @returns {Promise<boolean>} Un promise que se resuelve a true si se modifico correctamente, o rechaza con un error si hubo un problema.
+ */
 export async function modUsuario(Usuario: Usuario) {
   await sql.connect(sqlConfig);
 
@@ -169,6 +197,13 @@ export async function modUsuario(Usuario: Usuario) {
   });
 }
 
+/**
+ * Fetches an array of Marcada records from the database between two dates.
+ * @param {string} departamento - The department name to fetch records for.
+ * @param {string} startDate - The start date to fetch records from, in ISO 8601 format.
+ * @param {string} endDate - The end date to fetch records to, in ISO 8601 format.
+ * @returns {Promise<Array<Marcada>>} A promise that resolves to an array of Marcada records.
+ */
 export async function fetchMarcadaEntreFechas(departamento: string, startDate: string, endDate: string): Promise<Array<Marcada>> {
   let startTime = new Date();
   await sql.connect(sqlConfig);
@@ -205,6 +240,11 @@ export async function fetchMarcadaEntreFechas(departamento: string, startDate: s
   });
 }
 
+/**
+ * Updates a user in the database using the information from a Marcada record.
+ * @param {Marcada} marcadaRow The Marcada record to update the user with.
+ * @returns {Promise<boolean>} A promise that resolves to true if the update was successful.
+ */
 export async function updateUsuarioFromMarcada(marcadaRow: Marcada) {
   await sql.connect(sqlConfig);
 
@@ -234,6 +274,11 @@ export async function updateUsuarioFromMarcada(marcadaRow: Marcada) {
   });
 }
 
+/**
+ * Fetches a user record from the database given its Userid.
+ * @param {string} uid The Userid of the user to fetch.
+ * @returns {Promise<Record<string, any>>} A promise that resolves to the user record.
+ */
 async function UserfromUID(uid: string): Promise<Record<string, any>> {
   await sql.connect(sqlConfig);
 
@@ -256,6 +301,11 @@ async function UserfromUID(uid: string): Promise<Record<string, any>> {
   });
 }
 
+/**
+ * Processes a row of data to format it properly for display in a Svelte component.
+ * @param {any} row The row of data to process.
+ * @returns {any} The processed row of data.
+ */
 function processRow(row: any) {
   row.Entrada = formatTime(row.Entrada);
   row.Salida = formatTime(row.Salida);
@@ -269,3 +319,65 @@ function processRow(row: any) {
 }
 
 /* console.log(await fetchMarcadaEntreFechas('PEAP', '2024-01-01', '2024-01-04')); */
+
+/**
+ * Registers a new user in the database.
+ * @param {string} username The username for the new user.
+ * @param {string} password_hash The password hash for the new user.
+ * @returns {Promise<boolean>} A promise that resolves to true if the user was successfully
+ * registered.
+ */
+export async function registerWebUser(username: string, password_hash: string) {
+  await sql.connect(sqlConfig);
+
+  return new Promise((resolve, reject) => {
+    const request = new sql.Request();
+    const query = `USE ${Bun.env.DB}; INSERT INTO WebUsers (WebUsr, WebPwd) VALUES ('${username}', '${password_hash}');`;
+    request.query(query);
+    request.on('error', (err) => {
+      console.error('Error registering new user:', err);
+      reject(err);
+    });
+    request.on('done', () => {
+      resolve(true);
+    });
+  });
+}
+
+/**
+ * Authenticates a web user by verifying the provided username and password.
+ * If successful, generates a JSON Web Token (JWT) for the user.
+ *
+ * @param {string} username - The username of the user attempting to log in.
+ * @param {string} password - The plaintext password of the user.
+ * @returns {Promise<string | { token: string; }>} A promise that resolves to an object containing
+ * a JWT token if authentication is successful, or rejects with an error message if authentication fails.
+ */
+
+export async function loginWebUser(username: string, password: string): Promise<string | { token: string; }> {
+  await sql.connect(sqlConfig);
+
+  console.log('loginWebUser:', username, password);
+
+  return new Promise(async (resolve, reject) => {
+    const request = new sql.Request();
+    const query = `USE ${Bun.env.DB}; SELECT * FROM WebUsers WHERE WebUsr = '${username}';`;
+    request.query(query);
+
+    request.on('row', async (row) => {
+      const isPasswordValid = await bcrypt.compare(password, row.WebPwd);
+      if (!isPasswordValid) {
+          throw new Error('Invalid password');
+      }
+
+      // Generate a JWT
+      const token = jwt.sign({ userId: row.id }, password, { expiresIn: '1h' });
+      console.log('JWT issued');
+      resolve({ token });
+    });
+    request.on('error', (err) => {
+      console.error('Error logging in user:', err);
+      reject(err);
+    });
+  });
+}
