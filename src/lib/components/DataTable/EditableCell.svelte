@@ -1,12 +1,5 @@
 <script lang="ts">
-	import { globalStore } from '$lib/stores/global';
-	import { depAdmin } from '$lib/utils/utils';
-
-	let hostname = '';
-	globalStore.subscribe((value) => {
-		hostname = value.hostname;
-	});
-
+	export let editable = false; // Whether the cell is editable
 	export let row; // Row object of the cell
 	export let column; // Column object of the cell
 	export let value: string; // Current value of the cell
@@ -30,8 +23,10 @@
 </script>
 
 <div>
-	{#if depAdmin(hostname)}
+	{#if editable}
 		{#if !isEditing}
+			<!-- svelte-ignore a11y-interactive-supports-focus -->
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<span role="button" on:click={() => (isEditing = true)}>
 				{value || 'No definido'}
 			</span>

@@ -1,5 +1,8 @@
 <script lang="ts">
-	import type { Marcada } from '$lib/utils/types';
+	export let editable = false; // Whether the cell is editable
+
+
+	import type { Marcada } from '$lib/types/gen';
 	import EditableCell from '$lib/components/DataTable/EditableCell.svelte';
 	import { sortTime, sortString, sortNumber, sortEstado } from '$lib/utils/utils';
 	import {
@@ -146,6 +149,7 @@
 
 	const EditableCellLabel: DataLabel<Marcada> = ({ column, row, value }) =>
 		createRender(EditableCell, {
+			editable,
 			row,
 			column,
 			value,

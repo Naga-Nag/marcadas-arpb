@@ -1,12 +1,11 @@
 import * as XLSX from 'xlsx';
-import type { Marcada } from './types';
+import type { Marcada } from '../types/gen';
 import { globalStore } from '$lib/stores/global';
 
 let hostname: string;
 let showMarcadaDetalle: boolean;
 
 globalStore.subscribe((value) => {
-  hostname = value.hostname;
   showMarcadaDetalle = value.showMarcadaDetalle;
 });
 
@@ -176,16 +175,12 @@ export function matchesFilters(marcada: Marcada, searchText: string, selectedDep
   const matchesDepartamento = marcada.Departamento === selectedDepartamento;
 
   //Esto define como se separan los datos filtrados en distintas tabs (estaria bueno cambiarlo)
-  if (hostname === 'PEAP' || hostname === 'IFAP') {
+  /* if (hostname === 'PEAP' || hostname === 'IFAP') {
     return selectedDepartamento === 'ARPB'
       ? matchesSearchText
       : matchesDepartamento && matchesSearchText;
-  }
+  } */
   return matchesDepartamento && marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) || matchesSearchText;
-}
-
-export function depAdmin(string: string): boolean {
-  return string === 'PEAP' || string === 'IFAP';
 }
 
 export function filtrarMarcadasFinde(marcadas: Marcada[]): Marcada[] {

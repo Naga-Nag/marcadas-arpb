@@ -25,6 +25,23 @@ export type Usuario = {
     Foto: string;
 };
 
+export type WebUser = {
+    id: number;
+    username: string;
+    password: string;
+    token: string; //JWT
+    role: string;
+    departamento: string;
+    departamentosPermitidos: string[];
+}
+
+export type shortWebUser = {
+    username: string;
+    role: string;
+    departamento: string;
+    departamentosPermitidos: string[];
+}
+
 export type Notification = {
     id: number;
     title: string;

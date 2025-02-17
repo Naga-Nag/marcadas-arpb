@@ -1,9 +1,9 @@
 <script lang="ts">
 	export let departamentos: string[];
 	export let selectedDepartamento: string;
-	
-	
-	import { updateSelectedDepartamento} from '$lib/stores/global';
+
+	import { updateSelectedDepartamento } from '$lib/stores/global';
+	import { fetchMarcada } from '$lib/utils/mainController';
 	import { onMount } from 'svelte';
 
 	function selectDepartamento(departamento: string) {
@@ -13,25 +13,26 @@
 		}
 	}
 
-	departamentos.sort((a, b) => {
-		if (a === 'ARPB') {
-			return -1; // 'ARPB' should come first
-		}
-		if (b === 'ARPB') {
-			return 1; // 'ARPB' should come first
-		}
-		return a.localeCompare(b); // Sort the remaining elements alphabetically
-	});
+	if (departamentos.includes('ARPB') && departamentos.length > 1) {
+		departamentos.sort((a, b) => {
+			if (a === 'ARPB') {
+				return -1; // 'ARPB' should come first
+			}
+			if (b === 'ARPB') {
+				return 1; // 'ARPB' should come first
+			}
+			return a.localeCompare(b); // Sort the remaining elements alphabetically
+		});
+	}
 
 	async function getDepartamentos() {
 		let res = await fetch('/api/fetchDepartamentos/');
-		return res.json()
+		return res.json();
 	}
 
 	onMount(async () => {
 		departamentos = await getDepartamentos();
 	});
-	
 </script>
 
 <div
@@ -40,7 +41,9 @@
 	{#each departamentos as departamento}
 		<button
 			class="btn ml:5"
-			on:click={() => selectDepartamento(departamento)}
+			on:click={() => {
+				selectDepartamento(departamento);
+			}}
 			class:selected={selectedDepartamento === departamento}
 		>
 			{departamento}

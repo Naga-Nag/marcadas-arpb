@@ -1,6 +1,6 @@
 // src/lib/stores/notifications.js
 import { writable } from 'svelte/store';
-import type { Notification } from '$lib/utils/types';
+import type { Notification } from '$lib/types/gen';
 
 export const notifications = writable<Notification[]>([]);
 

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { notifications } from '$lib/stores/notifications';
 	import Notification from './Notification.svelte';
-    import type { Notification as NotificationItem} from '$lib/utils/types';
+    import type { Notification as NotificationItem} from '$lib/types/types';
 
     let notificationList: NotificationItem[] = [];
     notifications.subscribe((list) => (notificationList = list));

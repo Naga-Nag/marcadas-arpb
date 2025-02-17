@@ -1,3 +1,4 @@
+import type { Marcada } from '$lib/types/gen';
 import { writable } from 'svelte/store';
 
 export const globalStore = writable({
@@ -7,6 +8,7 @@ export const globalStore = writable({
     showMarcadaDetalle: true,
     selectedDepartamento: '',
     fechaMarcada:'',
+    marcadas : [] as Marcada[],
     departamentos: [] as string[],
 });
 
@@ -96,6 +98,13 @@ export function setDepartamentos(departamentos: string[]) {
     globalStore.update((state) => ({...state, departamentos: departamentos}));
 }
 
+export function setMarcadas(marcadas: Marcada[]) {
+    globalStore.update((state) => ({...state, marcadas: marcadas}));
+}
+
+export function clearMarcadas() {
+    globalStore.update((state) => ({...state, marcadas: []}));
+}
 
 
-globalStore.subscribe(value => console.log('globalStore data:', value));
+globalStore.subscribe(value => console.log('globalStore data :: =>', value));

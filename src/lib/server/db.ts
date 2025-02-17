@@ -1,4 +1,4 @@
-import type { Marcada, Usuario } from '$lib/utils/types';
+import type { Marcada, shortWebUser, Usuario } from '$lib/types/gen';
 import { formatTime } from '$lib/utils/utils';
 import { differenceInMilliseconds, differenceInMinutes, format, parseISO } from 'date-fns';
 import sql from 'mssql';
@@ -310,7 +310,7 @@ function processRow(row: any) {
   row.Entrada = formatTime(row.Entrada);
   row.Salida = formatTime(row.Salida);
   row.Marcada = formatTime(row.Marcada);
-  
+
   row.MR = row.MR ? row.MR : '';
   row.CUIL = row.CUIL ? row.CUIL : '';
   row.Jornada = row.Jornada ? row.Jornada : '';
@@ -323,25 +323,46 @@ function processRow(row: any) {
 /**
  * Registers a new user in the database.
  * @param {string} username The username for the new user.
- * @param {string} password_hash The password hash for the new user.
+ * @param {string} password The plaintext password for the new user.
  * @returns {Promise<boolean>} A promise that resolves to true if the user was successfully
  * registered.
  */
-export async function registerWebUser(username: string, password_hash: string) {
-  await sql.connect(sqlConfig);
+export async function registerWebUser(username: string, password: string, role: string, departamento: string) {
+  const password_hash = await bcrypt.hash(password, 10);
 
-  return new Promise((resolve, reject) => {
-    const request = new sql.Request();
-    const query = `USE ${Bun.env.DB}; INSERT INTO WebUsers (WebUsr, WebPwd) VALUES ('${username}', '${password_hash}');`;
-    request.query(query);
-    request.on('error', (err) => {
-      console.error('Error registering new user:', err);
-      reject(err);
+  try {
+    await sql.connect(sqlConfig);
+    console.log("DB :: registerWebUser:", username, role, departamento);
+
+    return new Promise((resolve, reject) => {
+      const request = new sql.Request();
+
+      // Parameterized query to prevent SQL injection
+      const query = `
+        INSERT INTO dbo.WebUsers (username, password, role, departamento, departamentosPermitidos) 
+        VALUES (@username, @password_hash, @role, @departamento, @departamento);
+      `;
+
+      request.input("username", sql.VarChar, username);
+      request.input("password_hash", sql.VarChar, password_hash);
+      request.input("role", sql.VarChar, role);
+      request.input("departamento", sql.VarChar, departamento);
+
+      request.query(query);
+
+      request.on("done", () => {
+        resolve(true);
+      });
+
+      request.on("error", (err) => {
+        console.error("DB :: registerWebUser: SQL Error:", err);
+      });
     });
-    request.on('done', () => {
-      resolve(true);
-    });
-  });
+
+  } catch (err) {
+    console.error("Error in registerWebUser:", err);
+    throw new Error("Registration failed");
+  }
 }
 
 /**
@@ -353,31 +374,134 @@ export async function registerWebUser(username: string, password_hash: string) {
  * @returns {Promise<string | { token: string; }>} A promise that resolves to an object containing
  * a JWT token if authentication is successful, or rejects with an error message if authentication fails.
  */
+import type { WebUser } from '$lib/types/gen';
+export async function loginWebUser(username: string, password: string): Promise<WebUser | { error: string }> {
+  try {
+    await sql.connect(sqlConfig);
+    console.log("DB :: loginWebUser:", username, password);
 
-export async function loginWebUser(username: string, password: string): Promise<string | { token: string; }> {
-  await sql.connect(sqlConfig);
+    return new Promise((resolve, reject) => {
+      const request = new sql.Request();
 
-  console.log('loginWebUser:', username, password);
+      request.input("username", sql.VarChar, username);
+      const query = "SELECT * FROM dbo.WebUsers WHERE username = @username;";
 
-  return new Promise(async (resolve, reject) => {
-    const request = new sql.Request();
-    const query = `USE ${Bun.env.DB}; SELECT * FROM WebUsers WHERE WebUsr = '${username}';`;
-    request.query(query);
+      let userFound = false;
 
-    request.on('row', async (row) => {
-      const isPasswordValid = await bcrypt.compare(password, row.WebPwd);
-      if (!isPasswordValid) {
-          throw new Error('Invalid password');
-      }
+      request.query(query);
 
-      // Generate a JWT
-      const token = jwt.sign({ userId: row.id }, password, { expiresIn: '1h' });
-      console.log('JWT issued');
-      resolve({ token });
+      request.on("row", async (row) => {
+        console.log("DB :: loginWebUser row:", row);
+        userFound = true;
+
+        try {
+          const isPasswordValid = await bcrypt.compare(password, row.password);
+          if (!isPasswordValid) {
+            console.warn("DB :: loginWebUser: Invalid password");
+            return reject(new Error("Invalid password"));
+          }
+
+          if (!Bun.env.JWT_SECRET) {
+            throw new Error("JWT_SECRET is not defined");
+          }
+          
+          const token = jwt.sign({ username }, Bun.env.JWT_SECRET, { expiresIn: "1h" });
+          console.log("DB :: loginWebUser: JWT issued");
+
+
+          //** Esta sentencia envia la informacion del objeto usuario al endpoint */
+          //**
+          // ? Me conviene mandar esta informacion? o mandar solamente un success o algo asi y luego mandar la info del user con fetchUser sin ningun secreto*/
+          resolve({
+            id: row.id,
+            username: row.username,
+            password: row.password,
+            role: row.role,
+            departamento: row.departamento,
+            departamentosPermitidos: row.departamentosPermitidos,
+            token: token
+          });
+        } catch (error) {
+          console.error("Error comparing passwords:", error);
+          reject(error);
+        }
+      });
+
+      request.on("done", () => {
+        if (!userFound) {
+          console.warn("DB :: loginWebUser: User not found");
+          reject(new Error("User not found"));
+        }
+      });
+
+      request.on("error", (err) => {
+        console.error("DB :: loginWebUser: SQL Error:", err);
+        reject(err);
+      });
     });
-    request.on('error', (err) => {
-      console.error('Error logging in user:', err);
-      reject(err);
+
+  } catch (err) {
+    console.error("Error in loginWebUser:", err);
+    throw new Error("Authentication failed");
+  }
+}
+
+export async function fetchWebUser( username: string ): Promise<shortWebUser> {
+  try {
+    await sql.connect(sqlConfig);
+    console.log("DB :: fetchWebUser:", username);
+
+    return new Promise((resolve, reject) => {
+      const request = new sql.Request();
+
+      request.input("username", sql.VarChar, username);
+      const query = "SELECT username, role, departamento, departamentosPermitidos FROM dbo.WebUsers WHERE username = @username;";
+
+      request.query(query);
+
+      request.on("row", (row) => {
+        console.log("DB :: fetchWebUser row:", row);
+        resolve(row);
+      });
+
+      request.on("error", (err) => {
+        console.error("DB :: fetchWebUser: SQL Error:", err);
+        reject(err);
+      });
     });
-  });
+
+  } catch (err) {
+    console.error("Error in fetchWebUser:", err);
+    throw new Error("Error fetching user");
+  }
+}
+
+export async function setWebUserDepaPermitidos(username: string, depaPermitidos: string[]) {
+  try {
+    await sql.connect(sqlConfig);
+    console.log("DB :: setWebUserDepaPermitidos:", username, depaPermitidos);
+
+    return new Promise((resolve, reject) => {
+      const request = new sql.Request();
+
+      request.input("username", sql.VarChar, username);
+      request.input("depaPermitidos", sql.VarChar, depaPermitidos);
+      const query = "UPDATE dbo.WebUsers SET departamentosPermitidos = @depaPermitidos WHERE username = @username;";
+
+      request.query(query);
+
+      request.on("done", () => {
+        resolve(true);
+      });
+
+      request.on("error", (err) => {
+        console.error("DB :: setWebUserDepaPermitidos: SQL Error:", err);
+        reject(err);
+      });
+    });
+
+  } catch (err) {
+    console.error("Error in setWebUserDepaPermitidos:", err);
+    throw new Error("Error updating user");
+  }
 }
