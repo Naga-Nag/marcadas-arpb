@@ -106,5 +106,11 @@ export function clearMarcadas() {
     globalStore.update((state) => ({...state, marcadas: []}));
 }
 
+export const getfechaMarcada = () => {
+    let fechaMarcada: string = '';
+    globalStore.subscribe(state => fechaMarcada = state.fechaMarcada)();
+    return fechaMarcada;
+}
+
 
 globalStore.subscribe(value => console.log('globalStore data :: =>', value));

@@ -27,7 +27,7 @@
 		updateSelectedDepartamento
 	} from '$lib/stores/global';
 	import { onMount } from 'svelte';
-	import type { Marcada, shortWebUser } from '$lib/types/gen';
+	import type { Marcada} from '$lib/types/gen';
 	import { isAdmin } from '$lib/stores/user';
 
 	let user = data.user;

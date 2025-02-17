@@ -2,7 +2,7 @@
 	export let departamentos: string[];
 	export let selectedDepartamento: string;
 
-	import { updateSelectedDepartamento } from '$lib/stores/global';
+	import { updateSelectedDepartamento} from '$lib/stores/global';
 	import { fetchMarcada } from '$lib/utils/mainController';
 	import { onMount } from 'svelte';
 
@@ -25,14 +25,7 @@
 		});
 	}
 
-	async function getDepartamentos() {
-		let res = await fetch('/api/fetchDepartamentos/');
-		return res.json();
-	}
-
-	onMount(async () => {
-		departamentos = await getDepartamentos();
-	});
+	
 </script>
 
 <div

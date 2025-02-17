@@ -18,7 +18,7 @@ export const load: PageServerLoad = async (event) => {
         departamentos: await fetchDepartamentos(),
         ipAddress: requestIp,
         fechaMarcada: defaultDate,
-        records: [],
+        marcadas: [],
     };
 };
 
