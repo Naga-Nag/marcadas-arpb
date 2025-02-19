@@ -1,9 +1,12 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 import type { shortWebUser } from '$lib/types/gen';
 
 export const userStore = writable<shortWebUser | undefined>(undefined);
 
 export const setUser = (newUser: shortWebUser) => {
+    if (!(get(userStore) === undefined)) {
+        
+    }
     userStore.set(newUser);
 };
 
@@ -14,6 +17,10 @@ export const getUser = (): shortWebUser => {
         throw new Error('User not logged in');
     }
     return user;
+};
+
+export const isCleared = () => {
+    return getUser() === undefined;
 };
 
 export const clearUser = () => {

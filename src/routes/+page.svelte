@@ -31,7 +31,7 @@
 	import { isAdmin } from '$lib/stores/user';
 
 	let user = data.user;
-
+	
 	// Variables para búsqueda y departamentos
 	let debouncedSearchText = '';
 	let registros: Marcada[] = [];
@@ -112,9 +112,9 @@
 
 		try {
 			if (showMarcadaDetalle) {
-				registros = await fetchMarcadaDetalle(user.departamento, fechaMarcada);
+				registros = await fetchMarcadaDetalle(selectedDepartamento, fechaMarcada);
 			} else {
-				await fetchMarcada(user.departamento, fechaMarcada, (batch) => {
+				await fetchMarcada(selectedDepartamento, fechaMarcada, (batch) => {
 					registros = [...registros, ...batch]; // Update registros incrementally
 				});
 			}
@@ -139,7 +139,7 @@
 <body>
 	<main class="main shadow:8|8|3|blue min-h:93vh">
 		<div class="d:flex flex:row justify-content:space-between">
-			<button on:click={logout}>Logout</button>
+			<button on:click={logout} class="btn">Salir</button>
 			<h1 class="text:center bg:white r:10 p:10 w:fit-content shadow:4|4|3|gray-70">
 				Presentismo - {user.departamento}
 			</h1>
@@ -151,7 +151,7 @@
 
 		<!-- // ANCHOR Tabs de departamentos -->
 		<!-- Esto solo se muestra si es admin el departamento es PEAP -->
-		{#if isAdmin(user) || user.departamento === 'PEAP'}
+		{#if user.departamentosPermitidos.length > 1}
 			<div class="d:flex flex:row justify-content:space-between">
 				<TabsDepartamento departamentos={user.departamentosPermitidos} bind:selectedDepartamento />
 			</div>

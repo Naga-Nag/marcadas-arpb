@@ -1,5 +1,6 @@
 import { goto } from "$app/navigation";
 import { globalStore } from "$lib/stores/global";
+import { clearUser } from "$lib/stores/user";
 import type { Marcada } from "../types/gen";
 
 let showMarcadaDetalle: boolean;
@@ -213,6 +214,7 @@ export async function handleRegister(registerUsername: string, registerPassword:
     }
 }
 
-export function logout() {
+export async function logout() {
+    clearUser();
     goto('/logout');
 }

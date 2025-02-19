@@ -6,6 +6,11 @@
 	import { fetchMarcada } from '$lib/utils/mainController';
 	import { onMount } from 'svelte';
 
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
+
+
 	function selectDepartamento(departamento: string) {
 		if (selectedDepartamento !== departamento) {
 			selectedDepartamento = departamento;
