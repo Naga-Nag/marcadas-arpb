@@ -33,7 +33,7 @@
 		setMarcadas,
 		clearMarcadas,
 		getMarcadas,
-		getMarcadasAusentes
+		getAusentes
 	} from '$lib/stores/global';
 	import { onMount } from 'svelte';
 	import type { Marcada } from '$lib/types/gen';
@@ -45,7 +45,7 @@
 	let searchText: string = '';
 	let debouncedSearchText = '';
 
-	let registros: Marcada[] = getMarcadas();
+	let registros: Marcada[] = [];
 	let fechaMarcada = '';
 	let showEntreFechas: boolean = false;
 	let showMarcadaDetalle: boolean = true;
@@ -62,6 +62,7 @@
 		showEntreFechas = value.showEntreFechas;
 		showMarcadaDetalle = value.showMarcadaDetalle;
 		omitirFinDeSemana = value.omitirFinde;
+		registros = value.marcadas;
 	});
 
 	//ANCHOR - Datos Filtrados
@@ -72,11 +73,11 @@
 		setloadingData(true);
 		clearMarcadas();
 		if (omitirFinDeSemana) {
-			registros = await fetchEntreFechas(user.departamento, fechaInicial, fechaFinal);
-			registros = filtrarMarcadasFinde(registros);
+			await fetchEntreFechas(user.departamento, fechaInicial, fechaFinal);
+			filtrarMarcadasFinde(registros);
 			setMarcadas(registros);
 		} else {
-			registros = await fetchEntreFechas(user.departamento, fechaInicial, fechaFinal);
+			await fetchEntreFechas(user.departamento, fechaInicial, fechaFinal);
 			setMarcadas(registros);
 		}
 		setloadingData(false);
@@ -89,10 +90,10 @@
 
 		try {
 			if (showMarcadaDetalle) {
-				registros = await fetchMarcadaDetalle(selectedDepartamento, fechaMarcada);
+				await fetchMarcadaDetalle(selectedDepartamento, fechaMarcada);
 				setMarcadas( registros );
 			} else {
-				registros = await fetchMarcada(selectedDepartamento, fechaMarcada);
+				await fetchMarcada(selectedDepartamento, fechaMarcada);
 				setMarcadas(registros);
 			}
 		} catch (error: unknown) {
@@ -113,7 +114,6 @@
 		await fechaListener(defaultDate);
 	});
 
-	$: Ausentes = getMarcadasAusentes();
 </script>
 
 <body>
@@ -170,19 +170,19 @@
 				{/if}
 
 				<BtnDescargar
-					data={registros}
+					data={() => registros}
 					placeholder="Descargar Vista Actual"
 					filename="marcadas VA - {selectedDepartamento} {fechaMarcada}"
 				/>
 				<BtnDescargar
-					data={Ausentes}
+					data={() => getAusentes()}
 					placeholder="Descargar Ausentes"
-					filename="marcadas AD - {selectedDepartamento} {fechaMarcada}"
+					filename={`marcadas AD - ${selectedDepartamento} ${fechaMarcada}`}
 				/>
 
 				{#if isAdmin(user) && selectedDepartamento === 'ARPB'}
 					<BtnDescargar
-						data={getMarcadasAusentes()}
+						data={() => getAusentes()}
 						placeholder="Descargar Todos los Ausentes"
 						filename="marcadas TD {fechaMarcada}"
 					/>
@@ -203,7 +203,7 @@
 				<!-- Contador de registros totales -->
 				<div class="d:flex flex:col">
 					<p class="font-size:18 bg:white r:10 p:10 w:fit-content">
-							Total Ausentes: {getMarcadasAusentes().length}
+							Total Ausentes: {getAusentes().length}
 					</p>
 				</div>
 			{:else}

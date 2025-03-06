@@ -43,7 +43,7 @@ export async function fetchMarcadaDelDia(
   let rowCount = 0;
   await sql.connect(sqlConfig);
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const rows: Array<Record<string, any>> = [];
     const request = new sql.Request();
 
@@ -82,8 +82,8 @@ export async function fetchMarcadaDelDia(
         onBatch([...rows]);
       }
       let endTime = new Date();
-      console.log("INFO || " + 'Tiempo de consulta MarcadaDelDia:', differenceInMilliseconds(endTime, startTime) + 'ms');
-      console.log("INFO || " + rowCount + " registros encontrados");
+      console.log("INFO db :: " + 'Tiempo de consulta MarcadaDelDia:', differenceInMilliseconds(endTime, startTime) + 'ms');
+      console.log("INFO db :: " + rowCount + " registros encontrados");
       resolve(); // Resolve the promise to indicate completion
     });
   });
@@ -98,7 +98,7 @@ export async function fetchMarcadaDelDia(
 export async function fetchDepartamentos(): Promise<Array<Record<string, any>>> {
   await sql.connect(sqlConfig);
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const rows: Array<Record<string, any>> = [];
     const request = new sql.Request();
     request.arrayRowMode = true;
@@ -132,7 +132,7 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
   let startTime = new Date();
   await sql.connect(sqlConfig);
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const rows: Array<Marcada> = [];
     const request = new sql.Request();
 
@@ -150,14 +150,14 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
     });
 
     request.on('error', (err) => {
-      console.error('db.ts || Error fetching data:', err);
+      console.error('db.ts db :: Error fetching data:', err);
       reject(err);
     });
 
     request.on('done', () => {
       let endTime = new Date();
-      console.log("INFO || " + 'Tiempo de consulta MarcadaDetalle:', differenceInMilliseconds(endTime, startTime) + 'ms');
-      console.log("INFO || " + rows.length + " registros encontrados");
+      console.log("INFO db :: " + 'Tiempo de consulta MarcadaDetalle:', differenceInMilliseconds(endTime, startTime) + 'ms');
+      console.log("INFO db :: " + rows.length + " registros encontrados");
       resolve(rows);
     });
   });
@@ -233,8 +233,8 @@ export async function fetchMarcadaEntreFechas(departamento: string, startDate: s
 
     request.on('done', () => {
       let endTime = new Date();
-      console.log("INFO || " + 'Tiempo de consulta MarcadaEntreFechas:', differenceInMilliseconds(endTime, startTime) + 'ms');
-      console.log("INFO || " + rows.length + " registros encontrados");
+      console.log("INFO db :: " + 'Tiempo de consulta MarcadaEntreFechas:', differenceInMilliseconds(endTime, startTime) + 'ms');
+      console.log("INFO db :: " + rows.length + " registros encontrados");
       resolve(rows);
     });
   });
@@ -248,20 +248,25 @@ export async function fetchMarcadaEntreFechas(departamento: string, startDate: s
 export async function updateUsuarioFromMarcada(marcadaRow: Marcada) {
   await sql.connect(sqlConfig);
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const request = new sql.Request();
 
     // Set up the query for detailed data
-    const { UID, MR, CUIL, Jornada, Activo, Nombre } = marcadaRow;
+    const { UID, MR, CUIL, Jornada, Activo, Nombre, Departamento } = marcadaRow;
+    let Deptid = await DeptIDfromDepartamento(Departamento);
+
     const query = `USE ${Bun.env.DB}; UPDATE UserInfo SET
       ${MR ? `UserCode = '${MR}',` : ''}
       ${CUIL ? `CUIL = '${CUIL}',` : ''}
       ${Jornada ? `Jornada = '${Jornada}',` : ''}
       ${Activo ? `Activo = '${Activo}',` : ''}
       ${Nombre ? `Name = '${Nombre}'` : ''}
+      ${Departamento ? `, Deptid = '${Deptid}'` : ''}
       WHERE Userid = '${UID}';`;
 
     request.query(query);
+
+    console.log('db.ts :: Query updateUsuarioFromMarcada:', query);
 
     request.on('error', (err) => {
       console.error('Error fetching data:', err);
@@ -287,6 +292,50 @@ async function UserfromUID(uid: string): Promise<Record<string, any>> {
     request.arrayRowMode = true;
     // Set up the query for detailed data
     const query = `USE ${Bun.env.DB}; SELECT * FROM UserInfo WHERE Userid = '${uid}';`;
+
+    request.query(query);
+
+    request.on('row', (row) => {
+      resolve(row[0]);
+    });
+
+    request.on('error', (err) => {
+      console.error('Error fetching data:', err);
+      reject(err);
+    });
+  });
+}
+
+async function DepartamentofromDeptid(deptid: string): Promise<Record<string, any>> {
+  await sql.connect(sqlConfig);
+
+  return new Promise((resolve, reject) => {
+    const request = new sql.Request();
+    request.arrayRowMode = true;
+    // Set up the query for detailed data
+    const query = `USE ${Bun.env.DB}; SELECT DeptName FROM Dept WHERE Deptid = '${deptid}';`;
+
+    request.query(query);
+
+    request.on('row', (row) => {
+      resolve(row[0]);
+    });
+
+    request.on('error', (err) => {
+      console.error('Error fetching data:', err);
+      reject(err);
+    });
+  });
+}
+
+async function DeptIDfromDepartamento(departamento: string): Promise<Record<string, any>> {
+  await sql.connect(sqlConfig);
+
+  return new Promise((resolve, reject) => {
+    const request = new sql.Request();
+    request.arrayRowMode = true;
+    // Set up the query for detailed data
+    const query = `USE ${Bun.env.DB}; SELECT Deptid FROM Dept WHERE DeptName = '${departamento}';`;
 
     request.query(query);
 

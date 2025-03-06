@@ -1,6 +1,7 @@
 import { goto } from "$app/navigation";
-import { globalStore } from "$lib/stores/global";
+import { globalStore, setloadingData, clearMarcadas, setMarcadas } from "$lib/stores/global";
 import { clearUser } from "$lib/stores/user";
+import { set } from "date-fns";
 import type { Marcada } from "../types/gen";
 
 let showMarcadaDetalle: boolean;
@@ -13,7 +14,8 @@ export async function fetchMarcada(
     departamento: string,
     fecha: string,
     onBatch?: (batch: Array<Marcada>) => void
-): Promise<Array<Marcada>> {
+) {
+    setloadingData(true);
     const response = await fetch('/api/fetchMarcada', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -74,13 +76,15 @@ export async function fetchMarcada(
     }
 
     // Return the accumulated records
-    return registros;
+    setMarcadas(registros);
+    setloadingData(false);
 }
 
 
 /* console.log(await fetchMarcada('TAAP', '2023-08-03' , (batch) => {console.log(batch)})); */
 
-export async function fetchMarcadaDetalle(departamento: string, fecha: string): Promise<Array<Marcada>> {
+export async function fetchMarcadaDetalle(departamento: string, fecha: string) {
+    setloadingData(true);
     if (departamento === '' || fecha === '') {
         throw new Error('Los parametros de fechas son invalidos :: Departamento: ' + departamento + '::' + ' Fecha: ' + fecha);
     }
@@ -93,10 +97,12 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
     if (!response.ok || !response.body) {
         throw new Error('Failed to fetch records');
     }
-    return response.json();
+    setMarcadas(await response.json());
+    setloadingData(false);
 }
 
-export async function fetchEntreFechas(departamento: string, fechaInicial: string, fechaFinal: string): Promise<Array<Marcada>> {
+export async function fetchEntreFechas(departamento: string, fechaInicial: string, fechaFinal: string) {
+    setloadingData(true);
     const response = await fetch('/api/fetchEntreFechas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -106,7 +112,8 @@ export async function fetchEntreFechas(departamento: string, fechaInicial: strin
     if (!response.ok || !response.body) {
         throw new Error('Failed to fetch records');
     }
-    return response.json();
+    setMarcadas(await response.json());
+    setloadingData(false);
 }
 
 export async function fetchDepartamentos(): Promise<Array<string>> {
@@ -127,6 +134,19 @@ export async function fetchDepartamentos(): Promise<Array<string>> {
  * @returns {Promise<void>} Un promise que se resuelve si la actualizaci n fue exitosa, o rechaza con un error si hubo un problema
  */
 export async function updateUsuarioFromMarcada(marcadaRow: Marcada) {
+    // Transformar el campo Activo a un valor valido
+    switch (marcadaRow.Activo) {
+        case 'No definido':
+            marcadaRow.Activo = '';
+            break;
+        case 'SI':
+            marcadaRow.Activo = '1';
+            break;
+        case 'NO':
+            marcadaRow.Activo = '0';
+            break;
+    }
+
     const response = await fetch('/api/updateUsuario', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -180,7 +200,7 @@ export async function handleLogin(username: string, password: string): Promise<{
 
         return { success: true };
     } catch (err) {
-        return { success: false, error: err.message };
+        return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
     }
 }
 
@@ -210,7 +230,7 @@ export async function handleRegister(registerUsername: string, registerPassword:
         registerPassword = '';
         return { success: true };
     } catch (err) {
-        return { success: false, error: err.message };
+        return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
     }
 }
 

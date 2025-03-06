@@ -5,7 +5,7 @@ export const userStore = writable<shortWebUser | undefined>(undefined);
 
 export const setUser = (newUser: shortWebUser) => {
     if (!(get(userStore) === undefined)) {
-        
+
     }
     userStore.set(newUser);
 };
@@ -28,9 +28,18 @@ export const clearUser = () => {
 };
 
 export const isAdmin = (user: shortWebUser) => {
-     return user.role === 'ADMIN';
+    return user.role === 'ADMIN';
 }
 
+export const getDepartamentosPermitidos = () => {
+    let departamentos: string[] = [];
+    userStore.subscribe(state => {
+        if (state) {
+            departamentos = state.departamentosPermitidos;
+        }
+    })();
+    return departamentos;
+}
 userStore.subscribe((value) => {
     console.log('userStore data ::  =>', value);
 });

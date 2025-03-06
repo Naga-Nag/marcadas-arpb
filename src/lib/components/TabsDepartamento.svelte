@@ -10,7 +10,6 @@
 			selectedDepartamento = departamento;
 			let marcadas = await fetchMarcada(departamento, getfechaMarcada());
 			console.log('TabsDepartamento :: marcadas', marcadas);
-			setMarcadas(marcadas);
 			updateSelectedDepartamento(departamento);
 		}
 	}

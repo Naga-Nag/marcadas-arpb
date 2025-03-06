@@ -1,5 +1,5 @@
 import type { Marcada } from '$lib/types/gen';
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 export const globalStore = writable({
     loading: false,
@@ -143,11 +143,11 @@ export const getfechaMarcada = () => {
     return fechaMarcada;
 }
 
-export const getMarcadasAusentes = () => {
-    let marcadas: Marcada[] = [];
-    globalStore.subscribe(state => marcadas = state.marcadas)();
+export function getAusentes() {
+    let marcadas: Marcada[] = getMarcadas();
     console.log('marcadas pre filtro', marcadas);
     marcadas = marcadas.filter(marcada => marcada.Marcada === '');
+    console.log('marcadas post filtro', marcadas);
     return marcadas;
 }
 

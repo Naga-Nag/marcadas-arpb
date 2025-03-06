@@ -21,7 +21,7 @@
 	import { writable } from 'svelte/store';
 	import { globalStore } from '$lib/stores/global';
 	import { notify } from '$lib/stores/notifications';
-	import { updateUsuarioFromMarcada } from '$lib/utils/mainController';
+	import { updateUsuarioFromMarcada, fetchDepartamentos } from '$lib/utils/mainController';
 	import { createEventDispatcher } from 'svelte';
 	export let registros: Array<Marcada>;
 
@@ -29,14 +29,20 @@
 
 	let showMarcadaDetalle: boolean;
 	let showEntreFechas: boolean;
+	
 	let departamentos: string[] = [];
+	async function loadDepartamentos() {
+		departamentos = await fetchDepartamentos();
+	}
+
+	loadDepartamentos();
 
 	globalStore.subscribe(($value) => {
 		showMarcadaDetalle = $value.showMarcadaDetalle;
 		showEntreFechas = $value.showEntreFechas;
-		departamentos = $value.departamentos;
 		registros = $value.marcadas;
 	});
+	
 	console.log('DataTable :: registros', registros);
 	const dataToDisplay = writable(registros);
 	$: console.log('DataTable :: dataToDisplay', $dataToDisplay);
@@ -55,7 +61,7 @@
 				});
 				// If newValue is not valid, refresh data to reset invalid values
 				$dataToDisplay = $dataToDisplay;
-				return;
+				throw new Error('DataTable :: updateData :: Departamento no valido, newValue {' + newValue + '} :: departamentos: [' + departamentos + ']');
 			}
 		}
 
@@ -68,25 +74,6 @@
 					duration: 3000,
 					type: 'error'
 				});
-				$dataToDisplay = $dataToDisplay;
-				return;
-			}
-		}
-
-		if (columnId === 'Activo') {
-			if (['Si', 'true', 'si', '1', 'SI'].includes(newValue)) {
-				newValue = '1';
-			} else if (['No', 'false', 'no', '0', 'NO'].includes(newValue)) {
-				newValue = '0';
-			} else {
-				notify({
-					id: Date.now(),
-					title: 'Error al actualizar datos',
-					message: 'Valor de Activo no valido',
-					duration: 3000,
-					type: 'error'
-				});
-				// If newValue is not valid, refresh data to reset invalid values
 				$dataToDisplay = $dataToDisplay;
 				return;
 			}
@@ -235,13 +222,6 @@
 	$: dataToDisplay.set(registros);
 	toggleSortOrder('asc', 'Estado');
 </script>
-
-<!-- {#each ids as id}
-  <div>
-    <input id="hide-{id}" type="checkbox" bind:checked={hideForId[id]} />
-    <label for="hide-{id}">{id}</label>
-  </div>
-{/each} -->
 
 <div class="table-container" on:scroll={handleScroll}>
 	<table {...$tableAttrs} class="table">
