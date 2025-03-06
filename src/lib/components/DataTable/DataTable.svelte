@@ -30,13 +30,16 @@
 	let showMarcadaDetalle: boolean;
 	let showEntreFechas: boolean;
 	let departamentos: string[] = [];
+
 	globalStore.subscribe(($value) => {
 		showMarcadaDetalle = $value.showMarcadaDetalle;
 		showEntreFechas = $value.showEntreFechas;
 		departamentos = $value.departamentos;
+		registros = $value.marcadas;
 	});
-
+	console.log('DataTable :: registros', registros);
 	const dataToDisplay = writable(registros);
+	$: console.log('DataTable :: dataToDisplay', $dataToDisplay);
 
 	const updateData = (rowId: string, columnId: string, newValue: string) => {
 		console.log('updateData', JSON.stringify({ rowId, columnId, newValue }));

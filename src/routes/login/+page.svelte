@@ -28,7 +28,7 @@
 
 </form>
 
-<form use:enhance method="post" action="?/register">
+<!-- <form use:enhance method="post" action="?/register">
     <div class="form-item">
         <label for="username">username<sup><small class="required">*</small></sup></label>
         <input id="username" type="username" name="username" required />
@@ -44,7 +44,7 @@
     <div class="form-item">
         <button type="submit">Register</button>
     </div>
-</form>
+</form> -->
 
 <style>
     div{

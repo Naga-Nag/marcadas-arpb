@@ -102,8 +102,39 @@ export function setMarcadas(marcadas: Marcada[]) {
     globalStore.update((state) => ({...state, marcadas: marcadas}));
 }
 
+//No es tiempo real
+export function getMarcadas() {
+    let marcadas: Marcada[] = [];
+    globalStore.subscribe(state => marcadas = state.marcadas)();
+    return marcadas;
+}
+
 export function clearMarcadas() {
     globalStore.update((state) => ({...state, marcadas: []}));
+}
+
+export const getSelectedDepartamento = () => {
+    let selectedDepartamento: string = '';
+    globalStore.subscribe(state => selectedDepartamento = state.selectedDepartamento)();
+    return selectedDepartamento;
+}
+
+export const getShowMarcadaDetalle = () => {
+    let showMarcadaDetalle: boolean = false;
+    globalStore.subscribe(state => showMarcadaDetalle = state.showMarcadaDetalle)();
+    return showMarcadaDetalle;
+}
+
+export const getShowEntreFechas = () => {
+    let showEntreFechas: boolean = false;
+    globalStore.subscribe(state => showEntreFechas = state.showEntreFechas)();
+    return showEntreFechas;
+}
+
+export const getOmitirFinde = () => {
+    let omitirFinde: boolean = false;
+    globalStore.subscribe(state => omitirFinde = state.omitirFinde)();
+    return omitirFinde;
 }
 
 export const getfechaMarcada = () => {
@@ -112,5 +143,18 @@ export const getfechaMarcada = () => {
     return fechaMarcada;
 }
 
+export const getMarcadasAusentes = () => {
+    let marcadas: Marcada[] = [];
+    globalStore.subscribe(state => marcadas = state.marcadas)();
+    console.log('marcadas pre filtro', marcadas);
+    marcadas = marcadas.filter(marcada => marcada.Marcada === '');
+    return marcadas;
+}
+
+export const getDepartamentos = () => {
+    let departamentos: string[] = [];
+    globalStore.subscribe(state => departamentos = state.departamentos)();
+    return departamentos;
+}
 
 globalStore.subscribe(value => console.log('globalStore data :: =>', value));

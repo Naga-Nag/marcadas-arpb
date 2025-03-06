@@ -2,6 +2,7 @@ import { formatIP } from '$lib/utils/utils';
 import { fetchDepartamentos, fetchWebUser } from '$lib/server/db';
 import type { PageServerLoad } from './$types';
 import {getUser, isAdmin} from '$lib/stores/user';
+import { setMarcadas } from '$lib/stores/global';
 
 
 

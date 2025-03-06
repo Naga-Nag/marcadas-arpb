@@ -2,18 +2,15 @@
 	export let departamentos: string[];
 	export let selectedDepartamento: string;
 
-	import { updateSelectedDepartamento} from '$lib/stores/global';
+	import { updateSelectedDepartamento, setMarcadas, getfechaMarcada } from '$lib/stores/global';
 	import { fetchMarcada } from '$lib/utils/mainController';
-	import { onMount } from 'svelte';
 
-	import { createEventDispatcher } from 'svelte';
-
-	const dispatch = createEventDispatcher();
-
-
-	function selectDepartamento(departamento: string) {
+	async function selectDepartamento(departamento: string) {
 		if (selectedDepartamento !== departamento) {
 			selectedDepartamento = departamento;
+			let marcadas = await fetchMarcada(departamento, getfechaMarcada());
+			console.log('TabsDepartamento :: marcadas', marcadas);
+			setMarcadas(marcadas);
 			updateSelectedDepartamento(departamento);
 		}
 	}

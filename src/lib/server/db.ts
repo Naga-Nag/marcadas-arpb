@@ -49,7 +49,7 @@ export async function fetchMarcadaDelDia(
 
     // Set up the query based on the department host
     const query =
-      departamento === 'PEAP' || departamento === 'IFAP'
+      departamento === 'ARPB'
         ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDiaPEAP('${fecha}');`
         : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDia('${departamento}', '${fecha}');`;
 
@@ -138,7 +138,7 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
 
     // Set up the query for detailed data
     const query =
-      departamento === 'PEAP' || departamento === 'IFAP'
+      departamento === 'ARPB'
         ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDetallePEAP('${fecha}');`
         : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDetalle('${departamento}', '${fecha}');`;
 
@@ -214,7 +214,7 @@ export async function fetchMarcadaEntreFechas(departamento: string, startDate: s
     request.stream = true;
 
     const query =
-      departamento === 'PEAP' || departamento === 'IFAP'
+      departamento === 'ARPB'
         ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechasPEAP('${startDate}', '${endDate}');`
         : `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechas('${departamento}', '${startDate}', '${endDate}');`;
 
@@ -404,7 +404,7 @@ export async function loginWebUser(username: string, password: string): Promise<
           if (!Bun.env.JWT_SECRET) {
             throw new Error("JWT_SECRET is not defined");
           }
-          
+
           const token = jwt.sign({ username }, Bun.env.JWT_SECRET, { expiresIn: "1h" });
           console.log("DB :: loginWebUser: JWT issued");
 
@@ -446,7 +446,7 @@ export async function loginWebUser(username: string, password: string): Promise<
   }
 }
 
-export async function fetchWebUser( username: string ): Promise<shortWebUser> {
+export async function fetchWebUser(username: string): Promise<shortWebUser> {
   try {
     await sql.connect(sqlConfig);
     console.log("DB :: fetchWebUser:", username);
