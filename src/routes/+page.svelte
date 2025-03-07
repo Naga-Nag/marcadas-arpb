@@ -91,7 +91,7 @@
 		try {
 			if (showMarcadaDetalle) {
 				await fetchMarcadaDetalle(selectedDepartamento, fechaMarcada);
-				setMarcadas( registros );
+				setMarcadas(registros);
 			} else {
 				await fetchMarcada(selectedDepartamento, fechaMarcada);
 				setMarcadas(registros);
@@ -113,7 +113,6 @@
 		updateFechaMarcada(defaultDate);
 		await fechaListener(defaultDate);
 	});
-
 </script>
 
 <body>
@@ -124,7 +123,7 @@
 				Presentismo - {user.departamento}
 			</h1>
 
-			<a href="/aut" class="font-size:9">👻</a>
+			<a href="/credits" class="font-size:9">👻</a>
 		</div>
 
 		<NotificationContainer />
@@ -136,7 +135,7 @@
 				<TabsDepartamento
 					departamentos={user.departamentosPermitidos}
 					bind:selectedDepartamento
-					on:depChange{}
+					on:depChange{clearMarcadas()}
 				/>
 			</div>
 		{/if}
@@ -203,7 +202,7 @@
 				<!-- Contador de registros totales -->
 				<div class="d:flex flex:col">
 					<p class="font-size:18 bg:white r:10 p:10 w:fit-content">
-							Total Ausentes: {getAusentes().length}
+						Total Ausentes: {getAusentes().length}
 					</p>
 				</div>
 			{:else}

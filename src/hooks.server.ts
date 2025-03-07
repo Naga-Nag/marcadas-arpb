@@ -3,7 +3,7 @@ import { redirect } from '@sveltejs/kit';
 import { fetchWebUser } from '$lib/server/db';
 import { setUser } from '$lib/stores/user';
 
-const protectedPaths = ['/', '/api', '/credits'];
+const protectedPaths = ['/', '/api', '/credits', '/test'];
 
 
 export const handle = async ({ event, resolve }) => {
@@ -36,6 +36,7 @@ export const handle = async ({ event, resolve }) => {
     if (token && Bun.env.JWT_SECRET && decodedUser && typeof decodedUser !== 'string') {
         console.log("HOOKS :: Token is valid, resolving");
         const user = await fetchWebUser(decodedUser.username);
+        user.ipaddr = event.getClientAddress();
         setUser(user);
         return resolve(event);
     } else {

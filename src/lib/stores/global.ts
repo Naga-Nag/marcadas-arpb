@@ -145,9 +145,12 @@ export const getfechaMarcada = () => {
 
 export function getAusentes() {
     let marcadas: Marcada[] = getMarcadas();
-    console.log('marcadas pre filtro', marcadas);
-    marcadas = marcadas.filter(marcada => marcada.Marcada === '');
-    console.log('marcadas post filtro', marcadas);
+    if (getShowMarcadaDetalle()) {
+        marcadas = marcadas.filter(marcada => marcada.Entrada === '' && marcada.Salida === '');
+    }
+    else {
+        marcadas = marcadas.filter(marcada => marcada.Marcada === '');
+    }
     return marcadas;
 }
 

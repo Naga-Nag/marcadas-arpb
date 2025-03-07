@@ -11,7 +11,7 @@ export const POST = async (event) => {
             headers: { "Content-Type": "application/json" },
         });
     } catch (error) {
-        return new Response(JSON.stringify({ message: "Username already exists" }), {
+        return new Response(JSON.stringify({ message: "El usuario ya existe" }), {
             status: 401,
             headers: { "Content-Type": "application/json" },
         });

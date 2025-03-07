@@ -5,6 +5,7 @@
 	let activeTab = 'login';
 </script>
 
+<main>
 <div class="container">
 	<div class="tabs">
 		<button
@@ -24,11 +25,11 @@
 	{#if activeTab === 'login'}
 		<form use:enhance method="post" action="?/login">
 			<div class="form-item">
-				<label for="username">Username<sup><small class="required">*</small></sup></label>
+				<label for="username">Usuario<sup><small class="required">*</small></sup></label>
 				<input value={form?.username ?? ''} id="username" type="text" name="username" required />
 			</div>
 			<div class="form-item">
-				<label for="password">Password<sup><small class="required">*</small></sup></label>
+				<label for="password">Contraseña<sup><small class="required">*</small></sup></label>
 				<input id="password" type="password" name="password" required />
 			</div>
 			<div class="form-item">
@@ -43,11 +44,11 @@
 	{:else}
 		<form use:enhance method="post" action="?/register">
 			<div class="form-item">
-				<label for="username">Username<sup><small class="required">*</small></sup></label>
+				<label for="username">Usuario<sup><small class="required">*</small></sup></label>
 				<input id="username" type="text" name="username" required />
 			</div>
 			<div class="form-item">
-				<label for="password">Password<sup><small class="required">*</small></sup></label>
+				<label for="password">Contraseña<sup><small class="required">*</small></sup></label>
 				<input id="password" type="password" name="password" required />
 			</div>
 			<div class="form-item">
@@ -60,15 +61,14 @@
 		</form>
 	{/if}
 </div>
-
+</main>
 <style>
-	body {
+	main {
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		height: 100vh;
+		height: 95vh;
 		margin: 0;
-		background-color: #333;
 	}
 
 	.container {
@@ -121,15 +121,6 @@
 	.required {
 		padding-left: 0.5em;
 		color: #ff0000;
-	}
-
-	.reset-link {
-		color: #FFF;
-		text-decoration: none;
-	}
-
-	.reset-link:hover {
-		text-decoration: underline;
 	}
 </style>
 

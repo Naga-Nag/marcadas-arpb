@@ -45,12 +45,12 @@
 	
 	console.log('DataTable :: registros', registros);
 	const dataToDisplay = writable(registros);
-	$: console.log('DataTable :: dataToDisplay', $dataToDisplay);
 
 	const updateData = (rowId: string, columnId: string, newValue: string) => {
 		console.log('updateData', JSON.stringify({ rowId, columnId, newValue }));
 
 		if (columnId === 'Departamento') {
+			newValue = newValue.toUpperCase();
 			if (!departamentos.includes(newValue)) {
 				notify({
 					id: Date.now(),

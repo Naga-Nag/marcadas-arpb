@@ -3,6 +3,7 @@ import { globalStore, setloadingData, clearMarcadas, setMarcadas } from "$lib/st
 import { clearUser } from "$lib/stores/user";
 import { set } from "date-fns";
 import type { Marcada } from "../types/gen";
+import { notify } from "$lib/stores/notifications";
 
 let showMarcadaDetalle: boolean;
 
@@ -86,6 +87,7 @@ export async function fetchMarcada(
 export async function fetchMarcadaDetalle(departamento: string, fecha: string) {
     setloadingData(true);
     if (departamento === '' || fecha === '') {
+        setloadingData(false);
         throw new Error('Los parametros de fechas son invalidos :: Departamento: ' + departamento + '::' + ' Fecha: ' + fecha);
     }
     const response = await fetch('/api/fetchMarcadaDetalle', {
@@ -95,6 +97,14 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string) {
     });
 
     if (!response.ok || !response.body) {
+        notify({
+            id: Date.now(),
+            title: 'Error',
+            message: 'Error al obtener',
+            type: 'error',
+            duration: 3000
+        });
+        setloadingData(false);
         throw new Error('Failed to fetch records');
     }
     setMarcadas(await response.json());
@@ -110,6 +120,7 @@ export async function fetchEntreFechas(departamento: string, fechaInicial: strin
     });
 
     if (!response.ok || !response.body) {
+        setloadingData(false);
         throw new Error('Failed to fetch records');
     }
     setMarcadas(await response.json());

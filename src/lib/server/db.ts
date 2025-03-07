@@ -200,11 +200,11 @@ export async function modUsuario(Usuario: Usuario) {
 /**
  * Fetches an array of Marcada records from the database between two dates.
  * @param {string} departamento - The department name to fetch records for.
- * @param {string} startDate - The start date to fetch records from, in ISO 8601 format.
- * @param {string} endDate - The end date to fetch records to, in ISO 8601 format.
+ * @param {string} fechaInicial - The start date to fetch records from, in ISO 8601 format.
+ * @param {string} fechaFinal - The end date to fetch records to, in ISO 8601 format.
  * @returns {Promise<Array<Marcada>>} A promise that resolves to an array of Marcada records.
  */
-export async function fetchMarcadaEntreFechas(departamento: string, startDate: string, endDate: string): Promise<Array<Marcada>> {
+export async function fetchMarcadaEntreFechas(departamento: string, fechaInicial: string, fechaFinal: string): Promise<Array<Marcada>> {
   let startTime = new Date();
   await sql.connect(sqlConfig);
 
@@ -215,8 +215,8 @@ export async function fetchMarcadaEntreFechas(departamento: string, startDate: s
 
     const query =
       departamento === 'ARPB'
-        ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechasPEAP('${startDate}', '${endDate}');`
-        : `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechas('${departamento}', '${startDate}', '${endDate}');`;
+        ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechasPEAP('${fechaInicial}', '${fechaFinal}');`
+        : `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechas('${departamento}', '${fechaInicial}', '${fechaFinal}');`;
 
     console.log('Query fetchMarcadaEntreFechas:', query);
     request.query(query);

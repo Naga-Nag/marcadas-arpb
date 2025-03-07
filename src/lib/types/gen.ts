@@ -36,6 +36,7 @@ export type WebUser = {
 }
 
 export type shortWebUser = {
+    ipaddr: string;
     username: string;
     role: string;
     departamento: string;

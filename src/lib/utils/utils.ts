@@ -152,12 +152,12 @@ export function sortString(a: string, b: string, sortOrder: 'asc' | 'desc' | und
 }
 
 
-export function getEstado(persona: { Entrada: any; Salida: any; Marcada?: any; }) {
-  if (persona.Entrada && persona.Salida || persona.Marcada) {
+export function getEstado(marcada: { Entrada: any; Salida: any; Marcada?: any; }) {
+  if (marcada.Entrada && marcada.Salida || marcada.Marcada) {
     return 'Completa';
-  } else if (persona.Entrada && !persona.Salida) {
+  } else if (marcada.Entrada && !marcada.Salida) {
     return 'Falta salida';
-  } else if (!persona.Entrada && persona.Salida) {
+  } else if (!marcada.Entrada && marcada.Salida) {
     return 'Falta entrada';
   } else {
     return 'Sin datos';
