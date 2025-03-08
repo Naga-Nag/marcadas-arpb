@@ -2,14 +2,13 @@
 	export let departamentos: string[];
 	export let selectedDepartamento: string;
 
-	import { updateSelectedDepartamento, setMarcadas, getfechaMarcada } from '$lib/stores/global';
+	import { updateSelectedDepartamento, getfechaMarcada } from '$lib/stores/global';
 	import { fetchMarcada } from '$lib/utils/mainController';
 
 	async function selectDepartamento(departamento: string) {
 		if (selectedDepartamento !== departamento) {
 			selectedDepartamento = departamento;
-			let marcadas = await fetchMarcada(departamento, getfechaMarcada());
-			console.log('TabsDepartamento :: marcadas', marcadas);
+			await fetchMarcada(departamento, getfechaMarcada());
 			updateSelectedDepartamento(departamento);
 		}
 	}

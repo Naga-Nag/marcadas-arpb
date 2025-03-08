@@ -1,5 +1,5 @@
 import type { Marcada, shortWebUser, Usuario } from '$lib/types/gen';
-import { formatTime } from '$lib/utils/utils';
+import { formatTime, getEstado } from '$lib/utils/utils';
 import { differenceInMilliseconds, differenceInMinutes, format, parseISO } from 'date-fns';
 import sql from 'mssql';
 import bcrypt from 'bcrypt';
@@ -341,7 +341,7 @@ function processRow(row: any) {
   row.Entrada = formatTime(row.Entrada);
   row.Salida = formatTime(row.Salida);
   row.Marcada = formatTime(row.Marcada);
-
+  row.Estado = getEstado(row);
   row.MR = row.MR ? row.MR : '';
   row.CUIL = row.CUIL ? row.CUIL : '';
   row.Jornada = row.Jornada ? row.Jornada : '';
@@ -412,7 +412,7 @@ import { json } from '@sveltejs/kit';
 export async function loginWebUser(username: string, password: string): Promise<WebUser | { error: string }> {
   try {
     await sql.connect(sqlConfig);
-    console.log("DB :: loginWebUser:", username, password);
+    console.log("DB :: loginWebUser:", username);
 
     return new Promise((resolve, reject) => {
       const request = new sql.Request();

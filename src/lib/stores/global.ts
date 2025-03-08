@@ -1,5 +1,5 @@
 import type { Marcada } from '$lib/types/gen';
-import { get, writable } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 
 export const globalStore = writable({
     loading: false,
@@ -8,9 +8,41 @@ export const globalStore = writable({
     showMarcadaDetalle: true,
     selectedDepartamento: '',
     fechaMarcada: '',
+    searchText: '',
     marcadas: [] as Marcada[],
     departamentos: [] as string[],
 });
+
+export const ausentes = derived(globalStore, ($store) => {
+    let marcadas = $store.marcadas;
+
+    if ($store.showMarcadaDetalle) {
+        return marcadas.filter(m => m.Marcada === '');
+    } else {
+        return marcadas.filter(m => m.Entrada === '' && m.Salida === '');
+    }
+});
+
+// Derived store to filter `marcadas` based on `searchText`
+export const filteredMarcadas = derived(globalStore, ($store) => {
+    const search = $store.searchText.trim().toLowerCase();
+    if (!search) return $store.marcadas; // If empty, return all `marcadas`
+
+    return $store.marcadas.filter(m =>
+        m.Nombre.toLowerCase().includes(search) ||
+        m.Departamento.toLowerCase().includes(search) ||
+        m.CUIL.includes(search) || 
+        m.MR.toString().includes(search)
+    );
+});
+
+// Function to update search text
+export function setSearchText(text: string) {
+    globalStore.update(store => {
+        store.searchText = text;
+        return store;
+    });
+}
 
 /**
  * Updates the `selectedDepartamento` in the global store.
@@ -147,6 +179,16 @@ export function getAusentes() {
         marcadas = marcadas.filter(marcada => marcada.Marcada === '');
     }
     return marcadas;
+}
+
+export function getSearchText() {
+    let searchText: string = '';
+    globalStore.subscribe(state => searchText = state.searchText)();
+    return searchText;
+}
+
+export function clearSearchText() {
+    globalStore.update((state) => ({ ...state, searchText: '' }));
 }
 
 export const getDepartamentos = () => {

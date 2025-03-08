@@ -14,7 +14,18 @@ export const authUser = async (event: RequestEvent) => {
      }
 
      else {
-          verify(session, 'secret', (err, decoded) => {
+          const secret = Bun.env.JWT_SECRET;
+          if (!secret) {
+               console.error('JWT secret is not defined');
+               return {
+                    status: 500,
+                    body: {
+                         error: 'Internal Server Error',
+                         message: 'JWT secret is not defined',
+                    },
+               };
+          }
+          verify(session, secret, (err, decoded) => {
                if (err) {
                     console.error('Error verifying token:', err);
                }

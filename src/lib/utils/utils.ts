@@ -2,18 +2,12 @@ import * as XLSX from 'xlsx';
 import type { Marcada } from '../types/gen';
 import { globalStore } from '$lib/stores/global';
 
-let hostname: string;
 let showMarcadaDetalle: boolean;
 
 globalStore.subscribe((value) => {
   showMarcadaDetalle = value.showMarcadaDetalle;
 });
 
-let dnsPromises: any;
-
-if (import.meta.env.SSR) { // Only run on the server side
-  dnsPromises = await import('dns/promises'); // Dynamically import dns/promises
-}
 
 export function downloadExcel(data: Array<Marcada>, fileName = 'marcada') {
   if (!Array.isArray(data) || data.length === 0) {
@@ -67,17 +61,6 @@ export function downloadExcel(data: Array<Marcada>, fileName = 'marcada') {
 
   // Release the object URL
   window.URL.revokeObjectURL(url);
-}
-
-export async function reverseDnsLookup(ip: string): Promise<string> {
-  const ipAddress = ip.startsWith('::ffff:') ? ip.slice(7) : ip;
-  try {
-    const result = await dnsPromises.reverse(ipAddress);
-    return result[0];
-  } catch (error) {
-    console.log(error);
-    return '';
-  }
 }
 
 export function formatIP(ip: string) {
@@ -162,25 +145,6 @@ export function getEstado(marcada: { Entrada: any; Salida: any; Marcada?: any; }
   } else {
     return 'Sin datos';
   }
-}
-
-// Filtering Helpers
-// Si algun campo sale undefined, esto no funca
-export function matchesFilters(marcada: Marcada, searchText: string, selectedDepartamento: string): boolean {
-  const matchesSearchText =
-    marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) ||
-    marcada.MR.toString().includes(searchText) ||
-    marcada.CUIL.includes(searchText);
-
-  const matchesDepartamento = marcada.Departamento === selectedDepartamento;
-
-  //Esto define como se separan los datos filtrados en distintas tabs (estaria bueno cambiarlo)
-  /* if (hostname === 'PEAP' || hostname === 'IFAP') {
-    return selectedDepartamento === 'ARPB'
-      ? matchesSearchText
-      : matchesDepartamento && matchesSearchText;
-  } */
-  return matchesDepartamento && marcada.Nombre.toLowerCase().includes(searchText.toLowerCase()) || matchesSearchText;
 }
 
 export function filtrarMarcadasFinde(marcadas: Marcada[]): Marcada[] {

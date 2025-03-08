@@ -22,6 +22,8 @@
 
 	import {
 		globalStore,
+		filteredMarcadas,
+		ausentes,
 		updateSelectedDepartamento,
 		clearMarcadas,
 		getAusentes,
@@ -30,6 +32,7 @@
 	import { onMount } from 'svelte';
 	import type { Marcada } from '$lib/types/gen';
 	import { isAdmin } from '$lib/stores/user';
+	import SearchBar from '$lib/components/SearchBar.svelte';
 
 	let user = data.user;
 
@@ -40,17 +43,18 @@
 	let omitirFinDeSemana = false;
 	let selectedDepartamento = '';
 
+	$: totalAusentes = $ausentes.length;
+
 	console.log('MAIN :: user => ', user);
 
 	
-
+	$: registros = $filteredMarcadas; // Dynamically update when filteredMarcadas changes
 	globalStore.subscribe((value) => {
 		selectedDepartamento = value.selectedDepartamento;
 		fechaMarcada = value.fechaMarcada;
 		showEntreFechas = value.showEntreFechas;
 		showMarcadaDetalle = value.showMarcadaDetalle;
 		omitirFinDeSemana = value.omitirFinde;
-		registros = value.marcadas;
 	});
 
 	//ANCHOR - Datos Filtrados
@@ -93,7 +97,7 @@
 		<div class="d:flex flex:row justify-content:space-between">
 			<button on:click={logout} class="btn">Salir</button>
 			<h1 class="text:center bg:white r:10 p:10 w:fit-content shadow:4|4|3|gray-70">
-				Presentismo - {user.departamento}
+				Marcadas - {user.departamento}
 			</h1>
 
 			<a href="/credits" class="font-size:9">👻</a>
@@ -108,7 +112,6 @@
 				<TabsDepartamento
 					departamentos={user.departamentosPermitidos}
 					bind:selectedDepartamento
-					on:depChange{clearMarcadas()}
 				/>
 			</div>
 		{/if}
@@ -120,11 +123,9 @@
 				<span> </span>
 				<MainOptions
 					on:toggleMarcadaDetalle={() => {
-						clearMarcadas();
 						fechaListener(fechaMarcada);
 					}}
 					on:toggleEntreFechas={() => {
-						clearMarcadas();
 						if (showEntreFechas) {
 							fechaListener(fechaMarcada);
 						}
@@ -147,18 +148,16 @@
 					filename="marcadas VA - {selectedDepartamento} {fechaMarcada}"
 				/>
 				<BtnDescargar
-					data={() => getAusentes()}
+					data={() => $ausentes}
 					placeholder="Descargar Ausentes"
 					filename={`marcadas AD - ${selectedDepartamento} ${fechaMarcada}`}
 				/>
 
-				{#if isAdmin(user) && selectedDepartamento === 'ARPB'}
-					<BtnDescargar
-						data={() => getAusentes()}
-						placeholder="Descargar Todos los Ausentes"
-						filename="marcadas TD {fechaMarcada}"
-					/>
-				{/if}
+
+			</div>
+
+			<div>
+				<SearchBar />
 			</div>
 
 			<!-- // ANCHOR DataTable -->
@@ -175,7 +174,7 @@
 				<!-- Contador de registros totales -->
 				<div class="d:flex flex:col">
 					<p class="font-size:18 bg:white r:10 p:10 w:fit-content">
-						Total Ausentes: {getAusentes().length}
+						Total Ausentes: {totalAusentes}
 					</p>
 				</div>
 			{:else}
