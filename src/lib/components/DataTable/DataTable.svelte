@@ -1,7 +1,6 @@
 <script lang="ts">
 	export let editable = false;
 
-
 	import type { Marcada } from '$lib/types/gen';
 	import EditableCell from '$lib/components/DataTable/EditableCell.svelte';
 	import { sortTime, sortString, sortNumber, sortEstado } from '$lib/utils/utils';
@@ -29,7 +28,7 @@
 
 	let showMarcadaDetalle: boolean;
 	let showEntreFechas: boolean;
-	
+
 	let departamentos: string[] = [];
 	async function loadDepartamentos() {
 		departamentos = await fetchDepartamentos();
@@ -42,8 +41,8 @@
 		showEntreFechas = $value.showEntreFechas;
 		registros = $value.marcadas;
 	});
-	
-	console.log('DataTable :: registros', registros);
+
+	console.log('DataTable :: ' + registros.length + ' registros ');
 	const dataToDisplay = writable(registros);
 
 	const updateData = (rowId: string, columnId: string, newValue: string) => {
@@ -61,7 +60,13 @@
 				});
 				// If newValue is not valid, refresh data to reset invalid values
 				$dataToDisplay = $dataToDisplay;
-				throw new Error('DataTable :: updateData :: Departamento no valido, newValue {' + newValue + '} :: departamentos: [' + departamentos + ']');
+				throw new Error(
+					'DataTable :: updateData :: Departamento no valido, newValue {' +
+						newValue +
+						'} :: departamentos: [' +
+						departamentos +
+						']'
+				);
 			}
 		}
 
