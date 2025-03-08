@@ -11,12 +11,7 @@
 		NotificationContainer
 	} from '$lib/components/components';
 
-	import {
-		filtrarMarcadasFinde,
-		getEstado,
-		matchesFilters,
-		reemplazarMarcadas
-	} from '$lib/utils/utils';
+	import { filtrarMarcadasFinde, reemplazarMarcadas } from '$lib/utils/utils';
 
 	import {
 		fetchMarcadaDetalle,
@@ -27,23 +22,16 @@
 
 	import {
 		globalStore,
-		updateFechaMarcada,
-		setloadingData,
 		updateSelectedDepartamento,
-		setMarcadas,
 		clearMarcadas,
-		getMarcadas,
-		getAusentes
+		getAusentes,
+		setFechaMarcada
 	} from '$lib/stores/global';
 	import { onMount } from 'svelte';
 	import type { Marcada } from '$lib/types/gen';
 	import { isAdmin } from '$lib/stores/user';
 
 	let user = data.user;
-
-	// Variables para búsqueda y departamentos
-	let searchText: string = '';
-	let debouncedSearchText = '';
 
 	let registros: Marcada[] = [];
 	let fechaMarcada = '';
@@ -54,7 +42,7 @@
 
 	console.log('MAIN :: user => ', user);
 
-	updateSelectedDepartamento(user.departamento);
+	
 
 	globalStore.subscribe((value) => {
 		selectedDepartamento = value.selectedDepartamento;
@@ -67,34 +55,21 @@
 
 	//ANCHOR - Datos Filtrados
 	// Computamos los datos filtrados en función del departamento seleccionado, el texto de búsqueda y la ordenación
-
 	async function rangoFechalistener(fechaInicial: string, fechaFinal: string) {
-		//TODO Pasar esta funcion a los endpoints, para no reiterar el codigo
-		setloadingData(true);
-		clearMarcadas();
 		if (omitirFinDeSemana) {
 			await fetchEntreFechas(user.departamento, fechaInicial, fechaFinal);
 			filtrarMarcadasFinde(registros);
-			setMarcadas(registros);
 		} else {
 			await fetchEntreFechas(user.departamento, fechaInicial, fechaFinal);
-			setMarcadas(registros);
 		}
-		setloadingData(false);
 	}
 
 	async function fechaListener(fechaMarcada: string) {
-		setloadingData(true);
-
-		clearMarcadas();
-
 		try {
 			if (showMarcadaDetalle) {
 				await fetchMarcadaDetalle(selectedDepartamento, fechaMarcada);
-				setMarcadas(registros);
 			} else {
 				await fetchMarcada(selectedDepartamento, fechaMarcada);
-				setMarcadas(registros);
 			}
 		} catch (error: unknown) {
 			if (error instanceof Error) {
@@ -103,14 +78,12 @@
 				console.error('Unknown error:', error);
 			}
 		}
-
-		setloadingData(false);
 	}
 
-	//TODO Limpiar onMount
 	onMount(async () => {
 		const defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-		updateFechaMarcada(defaultDate);
+		setFechaMarcada(defaultDate);
+		updateSelectedDepartamento(user.departamento);
 		await fechaListener(defaultDate);
 	});
 </script>
@@ -214,5 +187,3 @@
 	</main>
 </body>
 
-<style>
-</style>

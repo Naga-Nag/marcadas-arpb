@@ -26,23 +26,25 @@
 		});
 	}
 
-	
+	console.log('TabsDepartamento :: departamentos', departamentos, departamentos.length);
 </script>
 
 <div
 	class="d:flex mb:10 mt:10 p:5|5|5|5 overflow-x:auto size:6::scrollbar bg:gray/.2::scrollbar-thumb"
 >
-	{#each departamentos as departamento}
-		<button
-			class="btn ml:5"
-			on:click={() => {
-				selectDepartamento(departamento);
-			}}
-			class:selected={selectedDepartamento === departamento}
-		>
-			{departamento}
-		</button>
-	{/each}
+	{#if departamentos.length > 1}
+		{#each departamentos as departamento}
+			<button
+				class="btn ml:5"
+				on:click={() => {
+					selectDepartamento(departamento);
+				}}
+				class:selected={selectedDepartamento === departamento}
+			>
+				{departamento}
+			</button>
+		{/each}
+	{/if}
 </div>
 
 <style>

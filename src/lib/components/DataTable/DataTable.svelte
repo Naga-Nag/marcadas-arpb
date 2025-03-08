@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let editable = false; // Whether the cell is editable
+	export let editable = false;
 
 
 	import type { Marcada } from '$lib/types/gen';

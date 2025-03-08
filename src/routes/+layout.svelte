@@ -3,7 +3,7 @@
 </script>
 
 <head>
-	<title>Presentismo</title>
+	<title>Marcadas Web</title>
 </head>
 <body>
 	<slot></slot>

@@ -24,23 +24,17 @@ const sqlConfig = {
 
 
 /**
- * Fetches MarcadaDelDia records from the database, streaming them to the provided
- * onBatch callback in batches of 20 records. The callback is called with a copy of
- * the batch array, which is then cleared for the next batch.
+ * Fetches MarcadaDelDia records from the database.
  *
  * @param {string} departamento - The department name to fetch records for
  * @param {string} fecha - The date to fetch records for in ISO 8601 format
- * @param {function} onBatch - The callback to call with each batch of records
- * @returns {Promise<void>} A promise that resolves when all records have been
- *   processed
+ * @returns {Promise<Array<Record<string, any>>>} A promise that resolves to an array of records
  */
 export async function fetchMarcadaDelDia(
   departamento: string,
-  fecha: string,
-  onBatch: (batch: Array<Record<string, any>>) => void
-): Promise<void> {
+  fecha: string
+): Promise<Array<Record<string, any>>> {
   let startTime = new Date();
-  let rowCount = 0;
   await sql.connect(sqlConfig);
 
   return new Promise(async (resolve, reject) => {
@@ -53,20 +47,12 @@ export async function fetchMarcadaDelDia(
         ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDiaPEAP('${fecha}');`
         : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDia('${departamento}', '${fecha}');`;
 
-    request.stream = true; // Enable streaming
     request.query(query);
 
     // Event handler for each row
     request.on('row', (row) => {
       processRow(row);
       rows.push(row);
-
-      // Send the batch when it reaches 20 rows
-      if (rows.length === 20) {
-        onBatch([...rows]); // Send a copy of the batch
-        rowCount += rows.length;
-        rows.length = 0; // Clear rows array for the next batch
-      }
     });
 
     // Error handler
@@ -77,14 +63,10 @@ export async function fetchMarcadaDelDia(
 
     // Completion handler
     request.on('done', () => {
-      // Send any remaining rows
-      if (rows.length > 0) {
-        onBatch([...rows]);
-      }
       let endTime = new Date();
       console.log("INFO db :: " + 'Tiempo de consulta MarcadaDelDia:', differenceInMilliseconds(endTime, startTime) + 'ms');
-      console.log("INFO db :: " + rowCount + " registros encontrados");
-      resolve(); // Resolve the promise to indicate completion
+      console.log("INFO db :: " + rows.length + " registros encontrados");
+      resolve(rows); // Resolve the promise to indicate completion
     });
   });
 }
@@ -376,7 +358,7 @@ function processRow(row: any) {
  * @returns {Promise<boolean>} A promise that resolves to true if the user was successfully
  * registered.
  */
-export async function registerWebUser(username: string, password: string, role: string, departamento: string) {
+export async function registerWebUser(username: string, password: string, role: string, departamento: string): Promise<boolean> {
   const password_hash = await bcrypt.hash(password, 10);
 
   try {
@@ -386,16 +368,18 @@ export async function registerWebUser(username: string, password: string, role: 
     return new Promise((resolve, reject) => {
       const request = new sql.Request();
 
+      let departamentosPermitidos = JSON.stringify([departamento]);
       // Parameterized query to prevent SQL injection
       const query = `
         INSERT INTO dbo.WebUsers (username, password, role, departamento, departamentosPermitidos) 
-        VALUES (@username, @password_hash, @role, @departamento, @departamento);
+        VALUES (@username, @password_hash, @role, @departamento, @departamentosPermitidos);
       `;
 
       request.input("username", sql.VarChar, username);
       request.input("password_hash", sql.VarChar, password_hash);
       request.input("role", sql.VarChar, role);
       request.input("departamento", sql.VarChar, departamento);
+      request.input("departamentosPermitidos", sql.VarChar, departamentosPermitidos);
 
       request.query(query);
 
@@ -424,6 +408,7 @@ export async function registerWebUser(username: string, password: string, role: 
  * a JWT token if authentication is successful, or rejects with an error message if authentication fails.
  */
 import type { WebUser } from '$lib/types/gen';
+import { json } from '@sveltejs/kit';
 export async function loginWebUser(username: string, password: string): Promise<WebUser | { error: string }> {
   try {
     await sql.connect(sqlConfig);
@@ -509,6 +494,10 @@ export async function fetchWebUser(username: string): Promise<shortWebUser> {
       request.query(query);
 
       request.on("row", (row) => {
+        if (row.departamentosPermitidos) {
+          row.departamentosPermitidos = JSON.parse(row.departamentosPermitidos);
+        }
+
         console.log("DB :: fetchWebUser row:", row);
         resolve(row);
       });
@@ -530,11 +519,13 @@ export async function setWebUserDepaPermitidos(username: string, depaPermitidos:
     await sql.connect(sqlConfig);
     console.log("DB :: setWebUserDepaPermitidos:", username, depaPermitidos);
 
+    const depaPermitidosJSON = JSON.stringify(depaPermitidos);
+
     return new Promise((resolve, reject) => {
       const request = new sql.Request();
 
       request.input("username", sql.VarChar, username);
-      request.input("depaPermitidos", sql.VarChar, depaPermitidos);
+      request.input("depaPermitidos", sql.VarChar, depaPermitidosJSON);
       const query = "UPDATE dbo.WebUsers SET departamentosPermitidos = @depaPermitidos WHERE username = @username;";
 
       request.query(query);

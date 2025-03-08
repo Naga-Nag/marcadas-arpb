@@ -1,82 +1,25 @@
 import { goto } from "$app/navigation";
-import { globalStore, setloadingData, clearMarcadas, setMarcadas } from "$lib/stores/global";
+import { setloadingData, clearMarcadas, setMarcadas, getOmitirFinde, getfechaMarcada} from "$lib/stores/global";
 import { clearUser } from "$lib/stores/user";
-import { set } from "date-fns";
 import type { Marcada } from "../types/gen";
 import { notify } from "$lib/stores/notifications";
+import { filtrarMarcadasFinde } from "./utils";
 
-let showMarcadaDetalle: boolean;
-
-globalStore.subscribe((value) => {
-    showMarcadaDetalle = value.showMarcadaDetalle;
-});
-
-export async function fetchMarcada(
-    departamento: string,
-    fecha: string,
-    onBatch?: (batch: Array<Marcada>) => void
-) {
+export async function fetchMarcada(departamento: string, fecha: string) {
     setloadingData(true);
+
     const response = await fetch('/api/fetchMarcada', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ departamento, fecha })
     });
 
-    if (!response.ok || !response.body) {
+    if (!response.ok) {
         throw new Error('Failed to fetch records');
     }
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let buffer = ''; // Buffer to accumulate chunks
-    const registros: Array<Marcada> = []; // Final array of records
+    const registros: Array<Marcada> = await response.json();
 
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        // Decode the chunk and append it to the buffer
-        buffer += decoder.decode(value, { stream: true });
-
-        // Process the buffer for complete JSON batches
-        let boundaryIndex;
-        while ((boundaryIndex = buffer.indexOf('\n')) >= 0) {
-            const chunk = buffer.slice(0, boundaryIndex).trim(); // Extract one batch
-            buffer = buffer.slice(boundaryIndex + 1); // Remove processed batch
-
-            if (chunk) {
-                try {
-                    const batch = JSON.parse(chunk); // Parse the JSON batch
-                    registros.push(...batch); // Add to the final array
-
-                    // Call the callback with the batch if provided
-                    if (onBatch) {
-                        onBatch(batch);
-                    }
-                } catch (err) {
-                    console.error('Failed to parse JSON batch:', err, chunk);
-                }
-            }
-        }
-    }
-
-    // Handle any leftover data in the buffer
-    if (buffer.trim()) {
-        try {
-            const batch = JSON.parse(buffer.trim());
-            registros.push(...batch);
-
-            // Call the callback with the final batch if provided
-            if (onBatch) {
-                onBatch(batch);
-            }
-        } catch (err) {
-            console.error('Failed to parse final JSON batch:', err, buffer);
-        }
-    }
-
-    // Return the accumulated records
     setMarcadas(registros);
     setloadingData(false);
 }
@@ -85,10 +28,12 @@ export async function fetchMarcada(
 /* console.log(await fetchMarcada('TAAP', '2023-08-03' , (batch) => {console.log(batch)})); */
 
 export async function fetchMarcadaDetalle(departamento: string, fecha: string) {
+    clearMarcadas();
     setloadingData(true);
+
     if (departamento === '' || fecha === '') {
         setloadingData(false);
-        throw new Error('Los parametros de fechas son invalidos :: Departamento: ' + departamento + '::' + ' Fecha: ' + fecha);
+        throw new Error('mainController :: Los parametros de fechas son invalidos :: Departamento: ' + departamento + '::' + ' Fecha: ' + fecha);
     }
     const response = await fetch('/api/fetchMarcadaDetalle', {
         method: 'POST',
@@ -100,19 +45,23 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string) {
         notify({
             id: Date.now(),
             title: 'Error',
-            message: 'Error al obtener',
+            message: 'Error al obtener datos de marcadas',
             type: 'error',
             duration: 3000
         });
         setloadingData(false);
         throw new Error('Failed to fetch records');
     }
-    setMarcadas(await response.json());
+
+    let marcadas = await response.json();
+    setMarcadas(marcadas);
     setloadingData(false);
 }
 
 export async function fetchEntreFechas(departamento: string, fechaInicial: string, fechaFinal: string) {
+    clearMarcadas();
     setloadingData(true);
+
     const response = await fetch('/api/fetchEntreFechas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -123,7 +72,11 @@ export async function fetchEntreFechas(departamento: string, fechaInicial: strin
         setloadingData(false);
         throw new Error('Failed to fetch records');
     }
-    setMarcadas(await response.json());
+    let marcadas = await response.json();
+    if (getOmitirFinde()) {
+        filtrarMarcadasFinde(marcadas);
+    }
+    setMarcadas(marcadas);
     setloadingData(false);
 }
 

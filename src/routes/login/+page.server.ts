@@ -37,16 +37,16 @@ export const actions: Actions = {
           const formData = await request.formData();
           const username = formData.get('username') as string;
           const password = formData.get('password') as string;
-          const role = 'ADMIN' /* formData.get('role') as string */;
+          const role = 'USER' /* formData.get('role') as string */;
           const departamento = formData.get('departamento') as string;
 
           const data = await registerWebUser(username, password, role, departamento);
 
-          if ('error' in data) {
+          if (!data) {
                return { status: 401, error: true, message: 'Unauthorized' };
           }
           else {
-               const result: registerFormResponse = { error: false, message: 'User registered successfully' };
+               const result: registerFormResponse = { error: false, message: 'Usuario registrado con exito' };
                return result;
           }
      }

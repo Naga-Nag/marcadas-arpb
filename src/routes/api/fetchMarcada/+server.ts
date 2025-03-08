@@ -10,29 +10,13 @@ export async function POST({ request }) {
 			throw new Error('Parámetros inválidos: departamento o fechaMarcada no definidos');
 		}
 
-		console.log('POST || Streaming registros para:', departamento, fecha);
+		console.log('fetchMarcada :: Buscando registros para:', departamento, fecha);
 
-		// Create a readable stream
-		const stream = new ReadableStream({
-			async start(controller) {
-				try {
-					// Fetch data in batches
-					await fetchMarcadaDelDia(departamento, fecha, (batch) => {
-						// Send each batch to the stream
-						controller.enqueue(JSON.stringify(batch) + '\n');
-					});
-
-					// Close the stream when done
-					controller.close();
-				} catch (err) {
-					console.error('Error streaming registros:', err);
-					controller.error(err);
-				}
-			}
-		});
+		// Fetch records
+		const stream = await fetchMarcadaDelDia(departamento, fecha);
 
 		// Return the streaming response
-		return new Response(stream, {
+		return new Response(JSON.stringify(stream), {
 			headers: {
 				'Content-Type': 'application/json',
 				'Transfer-Encoding': 'chunked'

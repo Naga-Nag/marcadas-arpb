@@ -40,7 +40,7 @@ export type shortWebUser = {
     username: string;
     role: string;
     departamento: string;
-    departamentosPermitidos: Array<string>;
+    departamentosPermitidos: string[];
 }
 
 export type Notification = {

@@ -7,8 +7,8 @@ export const globalStore = writable({
     omitirFinde: false,
     showMarcadaDetalle: true,
     selectedDepartamento: '',
-    fechaMarcada:'',
-    marcadas : [] as Marcada[],
+    fechaMarcada: '',
+    marcadas: [] as Marcada[],
     departamentos: [] as string[],
 });
 
@@ -20,15 +20,6 @@ export const globalStore = writable({
 
 export function updateSelectedDepartamento(departamento: string) {
     globalStore.update((state) => ({ ...state, selectedDepartamento: departamento }));
-}
-
-/**
- * Updates the `fechaMarcada` in the global store.
- *
- * @param fecha - The date as an ISO string (e.g. '2023-08-03') to set as the selected date.
- */
-export function updateFechaMarcada(fecha: string) {
-    globalStore.update((state) => ({ ...state, fechaMarcada: fecha }));
 }
 
 /**
@@ -53,10 +44,10 @@ export function toggleMarcadaDetalle() {
 export function toggleEntreFechas() {
     globalStore.update((state) => {
         const newShowEntreFechas = !state.showEntreFechas;
-        return { 
-            ...state, 
-            showEntreFechas: newShowEntreFechas, 
-            showMarcadaDetalle: newShowEntreFechas ? true : state.showMarcadaDetalle 
+        return {
+            ...state,
+            showEntreFechas: newShowEntreFechas,
+            showMarcadaDetalle: newShowEntreFechas ? true : state.showMarcadaDetalle
         };
     });
 }
@@ -82,7 +73,7 @@ export function toggleOmitirFinde() {
  */
 
 export function setloadingData(loading: boolean) {
-    globalStore.update((state) => ({...state, loading: loading}));
+    globalStore.update((state) => ({ ...state, loading: loading }));
 }
 
 
@@ -95,11 +86,11 @@ export function setloadingData(loading: boolean) {
  * setDepartamentos(['ARPB', 'IFAP']);
  */
 export function setDepartamentos(departamentos: string[]) {
-    globalStore.update((state) => ({...state, departamentos: departamentos}));
+    globalStore.update((state) => ({ ...state, departamentos: departamentos }));
 }
 
 export function setMarcadas(marcadas: Marcada[]) {
-    globalStore.update((state) => ({...state, marcadas: marcadas}));
+    globalStore.update((state) => ({ ...state, marcadas: marcadas }));
 }
 
 //No es tiempo real
@@ -110,7 +101,7 @@ export function getMarcadas() {
 }
 
 export function clearMarcadas() {
-    globalStore.update((state) => ({...state, marcadas: []}));
+    globalStore.update((state) => ({ ...state, marcadas: [] }));
 }
 
 export const getSelectedDepartamento = () => {
@@ -141,6 +132,10 @@ export const getfechaMarcada = () => {
     let fechaMarcada: string = '';
     globalStore.subscribe(state => fechaMarcada = state.fechaMarcada)();
     return fechaMarcada;
+}
+
+export function setFechaMarcada(fecha: string) {
+    globalStore.update((state) => ({ ...state, fechaMarcada: fecha }));
 }
 
 export function getAusentes() {

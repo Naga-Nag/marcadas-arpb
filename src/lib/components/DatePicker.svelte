@@ -5,8 +5,7 @@
 <script lang="ts">
 	import { writable } from 'svelte/store';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { updateFechaMarcada } from '$lib/stores/global';
-	import { globalStore } from '$lib/stores/global';
+	import { globalStore, setFechaMarcada } from '$lib/stores/global';
 
 
 	let hoy = new Date().toISOString().split('T')[0];
@@ -22,7 +21,7 @@
 
 	function handleDateChange(e: any) {
 		console.log('DatePicker fecha definida:', e.target.value);
-		updateFechaMarcada(e.target.value);
+		setFechaMarcada(e.target.value);
 		dispatch('fechaDefinida', {
 			fecha: e.target.value
 		});
@@ -34,7 +33,7 @@
 			ayer.setDate(ayer.getDate() - 1);
 			$fechaMarcada = ayer.toISOString().split('T')[0];
 
-			updateFechaMarcada($fechaMarcada);
+			setFechaMarcada($fechaMarcada);
 
 			dispatch('fechaDefinida', {
 				fecha: ayer.toISOString().split('T')[0]
@@ -45,7 +44,7 @@
 			ayer.setDate(ayer.getDate() - 1);
 			$fechaMarcada = ayer.toISOString().split('T')[0];
 
-			updateFechaMarcada($fechaMarcada);
+			setFechaMarcada($fechaMarcada);
 
 			dispatch('fechaDefinida', {
 				fecha: ayer.toISOString().split('T')[0]
@@ -59,7 +58,7 @@
 			mañana.setDate(mañana.getDate() + 1);
 			$fechaMarcada = mañana.toISOString().split('T')[0];
 
-			updateFechaMarcada($fechaMarcada);
+			setFechaMarcada($fechaMarcada);
 
 			dispatch('fechaDefinida', {
 				fecha: mañana.toISOString().split('T')[0]
