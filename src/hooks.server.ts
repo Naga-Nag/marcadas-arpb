@@ -7,7 +7,7 @@ const protectedPaths = ['/', '/api', '/credits', '/test'];
 const superAdminPaths = ['/admin', '/admin/*'];
 
 export const handle = async ({ event, resolve }) => {
-    if (!protectedPaths.some(path => event.url.pathname.startsWith(path))) {
+    if (!protectedPaths.includes(event.url.pathname)) {
         return resolve(event);
     }
 
@@ -19,9 +19,15 @@ export const handle = async ({ event, resolve }) => {
         decodedUser = token && Bun.env.JWT_SECRET ? verify(token, Bun.env.JWT_SECRET) as JwtPayload : null;
     } catch (error) {
         if (error instanceof Error) {
-            console.log(`HOOKS :: Token error (${error.name}), cleaning cookie`);
-            event.cookies.delete('token', { path: '/' });
-            throw redirect(303, '/login');
+            if (error.name === 'TokenExpiredError') {
+                console.log("HOOKS :: Token expired, cleaning cookie");
+                event.cookies.delete('token', { path: '/' });
+                throw redirect(303, '/login');
+            } else if (error.name === 'JsonWebTokenError') {
+                console.log("HOOKS :: Token is invalid, cleaning cookie");
+                event.cookies.delete('token', { path: '/' });
+                throw redirect(303, '/login');
+            }
         }
     }
 
@@ -32,18 +38,18 @@ export const handle = async ({ event, resolve }) => {
         const user = await fetchWebUser(decodedUser.username);
         user.ipaddr = event.getClientAddress();
         setUser(user);
-
         if (superAdminPaths.some(path => 
             path === event.url.pathname || (path.endsWith('/*') && event.url.pathname.startsWith(path.replace('/*', '')))
         )) {
             if (user.role !== 'ADMIN') {
-                throw error(403, 'No estas autorizado a acceder a esta pagina.');
+                throw error(403, 'Forbidden: You do not have access to this page.');
             }
         }
 
         return resolve(event);
     } else {
         event.cookies.delete('token', { path: '/' });
+        console.log("HOOKS :: Unauthorized,Redirecting to login");
         throw redirect(303, '/login');
     }
 };
