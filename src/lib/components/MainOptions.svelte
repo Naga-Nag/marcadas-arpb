@@ -2,14 +2,10 @@
 	import { fade } from 'svelte/transition';
 	import {
 		globalStore,
-		toggleEntreFechas as TEF,
-		toggleMarcadaDetalle as TMD,
-		toggleOmitirFinde as TOF
-
+		toggleEntreFechas,
+		toggleMarcadaDetalle,
+		toggleOmitirFinde
 	} from '$lib/stores/global';
-	import { createEventDispatcher } from 'svelte';
-
-	const dispatch = createEventDispatcher();
 
 	let showEntreFechas: boolean;
 	let showMarcadaDetalle: boolean;
@@ -24,21 +20,6 @@
 
 	function toggleMenu() {
 		menuAbierto = !menuAbierto;
-	}
-
-	function toggleMarcadaDetalle() {
-		dispatch('toggleMarcadaDetalle');
-		TMD();
-	}
-
-	function toggleEntreFechas() {
-		dispatch('toggleEntreFechas');
-		TEF();
-	}
-
-	function toggleOmitirFinDeSemana() {
-		dispatch('toggleOmitirFinDeSemana');
-		TOF();
 	}
 </script>
 
@@ -62,11 +43,12 @@
 				Fechas
 			</div>
 			{#if showEntreFechas}
-				<div class="flex:row ml:20"> <!-- Añade tabulación -->
+				<div class="flex:row ml:20">
+					<!-- Añade tabulación -->
 					<input
 						type="checkbox"
 						bind:checked={omitirFinDeSemana}
-						on:change={toggleOmitirFinDeSemana}
+						on:change={toggleOmitirFinde}
 					/>Omitir fin de semana
 				</div>
 			{/if}
@@ -76,7 +58,7 @@
 					checked={showMarcadaDetalle}
 					disabled={showEntreFechas}
 					on:change={toggleMarcadaDetalle}
-				/>Marcadas Unicas
+				/>Incluir Marcadas Intermedias
 			</div>
 		</div>
 	{/if}

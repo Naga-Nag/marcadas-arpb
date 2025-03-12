@@ -1,65 +1,56 @@
 import { goto } from "$app/navigation";
-import { setloadingData, clearMarcadas, setMarcadas, getOmitirFinde, getfechaMarcada} from "$lib/stores/global";
+import { setloadingData, setMarcadas, getOmitirFinde, getfechaMarcada, getShowMarcadaDetalle} from "$lib/stores/global";
 import { clearUser } from "$lib/stores/user";
 import type { Marcada } from "../types/gen";
 import { notify } from "$lib/stores/notifications";
 import { filtrarMarcadasFinde } from "./utils";
 
-export async function fetchMarcada(departamento: string, fecha: string) {
-    setloadingData(true);
-
-    const response = await fetch('/api/fetchMarcada', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ departamento, fecha })
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch records');
-    }
-
-    const registros: Array<Marcada> = await response.json();
-
-    setMarcadas(registros);
-    setloadingData(false);
-}
-
-
 /* console.log(await fetchMarcada('TAAP', '2023-08-03' , (batch) => {console.log(batch)})); */
 
-export async function fetchMarcadaDetalle(departamento: string, fecha: string) {
-    clearMarcadas();
+export async function fetchMarcada(departamento: string, fecha: string) {
     setloadingData(true);
-
-    if (departamento === '' || fecha === '') {
-        setloadingData(false);
-        throw new Error('mainController :: Los parametros de fechas son invalidos :: Departamento: ' + departamento + '::' + ' Fecha: ' + fecha);
-    }
-    const response = await fetch('/api/fetchMarcadaDetalle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ departamento, fecha })
-    });
-
-    if (!response.ok || !response.body) {
-        notify({
-            id: Date.now(),
-            title: 'Error',
-            message: 'Error al obtener datos de marcadas',
-            type: 'error',
-            duration: 3000
+    let marcadas = [];
+    if (getShowMarcadaDetalle()) {
+        if (departamento === '' || fecha === '') {
+            setloadingData(false);
+            throw new Error('mainController :: Los parametros de fechas son invalidos :: Departamento: ' + departamento + '::' + ' Fecha: ' + fecha);
+        }
+        const response = await fetch('/api/fetchMarcadaDetalle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ departamento, fecha })
         });
-        setloadingData(false);
-        throw new Error('Failed to fetch records');
+    
+        if (!response.ok || !response.body) {
+            notify({
+                id: Date.now(),
+                title: 'Error',
+                message: 'Error al obtener datos de marcadas',
+                type: 'error',
+                duration: 3000
+            });
+            setloadingData(false);
+            throw new Error('Failed to fetch records');
+        }
+        marcadas = await response.json();
     }
-
-    let marcadas = await response.json();
+    else {
+        const response = await fetch('/api/fetchMarcada', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ departamento, fecha })
+        });
+    
+        if (!response.ok) {
+            throw new Error('Failed to fetch records');
+        }
+        marcadas = await response.json();
+    }
     setMarcadas(marcadas);
     setloadingData(false);
 }
 
 export async function fetchEntreFechas(departamento: string, fechaInicial: string, fechaFinal: string) {
-    clearMarcadas();
     setloadingData(true);
 
     const response = await fetch('/api/fetchEntreFechas', {

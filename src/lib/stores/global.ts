@@ -74,6 +74,7 @@ export function toggleMarcadaDetalle() {
  * toggleEntreFechas();
  */
 export function toggleEntreFechas() {
+    clearMarcadas();
     globalStore.update((state) => {
         const newShowEntreFechas = !state.showEntreFechas;
         return {
@@ -133,6 +134,7 @@ export function getMarcadas() {
 }
 
 export function clearMarcadas() {
+    console.log('globalStore :: clearMarcadas');
     globalStore.update((state) => ({ ...state, marcadas: [] }));
 }
 
@@ -160,7 +162,7 @@ export const getOmitirFinde = () => {
     return omitirFinde;
 }
 
-export const getfechaMarcada = () => {
+export function getfechaMarcada() {
     let fechaMarcada: string = '';
     globalStore.subscribe(state => fechaMarcada = state.fechaMarcada)();
     return fechaMarcada;

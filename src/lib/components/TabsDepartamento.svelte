@@ -8,8 +8,8 @@
 	async function selectDepartamento(departamento: string) {
 		if (selectedDepartamento !== departamento) {
 			selectedDepartamento = departamento;
-			await fetchMarcada(departamento, getfechaMarcada());
 			updateSelectedDepartamento(departamento);
+			await fetchMarcada(departamento, getfechaMarcada());
 		}
 	}
 

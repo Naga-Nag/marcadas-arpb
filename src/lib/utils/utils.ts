@@ -136,15 +136,18 @@ export function sortString(a: string, b: string, sortOrder: 'asc' | 'desc' | und
 
 
 export function getEstado(marcada: { Entrada: any; Salida: any; Marcada?: any; }) {
-  if (marcada.Entrada && marcada.Salida || marcada.Marcada) {
+  if (marcada.Entrada && marcada.Salida) {
     return 'Completa';
   } else if (marcada.Entrada && !marcada.Salida) {
     return 'Falta salida';
   } else if (!marcada.Entrada && marcada.Salida) {
     return 'Falta entrada';
+  } else if (!marcada.Marcada) {
+    return 'Sin datos';
   } else {
     return 'Sin datos';
   }
+ 
 }
 
 export function filtrarMarcadasFinde(marcadas: Marcada[]): Marcada[] {

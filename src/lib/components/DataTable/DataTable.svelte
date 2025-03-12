@@ -22,10 +22,10 @@
 	import { notify } from '$lib/stores/notifications';
 	import { updateUsuarioFromMarcada, fetchDepartamentos } from '$lib/utils/mainController';
 	import { createEventDispatcher } from 'svelte';
-	export let registros: Array<Marcada>;
 
 	const dispatch = createEventDispatcher();
 
+	let marcadas: Marcada[] = [];
 	let showMarcadaDetalle: boolean;
 	let showEntreFechas: boolean;
 
@@ -33,17 +33,16 @@
 	async function loadDepartamentos() {
 		departamentos = await fetchDepartamentos();
 	}
-
 	loadDepartamentos();
 
 	globalStore.subscribe(($value) => {
 		showMarcadaDetalle = $value.showMarcadaDetalle;
 		showEntreFechas = $value.showEntreFechas;
-		registros = $value.marcadas;
+		marcadas = $value.marcadas;
 	});
 
-	console.log('DataTable :: ' + registros.length + ' registros ');
-	const dataToDisplay = writable(registros);
+	console.log('DataTable :: ' + marcadas.length + ' marcadas ');
+	const dataToDisplay = writable(marcadas);
 
 	const updateData = (rowId: string, columnId: string, newValue: string) => {
 		console.log('updateData', JSON.stringify({ rowId, columnId, newValue }));
@@ -208,23 +207,23 @@
 		console.log('DataTable: toggleSortOrder', sortOrder, sortCol);
 
 		if (sortCol === 'Entrada' || sortCol === 'Salida' || sortCol === 'Marcada') {
-			registros = registros.sort((a, b) => sortTime(a[sortCol], b[sortCol], sortOrder));
+			marcadas = marcadas.sort((a, b) => sortTime(a[sortCol], b[sortCol], sortOrder));
 		} else if (sortCol === 'Estado') {
-			registros = registros.sort((a, b) => {
+			marcadas = marcadas.sort((a, b) => {
 				return sortEstado(a, b, sortOrder);
 			});
 		} else if (sortCol === 'MR' || sortCol === 'CUIL' || sortCol === 'Jornada') {
-			registros = registros.sort((a, b) =>
+			marcadas = marcadas.sort((a, b) =>
 				sortNumber(parseInt(a[sortCol]), parseInt(b[sortCol]), sortOrder)
 			);
 		} else if (sortCol === 'Departamento' || sortCol === 'Nombre') {
-			registros = registros.sort((a, b) => sortString(a[sortCol], b[sortCol], sortOrder));
+			marcadas = marcadas.sort((a, b) => sortString(a[sortCol], b[sortCol], sortOrder));
 		}
 
-		dataToDisplay.set([...registros]); // Force update with sorted array
+		dataToDisplay.set([...marcadas]); // Force update with sorted array
 	}
 
-	$: dataToDisplay.set(registros);
+	$: dataToDisplay.set(marcadas);
 	toggleSortOrder('asc', 'Estado');
 </script>
 

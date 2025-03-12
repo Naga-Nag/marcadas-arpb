@@ -14,7 +14,6 @@
 	import { filtrarMarcadasFinde, reemplazarMarcadas } from '$lib/utils/utils';
 
 	import {
-		fetchMarcadaDetalle,
 		fetchMarcada,
 		fetchEntreFechas,
 		logout
@@ -70,11 +69,7 @@
 
 	async function fechaListener(fechaMarcada: string) {
 		try {
-			if (showMarcadaDetalle) {
-				await fetchMarcadaDetalle(selectedDepartamento, fechaMarcada);
-			} else {
-				await fetchMarcada(selectedDepartamento, fechaMarcada);
-			}
+			await fetchMarcada(selectedDepartamento, fechaMarcada);
 		} catch (error: unknown) {
 			if (error instanceof Error) {
 				console.error('Error fetching data:', error.message);
@@ -127,6 +122,7 @@
 					}}
 					on:toggleEntreFechas={() => {
 						if (showEntreFechas) {
+							console.log('showEntreFechas => '+showEntreFechas);
 							fechaListener(fechaMarcada);
 						}
 					}}
@@ -165,9 +161,7 @@
 				<div>
 					<DataTable
 						editable={isAdmin(user)}
-						{registros}
-						on:refreshParentData={(e) =>
-							(registros = reemplazarMarcadas(registros, e.detail.newItem))}
+						
 					/>
 				</div>
 

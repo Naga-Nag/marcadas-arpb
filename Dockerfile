@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
 COPY . .
 
 # Expose the app port (3000 for SvelteKit)
-EXPOSE 3000
+EXPOSE 5173
 
 # Start the app
-CMD ["bun", "run", "preview", "--host"]
+CMD ["bun", "run", "dev", "--host"]
