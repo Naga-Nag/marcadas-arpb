@@ -21,8 +21,11 @@ RUN apt-get update && apt-get install -y \
 # Copy the rest of the project
 COPY . .
 
+# Build the SvelteKit project
+RUN bun run build
+
 # Expose the app port (3000 for SvelteKit)
-EXPOSE 5173
+EXPOSE 3000
 
 # Start the app
-CMD ["bun", "run", "dev", "--host"]
+CMD ["bun", "run", "start"]

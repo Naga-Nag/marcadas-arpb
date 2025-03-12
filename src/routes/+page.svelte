@@ -117,9 +117,7 @@
 			<div class="d:flex mb:10">
 				<span> </span>
 				<MainOptions
-					on:toggleMarcadaDetalle={() => {
-						fechaListener(fechaMarcada);
-					}}
+					on:toggleMarcadaDetalle={() => fechaListener(fechaMarcada)}
 					on:toggleEntreFechas={() => {
 						if (showEntreFechas) {
 							console.log('showEntreFechas => '+showEntreFechas);
