@@ -2,10 +2,10 @@ import * as XLSX from 'xlsx';
 import type { Marcada } from '../types/gen';
 import { globalStore } from '$lib/stores/global';
 
-let showMarcadaDetalle: boolean;
+let marcadasIntermedias: boolean;
 
 globalStore.subscribe((value) => {
-  showMarcadaDetalle = value.showMarcadaDetalle;
+  marcadasIntermedias = value.marcadasIntermedias;
 });
 
 
@@ -24,7 +24,7 @@ export function downloadExcel(data: Array<Marcada>, fileName = 'marcada') {
     'COD AUS': '',
     'Horas': '',
     'Observaciones': '',
-    ...(showMarcadaDetalle ? {
+    ...(marcadasIntermedias ? {
       'Marcada': row.Marcada || '',
     } : {
       'Entrada': row.Entrada,

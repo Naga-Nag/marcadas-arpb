@@ -3,30 +3,39 @@
 	import {
 		globalStore,
 		toggleEntreFechas as TEF,
-		toggleMarcadaDetalle as TMD,
-		toggleOmitirFinde as TOF
+		toggleMarcadasIntermedias as TMI,
+		toggleOmitirFinde as TOF,
+		toggleMarcadaEstandar as TME,
+
+		toggleMarcadasIntermedias
+
 	} from '$lib/stores/global';
+	import Tooltip from './tooltip.svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher();
 
-	let showEntreFechas: boolean;
-	let showMarcadaDetalle: boolean;
+	let entreFechas: boolean;
+	let marcadasIntermedias: boolean;
+	let marcadaEstandar: boolean;
+
+	let omitirFinde: boolean;
 
 	globalStore.subscribe(($value) => {
-		showEntreFechas = $value.showEntreFechas;
-		showMarcadaDetalle = $value.showMarcadaDetalle;
+		entreFechas = $value.entreFechas;
+		marcadasIntermedias = $value.marcadasIntermedias;
+		marcadaEstandar = $value.marcadaEstandar;
+		omitirFinde = $value.omitirFinde;
 	});
 
 	let menuAbierto = false;
-	let omitirFinDeSemana = false; // Nuevo estado
 
 	function toggleMenu() {
 		menuAbierto = !menuAbierto;
 	}
 
 	function toggleMarcadaDetalle() {
-		TMD();
+		TMI();
 		dispatch('toggleMarcadaDetalle');
 	}
 
@@ -35,10 +44,16 @@
 		dispatch('toggleEntreFechas');
 	}
 
-	function toggleOmitirFinDeSemana() {
+	function toggleOmitirFinde() {
 		TOF();
-		dispatch('toggleOmitirFinDeSemana');
+		dispatch('toggleOmitirFinde');
 	}
+
+	function toggleMarcadaEstandar() {
+		TME();
+		dispatch('toggleMarcadaEstandar');
+	}
+
 </script>
 
 <main on:mouseleave={() => (menuAbierto = false)}>
@@ -57,25 +72,26 @@
 			out:fade={{ duration: 200 }}
 		>
 			<div class="flex:row">
-				<input type="checkbox" checked={showEntreFechas} on:change={toggleEntreFechas} />Entre
-				Fechas
+				<input type="checkbox" checked={marcadaEstandar} on:change={toggleMarcadaEstandar} />
+				Marcada Estandar
+				<Tooltip text="Salida de Ayer / Entrada de Hoy" />
 			</div>
-			{#if showEntreFechas}
+
+			<div class="flex:row">
+				<input type="checkbox" checked={entreFechas} on:change={toggleEntreFechas} />Entre Fechas
+			</div>
+			{#if entreFechas}
 				<div class="flex:row ml:20">
-					<!-- Añade tabulación -->
-					<input
-						type="checkbox"
-						bind:checked={omitirFinDeSemana}
-						on:change={toggleOmitirFinDeSemana}
-					/>Omitir fin de semana
+					<input type="checkbox" bind:checked={omitirFinde} on:change={toggleOmitirFinde} />Omitir
+					fin de semana
 				</div>
 			{/if}
 			<div class="flex:row">
 				<input
 					type="checkbox"
-					checked={showMarcadaDetalle}
-					disabled={showEntreFechas}
-					on:change={toggleMarcadaDetalle}
+					checked={marcadasIntermedias}
+					disabled={entreFechas}
+					on:change={toggleMarcadasIntermedias}
 				/>Marcadas Intermedias
 			</div>
 		</div>

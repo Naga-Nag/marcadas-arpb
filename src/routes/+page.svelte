@@ -37,8 +37,8 @@
 
 	let registros: Marcada[] = [];
 	let fechaMarcada = '';
-	let showEntreFechas: boolean = false;
-	let showMarcadaDetalle: boolean = true;
+	let entreFechas: boolean = false;
+	let marcadasIntermedias: boolean = true;
 	let omitirFinDeSemana = false;
 	let selectedDepartamento = '';
 
@@ -51,8 +51,8 @@
 	globalStore.subscribe((value) => {
 		selectedDepartamento = value.selectedDepartamento;
 		fechaMarcada = value.fechaMarcada;
-		showEntreFechas = value.showEntreFechas;
-		showMarcadaDetalle = value.showMarcadaDetalle;
+		entreFechas = value.entreFechas;
+		marcadasIntermedias = value.marcadasIntermedias;
 		omitirFinDeSemana = value.omitirFinde;
 	});
 
@@ -119,15 +119,21 @@
 				<MainOptions
 					on:toggleMarcadaDetalle={() => fechaListener(fechaMarcada)}
 					on:toggleEntreFechas={() => {
-						if (showEntreFechas) {
-							console.log('showEntreFechas => '+showEntreFechas);
+						if (entreFechas) {
+							console.log('entreFechas => '+entreFechas);
 							fechaListener(fechaMarcada);
 						}
+					}}
+					on:toggleOmitirFinde={() => {
+						fechaListener(fechaMarcada);
+					}}
+					on:toggleMarcadaEstandar={() => {
+						fechaListener(fechaMarcada);
 					}}
 				/>
 				<span></span>
 
-				{#if showEntreFechas}
+				{#if entreFechas}
 					<RangeDatePicker
 						on:rangoFechaDefinido={(e) =>
 							rangoFechalistener(e.detail.fechaInicial, e.detail.fechaFinal)}

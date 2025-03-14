@@ -222,6 +222,39 @@ export async function fetchMarcadaEntreFechas(departamento: string, fechaInicial
   });
 }
 
+export async function fetchMarcadaEstandar(departamento: string, fecha: string): Promise<Array<Marcada>> {
+  let startTime = new Date();
+  await sql.connect(sqlConfig);
+
+  return new Promise((resolve, reject) => {
+    const rows: Array<Marcada> = [];
+    const request = new sql.Request();
+    request.stream = true;
+
+    const query = `USE ${Bun.env.DB}; SELECT * FROM MarcadaEstandar('${departamento}', '${fecha}');`;
+
+    console.log('db :: Query fetchMarcadaEstandar:', query);
+    request.query(query);
+
+    request.on('row', (row) => {
+      processRow(row);
+      rows.push(row);
+    });
+
+    request.on('error', (err) => {
+      console.error('Error fetching data:', err);
+      reject(err);
+    });
+
+    request.on('done', () => {
+      let endTime = new Date();
+      console.log("INFO db :: " + 'Tiempo de consulta MarcadaEstandar:', differenceInMilliseconds(endTime, startTime) + 'ms');
+      console.log("INFO db :: " + rows.length + " registros encontrados");
+      resolve(rows);
+    });
+  });
+}
+
 /**
  * Updates a user in the database using the information from a Marcada record.
  * @param {Marcada} marcadaRow The Marcada record to update the user with.
@@ -544,4 +577,41 @@ export async function setWebUserDepaPermitidos(username: string, depaPermitidos:
     console.error("Error in setWebUserDepaPermitidos:", err);
     throw new Error("Error updating user");
   }
+}
+
+export async function fetchUsuarios() {
+  const pool = await sql.connect(sqlConfig);
+  const result = await pool.request().query('SELECT * FROM WebUsers');
+  return result.recordset;
+}
+
+export async function createUsuario(usuario: any) {
+  const pool = await sql.connect(sqlConfig);
+  const result = await pool.request()
+    .input('username', sql.NVarChar, usuario.username)
+    .input('role', sql.NVarChar, usuario.role)
+    .input('departamento', sql.NVarChar, usuario.departamento)
+    .input('departamentosPermitidos', sql.NVarChar, usuario.departamentosPermitidos.join(','))
+    .query('INSERT INTO WebUsers (username, role, departamento, departamentosPermitidos) VALUES (@username, @role, @departamento, @departamentosPermitidos)');
+  return result;
+}
+
+export async function updateUsuario(usuario: any) {
+  const pool = await sql.connect(sqlConfig);
+  const result = await pool.request()
+    .input('id', sql.Int, usuario.id)
+    .input('username', sql.NVarChar, usuario.username)
+    .input('role', sql.NVarChar, usuario.role)
+    .input('departamento', sql.NVarChar, usuario.departamento)
+    .input('departamentosPermitidos', sql.NVarChar, usuario.departamentosPermitidos.join(','))
+    .query('UPDATE WebUsers SET username = @username, role = @role, departamento = @departamento, departamentosPermitidos = @departamentosPermitidos WHERE id = @id');
+  return result.rowsAffected;
+}
+
+export async function deleteUsuario(username: string) {
+  const pool = await sql.connect(sqlConfig);
+  const result = await pool.request()
+    .input('name', sql.Int, username)
+    .query('DELETE FROM WebUsers WHERE name = @username');
+  return result.rowsAffected;
 }

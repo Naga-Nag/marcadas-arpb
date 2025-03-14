@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation";
-import { setloadingData, setMarcadas, getOmitirFinde, getfechaMarcada, getShowMarcadaDetalle} from "$lib/stores/global";
+import { setloadingData, setMarcadas, getOmitirFinde, getfechaMarcada, getmarcadasIntermedias, getMarcadaEstandar } from "$lib/stores/global";
 import { clearUser } from "$lib/stores/user";
 import type { Marcada } from "../types/gen";
 import { notify } from "$lib/stores/notifications";
@@ -10,7 +10,7 @@ import { filtrarMarcadasFinde } from "./utils";
 export async function fetchMarcada(departamento: string, fecha: string) {
     setloadingData(true);
     let marcadas = [];
-    if (getShowMarcadaDetalle()) {
+    if (getmarcadasIntermedias()) {
         if (departamento === '' || fecha === '') {
             setloadingData(false);
             throw new Error('mainController :: Los parametros de fechas son invalidos :: Departamento: ' + departamento + '::' + ' Fecha: ' + fecha);
@@ -20,7 +20,7 @@ export async function fetchMarcada(departamento: string, fecha: string) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ departamento, fecha })
         });
-    
+
         if (!response.ok || !response.body) {
             notify({
                 id: Date.now(),
@@ -34,13 +34,20 @@ export async function fetchMarcada(departamento: string, fecha: string) {
         }
         marcadas = await response.json();
     }
+    else if (getMarcadaEstandar()) {
+        fetchMarcadaEstandar(departamento, fecha).then((data) => {
+            marcadas = data;
+            setMarcadas(marcadas);
+            setloadingData(false);
+        });
+    }
     else {
         const response = await fetch('/api/fetchMarcada', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ departamento, fecha })
         });
-    
+
         if (!response.ok) {
             throw new Error('Failed to fetch records');
         }
@@ -189,7 +196,50 @@ export async function handleRegister(registerUsername: string, registerPassword:
     }
 }
 
+
 export async function logout() {
     clearUser();
     goto('/logout');
+}
+export async function fetchUsuarios() {
+    const response = await fetch('/api/fetchUsuarios');
+    return await response.json();
+}
+
+export async function createUsuario(usuario: any) {
+    const response = await fetch('/api/createUsuario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(usuario)
+    });
+    return await response.json();
+}
+
+export async function updateUsuario(usuario: any) {
+    const response = await fetch('/api/updateUsuario', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(usuario)
+    });
+    return await response.json();
+}
+
+export async function deleteUsuario(username: string) {
+    const response = await fetch(`/api/deleteUsuario/${username}`, {
+        method: 'DELETE'
+    });
+    return await response.json();
+}
+
+export async function fetchMarcadaEstandar(departamento: string, fecha: string) {
+    const response = await fetch('/api/fetchMarcadaEstandar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ departamento, fecha })
+    });
+
+    if (!response.ok) {
+        throw new Error('mainController :: Marcada Estandar :: Error al obtener datos de marcadas');
+    }
+    return await response.json();
 }

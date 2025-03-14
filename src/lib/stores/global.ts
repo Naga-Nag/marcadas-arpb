@@ -3,9 +3,12 @@ import { writable, derived } from 'svelte/store';
 
 export const globalStore = writable({
     loading: false,
-    showEntreFechas: false,
+
+    marcadaEstandar: true,
+    entreFechas: false,
     omitirFinde: false,
-    showMarcadaDetalle: true,
+    marcadasIntermedias: false,
+
     selectedDepartamento: '',
     fechaMarcada: '',
     searchText: '',
@@ -16,7 +19,7 @@ export const globalStore = writable({
 export const ausentes = derived(globalStore, ($store) => {
     let marcadas = $store.marcadas;
 
-    if ($store.showMarcadaDetalle) {
+    if ($store.marcadasIntermedias) {
         return marcadas.filter(m => m.Marcada === '');
     } else {
         return marcadas.filter(m => m.Entrada === '' && m.Salida === '');
@@ -55,19 +58,38 @@ export function updateSelectedDepartamento(departamento: string) {
 }
 
 /**
- * Toggles the `showMarcadaDetalle` value in the global store.
+ * Toggles the `marcadasIntermedias` value in the global store. If set to true, sets `marcadaEstandar` to false.
  *
  * @example
  * toggleMarcadaDetalle();
  */
-export function toggleMarcadaDetalle() {
-    globalStore.update((state) => ({ ...state, showMarcadaDetalle: !state.showMarcadaDetalle }));
+export function toggleMarcadasIntermedias() {
+    globalStore.update((state) => {
+        const newMarcadasIntermedias = !state.marcadasIntermedias;
+        return {
+            ...state,
+            marcadasIntermedias: newMarcadasIntermedias,
+            marcadaEstandar: newMarcadasIntermedias ? false : state.marcadaEstandar
+        };
+    });
+}
+
+export function toggleMarcadaEstandar() {
+    globalStore.update((state) => {
+        const newMarcadaEstandar = !state.marcadaEstandar;
+        return {
+            ...state,
+            marcadaEstandar: newMarcadaEstandar,
+            marcadasIntermedias: newMarcadaEstandar ? false : true,
+            entreFechas: newMarcadaEstandar ? false : state.entreFechas
+        };
+    });
 }
 
 /**
- * Toggles the `showEntreFechas` value in the global store. If `showEntreFechas` is
- * being set to `true`, `showMarcadaDetalle` is also set to `true`. If
- * `showEntreFechas` is being set to `false`, `showMarcadaDetalle` is left
+ * Toggles the `entreFechas` value in the global store. If `entreFechas` is
+ * being set to `true`, `marcadasIntermedias` is also set to `true`. If
+ * `entreFechas` is being set to `false`, `marcadasIntermedias` is left
  * unchanged.
  *
  * @example
@@ -76,11 +98,12 @@ export function toggleMarcadaDetalle() {
 export function toggleEntreFechas() {
     clearMarcadas();
     globalStore.update((state) => {
-        const newShowEntreFechas = !state.showEntreFechas;
+        const newentreFechas = !state.entreFechas;
         return {
             ...state,
-            showEntreFechas: newShowEntreFechas,
-            showMarcadaDetalle: newShowEntreFechas ? true : state.showMarcadaDetalle
+            entreFechas: newentreFechas,
+            marcadaEstandar: newentreFechas ? false : state.marcadaEstandar,
+            marcadasIntermedias: newentreFechas ? true : state.marcadasIntermedias
         };
     });
 }
@@ -144,16 +167,16 @@ export const getSelectedDepartamento = () => {
     return selectedDepartamento;
 }
 
-export const getShowMarcadaDetalle = () => {
-    let showMarcadaDetalle: boolean = false;
-    globalStore.subscribe(state => showMarcadaDetalle = state.showMarcadaDetalle)();
-    return showMarcadaDetalle;
+export const getmarcadasIntermedias = () => {
+    let marcadasIntermedias: boolean = false;
+    globalStore.subscribe(state => marcadasIntermedias = state.marcadasIntermedias)();
+    return marcadasIntermedias;
 }
 
-export const getShowEntreFechas = () => {
-    let showEntreFechas: boolean = false;
-    globalStore.subscribe(state => showEntreFechas = state.showEntreFechas)();
-    return showEntreFechas;
+export const getentreFechas = () => {
+    let entreFechas: boolean = false;
+    globalStore.subscribe(state => entreFechas = state.entreFechas)();
+    return entreFechas;
 }
 
 export const getOmitirFinde = () => {
@@ -174,7 +197,7 @@ export function setFechaMarcada(fecha: string) {
 
 export function getAusentes() {
     let marcadas: Marcada[] = getMarcadas();
-    if (getShowMarcadaDetalle()) {
+    if (getmarcadasIntermedias()) {
         marcadas = marcadas.filter(marcada => marcada.Entrada === '' && marcada.Salida === '');
     }
     else {
@@ -198,5 +221,16 @@ export const getDepartamentos = () => {
     globalStore.subscribe(state => departamentos = state.departamentos)();
     return departamentos;
 }
+
+export const getMarcadaEstandar = () => {
+    let marcadaEstandar: boolean = false;
+    globalStore.subscribe(state => marcadaEstandar = state.marcadaEstandar)();
+    return marcadaEstandar;
+}
+
+export function setMarcadaEstandar(marcadaEstandar: boolean) {
+    globalStore.update((state) => ({ ...state, marcadaEstandar: marcadaEstandar }));
+}
+
 
 globalStore.subscribe(value => console.log('globalStore data :: =>', value));

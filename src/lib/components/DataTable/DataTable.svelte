@@ -26,8 +26,10 @@
 	const dispatch = createEventDispatcher();
 
 	let marcadas: Marcada[] = [];
-	let showMarcadaDetalle: boolean;
-	let showEntreFechas: boolean;
+
+	let marcadasIntermedias: boolean;
+	let entreFechas: boolean;
+	let marcadaEstandar: boolean = false;
 
 	let departamentos: string[] = [];
 	async function loadDepartamentos() {
@@ -36,8 +38,10 @@
 	loadDepartamentos();
 
 	globalStore.subscribe(($value) => {
-		showMarcadaDetalle = $value.showMarcadaDetalle;
-		showEntreFechas = $value.showEntreFechas;
+		marcadasIntermedias = $value.marcadasIntermedias;
+		entreFechas = $value.entreFechas;
+		marcadaEstandar = $value.marcadaEstandar;
+
 		marcadas = $value.marcadas;
 	});
 
@@ -167,8 +171,15 @@
 		table.column({ header: 'Nombre', accessor: 'Nombre' }),
 		table.column({ header: 'Departamento', accessor: 'Departamento', cell: EditableCellLabel }),
 		table.column({ header: 'Marcada', accessor: 'Marcada' }),
-		table.column({ header: 'Entrada', accessor: 'Entrada' }),
-		table.column({ header: 'Salida', accessor: 'Salida' }),
+		...(marcadaEstandar
+			? [
+					table.column({ header: 'Salida', accessor: 'Salida' }),
+					table.column({ header: 'Entrada', accessor: 'Entrada' })
+			  ]
+			: [
+					table.column({ header: 'Entrada', accessor: 'Entrada' }),
+					table.column({ header: 'Salida', accessor: 'Salida' })
+			  ]),
 		table.column({ header: 'Estado', accessor: 'Estado' }),
 		table.column({ header: 'Jornada', accessor: 'Jornada', cell: EditableCellLabel }),
 		table.column({ header: 'En Actividad', accessor: 'Activo', cell: EditableCellLabel })
@@ -185,11 +196,11 @@
 	let hideForId = Object.fromEntries(ids.map((id) => [id, false]));
 
 	$: {
-		hideForId.Entrada = showMarcadaDetalle;
-		hideForId.Salida = showMarcadaDetalle;
-		hideForId.Estado = showMarcadaDetalle;
+		hideForId.Entrada = marcadasIntermedias;
+		hideForId.Salida = marcadasIntermedias;
+		hideForId.Estado = marcadasIntermedias;
 
-		hideForId.Marcada = !showMarcadaDetalle;
+		hideForId.Marcada = !marcadasIntermedias;
 
 		$hiddenColumnIds = Object.entries(hideForId)
 			.filter(([, hide]) => hide)
