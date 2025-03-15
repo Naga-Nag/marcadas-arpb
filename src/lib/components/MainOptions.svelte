@@ -6,9 +6,7 @@
 		toggleMarcadasIntermedias as TMI,
 		toggleOmitirFinde as TOF,
 		toggleMarcadaEstandar as TME,
-
 		toggleMarcadasIntermedias
-
 	} from '$lib/stores/global';
 	import Tooltip from './tooltip.svelte';
 	import { createEventDispatcher } from 'svelte';
@@ -53,7 +51,6 @@
 		TME();
 		dispatch('toggleMarcadaEstandar');
 	}
-
 </script>
 
 <main on:mouseleave={() => (menuAbierto = false)}>
@@ -72,9 +69,10 @@
 			out:fade={{ duration: 200 }}
 		>
 			<div class="flex:row">
-				<input type="checkbox" checked={marcadaEstandar} on:change={toggleMarcadaEstandar} />
-				Marcada Estandar
-				<Tooltip text="Salida de Ayer / Entrada de Hoy" />
+				<Tooltip text="Salida de Ayer / Entrada de Hoy"
+					><input type="checkbox" checked={marcadaEstandar} on:change={toggleMarcadaEstandar} />
+					Marcada Estandar</Tooltip
+				>
 			</div>
 
 			<div class="flex:row">

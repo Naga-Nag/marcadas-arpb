@@ -164,7 +164,8 @@
 			{#if registros.length > 0 && selectedDepartamento}
 				<div>
 					<DataTable
-						editable={isAdmin(user)}
+						editable={isAdmin(user)} 
+						marcadas={registros}
 						
 					/>
 				</div>

@@ -1,4 +1,6 @@
 <script>
+  import { fade } from 'svelte/transition';
+
   export let text = 'Tooltip text'; // The text to display inside the tooltip
   let visible = false;
 
@@ -18,8 +20,7 @@
   }
 
   .tooltip {
-    visibility: hidden;
-    background-color: black;
+    background-color: rgba(0, 0, 0, 0.61);
     color: #fff;
     text-align: center;
     border-radius: 5px;
@@ -27,22 +28,14 @@
     position: absolute;
     z-index: 1;
     bottom: 125%; /* Position above the element */
-    left: 50%;
+    left: 125%;
     transform: translateX(-50%);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .tooltip-container:hover .tooltip {
-    visibility: visible;
-    opacity: 1;
   }
 </style>
 
 <div class="tooltip-container" role="tooltip" on:mouseover={showTooltip} on:mouseleave={hideTooltip} on:focus={showTooltip} on:blur={hideTooltip}>
   <slot></slot>
   {#if visible}
-    <div class="tooltip">{text}</div>
+    <div class="tooltip" transition:fade>{text}</div>
   {/if}
 </div>
-

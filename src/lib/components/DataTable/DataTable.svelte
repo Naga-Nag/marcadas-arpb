@@ -1,6 +1,6 @@
 <script lang="ts">
 	export let editable = false;
-
+	export let marcadas: Marcada[] = [];
 	import type { Marcada } from '$lib/types/gen';
 	import EditableCell from '$lib/components/DataTable/EditableCell.svelte';
 	import { sortTime, sortString, sortNumber, sortEstado } from '$lib/utils/utils';
@@ -25,7 +25,6 @@
 
 	const dispatch = createEventDispatcher();
 
-	let marcadas: Marcada[] = [];
 
 	let marcadasIntermedias: boolean;
 	let entreFechas: boolean;
@@ -41,8 +40,6 @@
 		marcadasIntermedias = $value.marcadasIntermedias;
 		entreFechas = $value.entreFechas;
 		marcadaEstandar = $value.marcadaEstandar;
-
-		marcadas = $value.marcadas;
 	});
 
 	console.log('DataTable :: ' + marcadas.length + ' marcadas ');
