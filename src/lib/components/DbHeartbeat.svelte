@@ -1,25 +1,37 @@
 <script lang="ts">
 	import { heartbeat } from '$lib/utils/mainController.js';
 	import { onMount } from 'svelte';
-	let connected: boolean = false;
 
-	onMount(() => {
-          heartbeat().then((result) => {
-            connected = result;
-          });
-     });
-     
-	$: (async () => {
-		while (true) {
+	export let connected: boolean = false;
+
+	async function checkHeartbeat() {
+		try {
 			connected = await heartbeat();
-			await new Promise((resolve) => setTimeout(resolve, 5000));
+		} catch (error) {
+			console.error('Error during heartbeat check', error); // This will log any errors in the `heartbeat` call
 		}
-	})();
+
+		// After completing the check, schedule the next check with a 5-second delay
+		setTimeout(checkHeartbeat, 2000); // Recursive call with a delay
+	}
+
+	onMount(async () => {
+		await checkHeartbeat(); // Start the heartbeat check when the component mounts
+	});
 </script>
 
-<div class={`heartbeat ${connected ? 'connected' : 'paused'}`} />
+<div class="status">
+	<div class={`heartbeat ${connected ? 'connected' : 'paused'}`} />
+	<span class="font-size:18">{connected ? 'Conectado a la base de datos' : 'Desconectado de la base de datos'}</span>
+</div>
+<br>
 
 <style>
+	.status {
+		display: flex;
+		align-items: center;
+	}
+
 	.heartbeat {
 		width: 20px;
 		height: 20px;
@@ -30,6 +42,7 @@
 		transition:
 			background-color 0.3s,
 			box-shadow 0.3s;
+		margin-right: 10px; /* Add some space between the heartbeat and the text */
 	}
 
 	.heartbeat.connected {

@@ -6,7 +6,10 @@ import { notify } from "$lib/stores/notifications";
 import { filtrarMarcadasFinde } from "./utils";
 
 export async function fetchUsuarios() {
-    const response = await fetch('/api/fetchUsuarios');
+    const response = await fetch('/api/usuarios', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    });
     return await response.json();
 }
 

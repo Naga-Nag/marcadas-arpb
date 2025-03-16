@@ -2,11 +2,14 @@
 	import { enhance } from '$app/forms';
 	export let form;
 	let activeTab = 'login';
-	
+
+	import { DbHeartbeat } from '$lib/components/components.js';
+	let connected: boolean;
 </script>
 
 <main>
 	<div class="container">
+		<DbHeartbeat bind:connected />
 		<div class="tabs">
 			<button class:active-tab={activeTab === 'login'} on:click={() => (activeTab = 'login')}>
 				Ingresar
@@ -32,7 +35,10 @@
 					{/if}
 				</div>
 				<div class="form-item">
-					<button type="submit">Ingresar</button>
+					<button type="submit" disabled={!connected}>Ingresar</button>
+					{#if !connected}
+						<small>Sin conexión</small>
+					{/if}
 				</div>
 			</form>
 		{:else}
@@ -50,7 +56,10 @@
 					<input id="departamento" type="text" name="departamento" required />
 				</div>
 				<div class="form-item">
-					<button type="submit">Registrarse</button>
+					<button type="submit" disabled={!connected}>Registrarse</button>
+					{#if !connected}
+						<small>Sin conexión</small>
+					{/if}
 				</div>
 			</form>
 		{/if}

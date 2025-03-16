@@ -1,9 +1,11 @@
 import type { Marcada, shortWebUser, Usuario } from '$lib/types/gen';
 import { formatTime, getEstado } from '$lib/utils/utils';
 import { differenceInMilliseconds, differenceInMinutes, format, parseISO } from 'date-fns';
+import type { WebUser } from '$lib/types/gen';
 import sql from 'mssql';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import ping from 'ping';
 
 const sqlConfig = {
   user: Bun.env.DB_UID!,
@@ -28,10 +30,12 @@ const sqlConfig = {
  */
 export async function checkDatabaseConnection(): Promise<boolean> {
   try {
-    await sql.connect(sqlConfig);
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 1000));
+    const connectPromise = sql.connect(sqlConfig);
+    await Promise.race([timeoutPromise, connectPromise]);
+    (await connectPromise).close();
     return true;
-  } catch (err) {
-    console.error('Error checking database connection:', err);
+  } catch (error) {
     return false;
   }
 }
@@ -453,9 +457,8 @@ export async function registerWebUser(username: string, password: string, role: 
  * @returns {Promise<string | { token: string; }>} A promise that resolves to an object containing
  * a JWT token if authentication is successful, or rejects with an error message if authentication fails.
  */
-import type { WebUser } from '$lib/types/gen';
-import { json } from '@sveltejs/kit';
-export async function loginWebUser(username: string, password: string): Promise<WebUser | { error: string }> {
+
+export async function loginWebUser(username: string, password: string): Promise<{ WebUser: WebUser, token: string } | { error: string }> {
   try {
     await sql.connect(sqlConfig);
     console.log("DB :: loginWebUser:", username);
@@ -478,7 +481,7 @@ export async function loginWebUser(username: string, password: string): Promise<
           const isPasswordValid = await bcrypt.compare(password, row.password);
           if (!isPasswordValid) {
             console.warn("DB :: loginWebUser: Invalid password");
-            return reject(new Error("Invalid password"));
+            return resolve({ error: "Invalid password" });
           }
 
           if (!Bun.env.JWT_SECRET) {
@@ -488,34 +491,33 @@ export async function loginWebUser(username: string, password: string): Promise<
           const token = jwt.sign({ username }, Bun.env.JWT_SECRET, { expiresIn: "1h" });
           console.log("DB :: loginWebUser: JWT issued");
 
-
-          //** Esta sentencia envia la informacion del objeto usuario al endpoint */
-          //**
-          // ? Me conviene mandar esta informacion? o mandar solamente un success o algo asi y luego mandar la info del user con fetchUser sin ningun secreto*/
           resolve({
-            id: row.id,
-            username: row.username,
-            password: row.password,
-            role: row.role,
-            departamento: row.departamento,
-            departamentosPermitidos: row.departamentosPermitidos,
+            WebUser: {
+              id: row.id,
+              username: row.username,
+              password: row.password,
+              role: row.role,
+              departamento: row.departamento,
+              departamentosPermitidos: row.departamentosPermitidos,
+            },
+            token
           });
         } catch (error) {
           console.error("Error comparing passwords:", error);
-          reject(error);
+          reject({ error: "Authentication failed" });
         }
       });
 
       request.on("done", () => {
         if (!userFound) {
           console.warn("DB :: loginWebUser: User not found");
-          reject(new Error("User not found"));
+          resolve({ error: "User not found" });
         }
       });
 
       request.on("error", (err) => {
         console.error("DB :: loginWebUser: SQL Error:", err);
-        reject(err);
+        reject({ error: "Authentication failed" });
       });
     });
 
@@ -636,7 +638,7 @@ export async function createUsuario(usuario: WebUser) {
       request.input("role", sql.NVarChar, usuario.role);
       request.input("departamento", sql.NVarChar, usuario.departamento);
       request.input("departamentosPermitidos", sql.NVarChar, usuario.departamentosPermitidos.join(','));
-      
+
 
       const query = "INSERT INTO WebUsers (username, password, role, departamento, departamentosPermitidos) VALUES (@username, @password, @role, @departamento, @departamentosPermitidos)";
       request.query(query);

@@ -27,9 +27,11 @@
     padding: 5px;
     position: absolute;
     z-index: 1;
-    bottom: 125%; /* Position above the element */
-    left: 125%;
-    transform: translateX(-50%);
+    top: 50%; /* Position vertically centered */
+    left: 125%; /* Position to the right of the element */
+    transform: translateY(-50%);
+
+    white-space: nowrap; /* Prevent text from wrapping */
   }
 </style>
 
