@@ -1,11 +1,39 @@
 import { goto } from "$app/navigation";
 import { setloadingData, setMarcadas, getOmitirFinde, getfechaMarcada, getmarcadasIntermedias, getMarcadaEstandar } from "$lib/stores/global";
 import { clearUser } from "$lib/stores/user";
-import type { Marcada } from "../types/gen";
+import type { Marcada, WebUser } from "../types/gen";
 import { notify } from "$lib/stores/notifications";
 import { filtrarMarcadasFinde } from "./utils";
 
-/* console.log(await fetchMarcada('TAAP', '2023-08-03' , (batch) => {console.log(batch)})); */
+export async function fetchUsuarios() {
+    const response = await fetch('/api/fetchUsuarios');
+    return await response.json();
+}
+
+export async function createUsuario(usuario: WebUser) {
+    const response = await fetch('/api/createUsuario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(usuario)
+    });
+    return await response.json();
+}
+
+export async function updateUsuario(usuario: any) {
+    const response = await fetch('/api/updateUsuario', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(usuario)
+    });
+    return await response.json();
+}
+
+export async function deleteUsuario(username: string) {
+    const response = await fetch(`/api/deleteUsuario/${username}`, {
+        method: 'DELETE'
+    });
+    return await response.json();
+}
 
 export async function fetchMarcada(departamento: string, fecha: string) {
     setloadingData(true);
@@ -201,35 +229,6 @@ export async function logout() {
     clearUser();
     goto('/logout');
 }
-export async function fetchUsuarios() {
-    const response = await fetch('/api/fetchUsuarios');
-    return await response.json();
-}
-
-export async function createUsuario(usuario: any) {
-    const response = await fetch('/api/createUsuario', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(usuario)
-    });
-    return await response.json();
-}
-
-export async function updateUsuario(usuario: any) {
-    const response = await fetch('/api/updateUsuario', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(usuario)
-    });
-    return await response.json();
-}
-
-export async function deleteUsuario(username: string) {
-    const response = await fetch(`/api/deleteUsuario/${username}`, {
-        method: 'DELETE'
-    });
-    return await response.json();
-}
 
 export async function fetchMarcadaEstandar(departamento: string, fecha: string) {
     const response = await fetch('/api/fetchMarcadaEstandar', {
@@ -242,4 +241,14 @@ export async function fetchMarcadaEstandar(departamento: string, fecha: string) 
         throw new Error('mainController :: Marcada Estandar :: Error al obtener datos de marcadas');
     }
     return await response.json();
+}
+
+export async function heartbeat(): Promise<boolean> {
+    try {
+        const response = await fetch('/api/heartbeat');
+        return response.json();
+    } catch (error) {
+        console.error('Error checking heartbeat:', error);
+        return false;
+    }
 }

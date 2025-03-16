@@ -22,6 +22,19 @@ const sqlConfig = {
   stream: true,  // Enable streaming
 };
 
+/**
+ * Checks the database connection by attempting to connect and then immediately disconnect.
+ * @returns {Promise<boolean>} A promise that resolves to true if the connection is successful, or false if it fails.
+ */
+export async function checkDatabaseConnection(): Promise<boolean> {
+  try {
+    await sql.connect(sqlConfig);
+    return true;
+  } catch (err) {
+    console.error('Error checking database connection:', err);
+    return false;
+  }
+}
 
 /**
  * Fetches MarcadaDelDia records from the database.
@@ -486,7 +499,6 @@ export async function loginWebUser(username: string, password: string): Promise<
             role: row.role,
             departamento: row.departamento,
             departamentosPermitidos: row.departamentosPermitidos,
-            token: token
           });
         } catch (error) {
           console.error("Error comparing passwords:", error);
@@ -579,39 +591,131 @@ export async function setWebUserDepaPermitidos(username: string, depaPermitidos:
   }
 }
 
-export async function fetchUsuarios() {
-  const pool = await sql.connect(sqlConfig);
-  const result = await pool.request().query('SELECT * FROM WebUsers');
-  return result.recordset;
+export async function fetchUsuarios(): Promise<WebUser[]> {
+  try {
+    await sql.connect(sqlConfig);
+
+    return new Promise((resolve, reject) => {
+      const request = new sql.Request();
+
+      const query = "SELECT * FROM dbo.WebUsers;";
+      request.query(query);
+
+      let usuarios: WebUser[] = [];
+      request.on("row", (row) => {
+        usuarios.push(row);
+      });
+
+      request.on("done", () => {
+        console.log("DB :: fetchUsuarios:", usuarios);
+        resolve(usuarios);
+      });
+
+      request.on("error", (err) => {
+        console.error("DB :: fetchUsuarios: SQL Error:", err);
+        reject(err);
+      });
+    });
+
+  } catch (err) {
+    console.error("Error in fetchUsuarios:", err);
+    throw new Error("Error fetching usuarios");
+  }
 }
 
-export async function createUsuario(usuario: any) {
-  const pool = await sql.connect(sqlConfig);
-  const result = await pool.request()
-    .input('username', sql.NVarChar, usuario.username)
-    .input('role', sql.NVarChar, usuario.role)
-    .input('departamento', sql.NVarChar, usuario.departamento)
-    .input('departamentosPermitidos', sql.NVarChar, usuario.departamentosPermitidos.join(','))
-    .query('INSERT INTO WebUsers (username, role, departamento, departamentosPermitidos) VALUES (@username, @role, @departamento, @departamentosPermitidos)');
-  return result;
-}
 
-export async function updateUsuario(usuario: any) {
-  const pool = await sql.connect(sqlConfig);
-  const result = await pool.request()
-    .input('id', sql.Int, usuario.id)
-    .input('username', sql.NVarChar, usuario.username)
-    .input('role', sql.NVarChar, usuario.role)
-    .input('departamento', sql.NVarChar, usuario.departamento)
-    .input('departamentosPermitidos', sql.NVarChar, usuario.departamentosPermitidos.join(','))
-    .query('UPDATE WebUsers SET username = @username, role = @role, departamento = @departamento, departamentosPermitidos = @departamentosPermitidos WHERE id = @id');
-  return result.rowsAffected;
+export async function createUsuario(usuario: WebUser) {
+  try {
+    await sql.connect(sqlConfig);
+
+    return new Promise((resolve, reject) => {
+      const request = new sql.Request();
+
+      request.input("username", sql.NVarChar, usuario.username);
+      request.input("password", sql.NVarChar, usuario.password);
+      request.input("role", sql.NVarChar, usuario.role);
+      request.input("departamento", sql.NVarChar, usuario.departamento);
+      request.input("departamentosPermitidos", sql.NVarChar, usuario.departamentosPermitidos.join(','));
+      
+
+      const query = "INSERT INTO WebUsers (username, password, role, departamento, departamentosPermitidos) VALUES (@username, @password, @role, @departamento, @departamentosPermitidos)";
+      request.query(query);
+
+      request.on("done", (result) => {
+        console.log("DB :: createUsuario:", result);
+        resolve(result);
+      });
+
+      request.on("error", (err) => {
+        console.error("DB :: createUsuario: SQL Error:", err);
+        reject(err);
+      });
+    });
+
+  } catch (err) {
+    console.error("Error in createUsuario:", err);
+    throw new Error("Error creating usuario");
+  }
+}
+export async function updateUsuario(usuario: WebUser) {
+  try {
+    await sql.connect(sqlConfig);
+
+    return new Promise((resolve, reject) => {
+      const request = new sql.Request();
+
+      request.input("id", sql.Int, usuario.id);
+      request.input("username", sql.NVarChar, usuario.username);
+      request.input("password", sql.NVarChar, usuario.password);
+      request.input("role", sql.NVarChar, usuario.role);
+      request.input("departamento", sql.NVarChar, usuario.departamento);
+      request.input("departamentosPermitidos", sql.NVarChar, usuario.departamentosPermitidos.join(','));
+
+      const query = "UPDATE WebUsers SET username = @username, password = @password, role = @role, departamento = @departamento, departamentosPermitidos = @departamentosPermitidos WHERE id = @id";
+      request.query(query);
+
+      request.on("done", (result) => {
+        console.log("DB :: updateUsuario:", result);
+        resolve(result);
+      });
+
+      request.on("error", (err) => {
+        console.error("DB :: updateUsuario: SQL Error:", err);
+        reject(err);
+      });
+    });
+
+  } catch (err) {
+    console.error("Error in updateUsuario:", err);
+    throw new Error("Error updating usuario");
+  }
 }
 
 export async function deleteUsuario(username: string) {
-  const pool = await sql.connect(sqlConfig);
-  const result = await pool.request()
-    .input('name', sql.Int, username)
-    .query('DELETE FROM WebUsers WHERE name = @username');
-  return result.rowsAffected;
+  try {
+    await sql.connect(sqlConfig);
+
+    return new Promise((resolve, reject) => {
+      const request = new sql.Request();
+
+      request.input("username", sql.NVarChar, username);
+
+      const query = "DELETE FROM WebUsers WHERE username = @username";
+      request.query(query);
+
+      request.on("done", (result) => {
+        console.log("DB :: deleteUsuario:", result);
+        resolve(result);
+      });
+
+      request.on("error", (err) => {
+        console.error("DB :: deleteUsuario: SQL Error:", err);
+        reject(err);
+      });
+    });
+
+  } catch (err) {
+    console.error("Error in deleteUsuario:", err);
+    throw new Error("Error deleting usuario");
+  }
 }

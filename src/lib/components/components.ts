@@ -7,3 +7,6 @@ export {default as RangeDatePicker} from "$lib/components/RangeDatePicker.svelte
 export {default as TabsDepartamento} from "$lib/components/TabsDepartamento.svelte"
 export {default as Notification} from "$lib/components/Notification/Notification.svelte"
 export {default as NotificationContainer} from "$lib/components/Notification/NotificationContainer.svelte"
+export {default as Tag} from "$lib/components/Tag.svelte"
+export {default as DbHeartbeat} from "$lib/components/DbHeartbeat.svelte"
+export {default as tooltip} from "$lib/components/tooltip.svelte"

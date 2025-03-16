@@ -29,7 +29,6 @@ export type WebUser = {
     id: number;
     username: string;
     password: string;
-    token: string; //JWT
     role: string;
     departamento: string;
     departamentosPermitidos: string[];

@@ -1,67 +1,62 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-
 	export let form;
 	let activeTab = 'login';
+	
 </script>
 
 <main>
-<div class="container">
-	<div class="tabs">
-		<button
-			class:active-tab={activeTab === 'login'}
-			on:click={() => (activeTab = 'login')}
-		>
-			Ingresar
-		</button>
-		<button
-			class:active-tab={activeTab === 'register'}
-			on:click={() => (activeTab = 'register')}
-		>
-			Registrarse
-		</button>
-	</div>
+	<div class="container">
+		<div class="tabs">
+			<button class:active-tab={activeTab === 'login'} on:click={() => (activeTab = 'login')}>
+				Ingresar
+			</button>
+			<button class:active-tab={activeTab === 'register'} on:click={() => (activeTab = 'register')}>
+				Registrarse
+			</button>
+		</div>
 
-	{#if activeTab === 'login'}
-		<form use:enhance method="post" action="?/login">
-			<div class="form-item">
-				<label for="username">Usuario<sup><small class="required">*</small></sup></label>
-				<input value={form?.username ?? ''} id="username" type="text" name="username" required />
-			</div>
-			<div class="form-item">
-				<label for="password">Contraseña<sup><small class="required">*</small></sup></label>
-				<input id="password" type="password" name="password" required />
-			</div>
-			<div class="form-item">
-				{#if form?.error}
-					<small>{form?.message}</small>
-				{/if}
-			</div>
-			<div class="form-item">
-				<button type="submit">Ingresar</button>
-			</div>
-		</form>
-	{:else}
-		<form use:enhance method="post" action="?/register">
-			<div class="form-item">
-				<label for="username">Usuario<sup><small class="required">*</small></sup></label>
-				<input id="username" type="text" name="username" required />
-			</div>
-			<div class="form-item">
-				<label for="password">Contraseña<sup><small class="required">*</small></sup></label>
-				<input id="password" type="password" name="password" required />
-			</div>
-			<div class="form-item">
-				<label for="departamento">Departamento<sup><small class="required">*</small></sup></label>
-				<input id="departamento" type="text" name="departamento" required />
-			</div>
-			<div class="form-item">
-				<button type="submit">Registrarse</button>
-			</div>
-		</form>
-	{/if}
-</div>
+		{#if activeTab === 'login'}
+			<form use:enhance method="post" action="?/login">
+				<div class="form-item">
+					<label for="username">Usuario<sup><small class="required">*</small></sup></label>
+					<input value={form?.username ?? ''} id="username" type="text" name="username" required />
+				</div>
+				<div class="form-item">
+					<label for="password">Contraseña<sup><small class="required">*</small></sup></label>
+					<input id="password" type="password" name="password" required />
+				</div>
+				<div class="form-item">
+					{#if form?.error}
+						<small>{form?.message}</small>
+					{/if}
+				</div>
+				<div class="form-item">
+					<button type="submit">Ingresar</button>
+				</div>
+			</form>
+		{:else}
+			<form use:enhance method="post" action="?/register">
+				<div class="form-item">
+					<label for="username">Usuario<sup><small class="required">*</small></sup></label>
+					<input id="username" type="text" name="username" required />
+				</div>
+				<div class="form-item">
+					<label for="password">Contraseña<sup><small class="required">*</small></sup></label>
+					<input id="password" type="password" name="password" required />
+				</div>
+				<div class="form-item">
+					<label for="departamento">Departamento<sup><small class="required">*</small></sup></label>
+					<input id="departamento" type="text" name="departamento" required />
+				</div>
+				<div class="form-item">
+					<button type="submit">Registrarse</button>
+				</div>
+			</form>
+		{/if}
+	</div>
 </main>
+
 <style>
 	main {
 		display: flex;
@@ -89,7 +84,7 @@
 	button {
 		margin: 0 0.5em;
 		padding: 0.5em 1em;
-		background-color: #FFF;
+		background-color: #fff;
 		border: none;
 		border-radius: 5px;
 		transition: all 0.3s ease-in;
@@ -98,16 +93,16 @@
 	button:hover {
 		cursor: pointer;
 		background-color: #4d4c4c;
-		color: #FFF;
+		color: #fff;
 	}
 
 	.active-tab {
 		background-color: #4d4c4c;
-		color: #FFF;
+		color: #fff;
 	}
 
 	.form-item {
-		color: #FFF;
+		color: #fff;
 		margin-bottom: 0.5em;
 		display: flex;
 		flex-direction: row;
@@ -123,4 +118,3 @@
 		color: #ff0000;
 	}
 </style>
-
