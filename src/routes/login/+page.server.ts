@@ -25,7 +25,7 @@ export const actions: Actions = {
 
           const data = await loginWebUser(username, password);
           if ('error' in data) {
-               return { status: 401, error: true, message: 'Unauthorized' };
+               return { status: 401, error: true, message: 'Error en la autenticacion' };
           }
           console.log("Login data :: ", data);
             cookies.set('token', data.token, { path: '/', secure: false });
@@ -43,7 +43,7 @@ export const actions: Actions = {
           const data = await registerWebUser(username, password, role, departamento);
 
           if (!data) {
-               return { status: 401, error: true, message: 'Unauthorized' };
+               return { status: 401, error: true, message: 'No se recibio respuesta de la base de datos' };
           }
           else {
                const result: registerFormResponse = { error: false, message: 'Usuario registrado con exito' };

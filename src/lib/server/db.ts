@@ -28,7 +28,20 @@ const sqlConfig = {
  * @returns {Promise<boolean>} A promise that resolves to true if the connection is successful, or false if it fails.
  */
 export async function checkDatabaseConnection(): Promise<boolean> {
- return true
+  const pool = new sql.ConnectionPool(sqlConfig);
+  const timeout = new Promise<boolean>((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 5000));
+  
+  try {
+    await Promise.race([pool.connect(), timeout]);
+    return true;
+  } catch (error) {
+    console.error('Error checking database connection:', error);
+    return false;
+  } finally {
+    if (pool.connected) {
+      pool.close();
+    }
+  }
 }
 
 /**

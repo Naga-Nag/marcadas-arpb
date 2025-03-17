@@ -49,7 +49,7 @@ export const handle = async ({ event, resolve }) => {
         return resolve(event);
     } else {
         event.cookies.delete('token', { path: '/' });
-        console.log("HOOKS :: Unauthorized,Redirecting to login");
+        console.log("HOOKS :: Unauthorized, redirecting to login");
         throw redirect(303, '/login');
     }
 };
