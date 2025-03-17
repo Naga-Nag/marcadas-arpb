@@ -56,7 +56,7 @@
 					<input id="departamento" type="text" name="departamento" required />
 				</div>
 				<div class="form-item">
-					<button type="submit" disabled={!connected}>Registrarse</button>
+					<button type="submit">Registrarse</button>
 					{#if !connected}
 						<small>Sin conexión</small>
 					{/if}

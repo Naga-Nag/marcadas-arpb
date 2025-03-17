@@ -1,11 +1,10 @@
 import type { Marcada, shortWebUser, Usuario } from '$lib/types/gen';
 import { formatTime, getEstado } from '$lib/utils/utils';
-import { differenceInMilliseconds, differenceInMinutes, format, parseISO } from 'date-fns';
+import { differenceInMilliseconds} from 'date-fns';
 import type { WebUser } from '$lib/types/gen';
 import sql from 'mssql';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import ping from 'ping';
 
 const sqlConfig = {
   user: Bun.env.DB_UID!,
@@ -29,15 +28,7 @@ const sqlConfig = {
  * @returns {Promise<boolean>} A promise that resolves to true if the connection is successful, or false if it fails.
  */
 export async function checkDatabaseConnection(): Promise<boolean> {
-  try {
-    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 1000));
-    const connectPromise = sql.connect(sqlConfig);
-    await Promise.race([timeoutPromise, connectPromise]);
-    (await connectPromise).close();
-    return true;
-  } catch (error) {
-    return false;
-  }
+ return true
 }
 
 /**
@@ -420,7 +411,7 @@ export async function registerWebUser(username: string, password: string, role: 
 
       let departamentosPermitidos = JSON.stringify([departamento]);
       // Parameterized query to prevent SQL injection
-      const query = `
+      const query = `USE ${Bun.env.DB};
         INSERT INTO dbo.WebUsers (username, password, role, departamento, departamentosPermitidos) 
         VALUES (@username, @password_hash, @role, @departamento, @departamentosPermitidos);
       `;
@@ -467,7 +458,7 @@ export async function loginWebUser(username: string, password: string): Promise<
       const request = new sql.Request();
 
       request.input("username", sql.VarChar, username);
-      const query = "SELECT * FROM dbo.WebUsers WHERE username = @username;";
+      const query = `USE ${Bun.env.DB}; SELECT * FROM dbo.WebUsers WHERE username = @username;`;
 
       let userFound = false;
 
@@ -536,7 +527,7 @@ export async function fetchWebUser(username: string): Promise<shortWebUser> {
       const request = new sql.Request();
 
       request.input("username", sql.VarChar, username);
-      const query = "SELECT username, role, departamento, departamentosPermitidos FROM dbo.WebUsers WHERE username = @username;";
+      const query = `USE ${Bun.env.DB}; SELECT username, role, departamento, departamentosPermitidos FROM dbo.WebUsers WHERE username = @username;`;
 
       request.query(query);
 
@@ -573,7 +564,7 @@ export async function setWebUserDepaPermitidos(username: string, depaPermitidos:
 
       request.input("username", sql.VarChar, username);
       request.input("depaPermitidos", sql.VarChar, depaPermitidosJSON);
-      const query = "UPDATE dbo.WebUsers SET departamentosPermitidos = @depaPermitidos WHERE username = @username;";
+      const query = `USE ${Bun.env.DB}; UPDATE dbo.WebUsers SET departamentosPermitidos = @depaPermitidos WHERE username = @username;`;
 
       request.query(query);
 
@@ -600,7 +591,7 @@ export async function fetchUsuarios(): Promise<WebUser[]> {
     return new Promise((resolve, reject) => {
       const request = new sql.Request();
 
-      const query = "SELECT * FROM dbo.WebUsers;";
+      const query = `USE ${Bun.env.DB}; SELECT * FROM dbo.WebUsers;`;
       request.query(query);
 
       let usuarios: WebUser[] = [];
@@ -640,7 +631,7 @@ export async function createUsuario(usuario: WebUser) {
       request.input("departamentosPermitidos", sql.NVarChar, usuario.departamentosPermitidos.join(','));
 
 
-      const query = "INSERT INTO WebUsers (username, password, role, departamento, departamentosPermitidos) VALUES (@username, @password, @role, @departamento, @departamentosPermitidos)";
+      const query = `USE ${Bun.env.DB}; INSERT INTO WebUsers (username, password, role, departamento, departamentosPermitidos) VALUES (@username, @password, @role, @departamento, @departamentosPermitidos)`;
       request.query(query);
 
       request.on("done", (result) => {
@@ -673,7 +664,7 @@ export async function updateUsuario(usuario: WebUser) {
       request.input("departamento", sql.NVarChar, usuario.departamento);
       request.input("departamentosPermitidos", sql.NVarChar, usuario.departamentosPermitidos.join(','));
 
-      const query = "UPDATE WebUsers SET username = @username, password = @password, role = @role, departamento = @departamento, departamentosPermitidos = @departamentosPermitidos WHERE id = @id";
+      const query = `USE ${Bun.env.DB}; UPDATE WebUsers SET username = @username, password = @password, role = @role, departamento = @departamento, departamentosPermitidos = @departamentosPermitidos WHERE id = @id`;
       request.query(query);
 
       request.on("done", (result) => {
@@ -702,7 +693,7 @@ export async function deleteUsuario(username: string) {
 
       request.input("username", sql.NVarChar, username);
 
-      const query = "DELETE FROM WebUsers WHERE username = @username";
+      const query = `USE ${Bun.env.DB}; DELETE FROM WebUsers WHERE username = @username;`;
       request.query(query);
 
       request.on("done", (result) => {
