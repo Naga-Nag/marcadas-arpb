@@ -27,8 +27,8 @@ export const actions: Actions = {
           if ('error' in data) {
                return { status: 401, error: true, message: 'Unauthorized' };
           }
-
-          cookies.set('token', data.token, { path: '/' });
+          console.log("Login data :: ", data);
+            cookies.set('token', data.token, { path: '/', secure: false });
 
           throw redirect(303, '/');
      },
