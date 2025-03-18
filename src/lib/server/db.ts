@@ -1,6 +1,6 @@
 import type { Marcada, shortWebUser, Usuario } from '$lib/types/gen';
 import { formatTime, getEstado } from '$lib/utils/utils';
-import { differenceInMilliseconds} from 'date-fns';
+import { differenceInMilliseconds } from 'date-fns';
 import type { WebUser } from '$lib/types/gen';
 import sql from 'mssql';
 import bcrypt from 'bcryptjs';
@@ -30,7 +30,7 @@ const sqlConfig = {
 export async function checkDatabaseConnection(): Promise<boolean> {
   const pool = new sql.ConnectionPool(sqlConfig);
   const timeout = new Promise<boolean>((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 5000));
-  
+
   try {
     await Promise.race([pool.connect(), timeout]);
     return true;
