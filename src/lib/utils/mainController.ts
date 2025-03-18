@@ -138,6 +138,12 @@ export async function updateUsuarioFromMarcada(marcadaRow: Marcada) {
         case 'NO':
             marcadaRow.Activo = '0';
             break;
+        case 'BAJA':
+            marcadaRow.Activo = '0';
+            break;
+        case 'baja':
+            marcadaRow.Activo = '0';
+            break;
     }
 
     const response = await fetch('/api/updateUsuario', {
