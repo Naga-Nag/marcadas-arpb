@@ -293,7 +293,7 @@ export async function updateUsuarioFromMarcada(marcadaRow: Marcada) {
 
     request.query(query);
 
-    console.log('db.ts :: Query updateUsuarioFromMarcada:', query);
+    console.log('db.ts :: updateUsuarioFromMarcada :: Query :: ', query);
 
     request.on('error', (err) => {
       console.error('Error fetching data:', err);
