@@ -63,10 +63,7 @@ export async function fetchMarcadaDelDia(
     const request = new sql.Request();
 
     // Set up the query based on the department host
-    const query =
-      departamento === 'ARPB'
-        ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDiaPEAP('${fecha}');`
-        : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDia('${departamento}', '${fecha}');`;
+    const query = `USE ${Bun.env.DB}; SELECT * FROM MarcadaDelDia('${departamento}', '${fecha}');`;
 
     request.query(query);
 
@@ -140,10 +137,7 @@ export async function fetchMarcadaDetalle(departamento: string, fecha: string): 
     const request = new sql.Request();
 
     // Set up the query for detailed data
-    const query =
-      departamento === 'ARPB'
-        ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaDetallePEAP('${fecha}');`
-        : `USE ${Bun.env.DB}; SELECT * FROM MarcadaDetalle('${departamento}', '${fecha}');`;
+    const query = `USE ${Bun.env.DB}; SELECT * FROM MarcadaDetalle('${departamento}', '${fecha}');`
 
     request.query(query);
 
@@ -216,10 +210,7 @@ export async function fetchMarcadaEntreFechas(departamento: string, fechaInicial
     const request = new sql.Request();
     request.stream = true;
 
-    const query =
-      departamento === 'ARPB'
-        ? `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechasPEAP('${fechaInicial}', '${fechaFinal}');`
-        : `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechas('${departamento}', '${fechaInicial}', '${fechaFinal}');`;
+    const query =`USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechas('${departamento}', '${fechaInicial}', '${fechaFinal}');`;
 
     console.log('Query fetchMarcadaEntreFechas:', query);
     request.query(query);
