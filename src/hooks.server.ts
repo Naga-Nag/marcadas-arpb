@@ -21,11 +21,16 @@ export const handle = async ({ event, resolve }) => {
         if (error instanceof Error) {
             if (error.name === 'TokenExpiredError') {
                 console.log("HOOKS :: Token expired, cleaning cookie");
-                event.cookies.delete('token', { path: '/' });
+                event.cookies.delete('token', { path: '/', secure:false});
                 throw redirect(303, '/login');
             } else if (error.name === 'JsonWebTokenError') {
                 console.log("HOOKS :: Token is invalid, cleaning cookie");
-                event.cookies.delete('token', { path: '/' });
+                event.cookies.delete('token', { path: '/', secure:false});
+                throw redirect(303, '/login');
+            }
+            else {
+                console.log("HOOKS :: Token is invalid, cleaning cookie");
+                event.cookies.delete('token', { path: '/', secure:false});
                 throw redirect(303, '/login');
             }
         }

@@ -1,5 +1,7 @@
+// Removed the inline module declaration as it will be moved to a separate declaration file.
+
 import * as XLSX from 'xlsx';
-import XlsxTemplater from '@sailimuhu/xlsxtemplater';
+import XlsxTemplater from '@sailimuhu/xlsxtemplater'; //Esto me da internal server error
 import type { Marcada } from '../types/gen';
 import { globalStore } from '$lib/stores/global';
 
