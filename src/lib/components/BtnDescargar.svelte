@@ -8,7 +8,7 @@
 
 <main>
 	<button
-		class="btn bg:beryl bg:rgb(0,150,105):hover transition:background-color|200ms|ease-in-out font:white {className} ml:5"
+		class="btn bg:beryl bg:rgb(0,150,105):hover ~background-color|200ms|ease-in-out font:white {className} ml:5"
 		on:click={() => downloadExcel(data(), filename)}
 	>
 		{placeholder}

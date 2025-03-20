@@ -11,12 +11,15 @@
 		NotificationContainer
 	} from '$lib/components/components';
 
-	import { filtrarMarcadasFinde, reemplazarMarcadas } from '$lib/utils/utils';
+	import { filtrarMarcadasFinde } from '$lib/utils/utils';
 
 	import {
 		fetchMarcada,
 		fetchEntreFechas,
-		logout
+		logout,
+
+		genParte
+
 	} from '$lib/utils/mainController';
 
 	import {
@@ -152,6 +155,13 @@
 					placeholder="Descargar Ausentes"
 					filename={`marcadas AD - ${selectedDepartamento} ${fechaMarcada}`}
 				/>
+
+				<button
+					class="btn btnfade ml:5"
+					on:click={() => {
+						genParte(registros);
+					}}
+				>Generar Parte Diario</button>
 
 
 			</div>

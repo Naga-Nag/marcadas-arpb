@@ -261,3 +261,39 @@ export async function heartbeat(): Promise<boolean> {
         return false;
     }
 }
+
+
+export async function genParte(Marcadas: Array<Marcada>) {
+    try {
+        const response = await fetch('/api/genParte', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ Marcadas }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to generate report');
+        }
+
+        // Create a blob from the response
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        let date = new Date();
+        let formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+        let filename = `Parte diario - ${formattedDate}.xlsx`;
+
+        // Create a link and simulate a click to download the file
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+
+        // Release the object URL
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error downloading report:', error);
+    }
+}

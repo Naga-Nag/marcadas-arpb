@@ -1,30 +1,14 @@
 // Removed the inline module declaration as it will be moved to a separate declaration file.
 
 import * as XLSX from 'xlsx';
-import XlsxTemplater from '@sailimuhu/xlsxtemplater'; //Esto me da internal server error
 import type { Marcada } from '../types/gen';
-import { globalStore } from '$lib/stores/global';
+import { getAusentes, globalStore } from '$lib/stores/global';
 
 let marcadasIntermedias: boolean;
 
 globalStore.subscribe((value) => {
   marcadasIntermedias = value.marcadasIntermedias;
 });
-
-export async function generateExcelTemplate(data: Array<Marcada>, fileName = 'marcada') {
-  if (!Array.isArray(data) || data.length === 0) {}
-  const templater = new XlsxTemplater('./static/parte-template.xlsx');
-  await templater.render({
-    departamento: data[0].Departamento,
-    items: [
-      { name: 'Item 1', price: 100 },
-      { name: 'Item 2', price: 200 }
-    ]
-  });
-  
-  await templater.save(fileName + '.xlsx');
-}
-
 
 export function downloadExcel(data: Array<Marcada>, fileName = 'marcada') {
   if (!Array.isArray(data) || data.length === 0) {
@@ -164,7 +148,7 @@ export function getEstado(marcada: { Entrada: any; Salida: any; Marcada?: any; }
   } else {
     return 'Sin datos';
   }
- 
+
 }
 
 export function filtrarMarcadasFinde(marcadas: Marcada[]): Marcada[] {
