@@ -11,7 +11,7 @@ export const load: PageServerLoad = async (event) => {
     const requestIp = formatIP(event.getClientAddress()); // IP from Client Request
 
     console.log('MAIN :: IP Address from Client Request: ::', requestIp + ' :: ');
-    const defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    const defaultDate = new Date(Date.now()).toISOString().split('T')[0];
 
     console.log('MAIN :: fechaMarcada: ' + defaultDate + ' :: ' + 'IPAddress: ' + requestIp);
 

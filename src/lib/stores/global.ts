@@ -1,5 +1,6 @@
 import type { Marcada } from '$lib/types/gen';
-import { writable, derived } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
+import { getOcultarBajas } from './dataFilter';
 
 export const globalStore = writable({
     loading: false,
@@ -30,7 +31,7 @@ export const ausentes = derived(globalStore, ($store) => {
 export const filteredMarcadas = derived(globalStore, ($store) => {
     const search = $store.searchText.trim().toLowerCase();
     if (!search) return $store.marcadas; // If empty, return all `marcadas`
-
+    
     return $store.marcadas.filter(m =>
         m.Nombre.toLowerCase().includes(search) ||
         m.Departamento.toLowerCase().includes(search) ||

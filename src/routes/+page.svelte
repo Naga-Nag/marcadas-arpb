@@ -13,28 +13,21 @@
 
 	import { filtrarMarcadasFinde } from '$lib/utils/utils';
 
-	import {
-		fetchMarcada,
-		fetchEntreFechas,
-		logout,
-
-		genParte
-
-	} from '$lib/utils/mainController';
+	import { fetchMarcada, fetchEntreFechas, logout } from '$lib/utils/mainController';
 
 	import {
 		globalStore,
 		filteredMarcadas,
 		ausentes,
 		updateSelectedDepartamento,
-		clearMarcadas,
-		getAusentes,
 		setFechaMarcada
 	} from '$lib/stores/global';
 	import { onMount } from 'svelte';
 	import type { Marcada } from '$lib/types/gen';
 	import { isAdmin } from '$lib/stores/user';
 	import SearchBar from '$lib/components/SearchBar.svelte';
+	import { generateExcelFromTemplate } from '$lib/utils/genParteClientSide';
+	import FilterOptions from '$lib/components/FilterOptions.svelte';
 
 	let user = data.user;
 
@@ -49,7 +42,6 @@
 
 	console.log('MAIN :: user => ', user);
 
-	
 	$: registros = $filteredMarcadas; // Dynamically update when filteredMarcadas changes
 	globalStore.subscribe((value) => {
 		selectedDepartamento = value.selectedDepartamento;
@@ -83,10 +75,9 @@
 	}
 
 	onMount(async () => {
-		const defaultDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-		setFechaMarcada(defaultDate);
+		setFechaMarcada(data.fechaMarcada);
 		updateSelectedDepartamento(user.departamento);
-		await fechaListener(defaultDate);
+		await fechaListener(data.fechaMarcada);
 	});
 </script>
 
@@ -107,10 +98,7 @@
 		<!-- Esto solo se muestra si es admin o el departamento es PEAP -->
 		{#if user.departamentosPermitidos.length > 1 || isAdmin(user)}
 			<div class="d:flex flex:row justify-content:space-between">
-				<TabsDepartamento
-					departamentos={user.departamentosPermitidos}
-					bind:selectedDepartamento
-				/>
+				<TabsDepartamento departamentos={user.departamentosPermitidos} bind:selectedDepartamento />
 			</div>
 		{/if}
 
@@ -123,7 +111,7 @@
 					on:toggleMarcadaDetalle={() => fechaListener(fechaMarcada)}
 					on:toggleEntreFechas={() => {
 						if (entreFechas) {
-							console.log('entreFechas => '+entreFechas);
+							console.log('entreFechas => ' + entreFechas);
 							fechaListener(fechaMarcada);
 						}
 					}}
@@ -134,6 +122,7 @@
 						fechaListener(fechaMarcada);
 					}}
 				/>
+				
 				<span></span>
 
 				{#if entreFechas}
@@ -159,11 +148,9 @@
 				<button
 					class="btn btnfade ml:5"
 					on:click={() => {
-						genParte(registros);
-					}}
-				>Generar Parte Diario</button>
-
-
+						generateExcelFromTemplate(registros);
+					}}>Generar Parte Diario</button
+				>
 			</div>
 
 			<div>
@@ -173,11 +160,7 @@
 			<!-- // ANCHOR DataTable -->
 			{#if registros.length > 0 && selectedDepartamento}
 				<div>
-					<DataTable
-						editable={isAdmin(user)} 
-						marcadas={registros}
-						
-					/>
+					<DataTable editable={isAdmin(user)} marcadas={registros} />
 				</div>
 
 				<!-- Contador de registros totales -->
@@ -194,4 +177,3 @@
 		{/if}
 	</main>
 </body>
-

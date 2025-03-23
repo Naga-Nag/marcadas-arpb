@@ -189,6 +189,7 @@
 	$pageSize = 40;
 
 	const { hiddenColumnIds } = pluginStates.hideCols;
+
 	const ids = flatColumns.map((c) => c.id);
 	let hideForId = Object.fromEntries(ids.map((id) => [id, false]));
 
@@ -196,7 +197,6 @@
 		hideForId.Entrada = marcadasIntermedias;
 		hideForId.Salida = marcadasIntermedias;
 		hideForId.Estado = marcadasIntermedias;
-
 		hideForId.Marcada = !marcadasIntermedias;
 
 		$hiddenColumnIds = Object.entries(hideForId)

@@ -4,14 +4,12 @@
 
 <script lang="ts">
 	import { writable } from 'svelte/store';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import { globalStore, setFechaMarcada } from '$lib/stores/global';
 
-
 	let hoy = new Date().toISOString().split('T')[0];
-	let ayer = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-	export let fechaMarcada = writable(ayer);
-	
+	export let fechaMarcada = writable(hoy);
+
 	let isloading: boolean;
 	globalStore.subscribe((value) => {
 		isloading = value.loading;
@@ -38,8 +36,7 @@
 			dispatch('fechaDefinida', {
 				fecha: ayer.toISOString().split('T')[0]
 			});
-		}
-		else {
+		} else {
 			let ayer = new Date();
 			ayer.setDate(ayer.getDate() - 1);
 			$fechaMarcada = ayer.toISOString().split('T')[0];
@@ -65,7 +62,6 @@
 			});
 		}
 	}
-
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -81,5 +77,9 @@
 	/>
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<button class="font-size:20 nakedbtn" on:click={setDateMañana} disabled={isloading || $fechaMarcada === hoy}>►</button>
+	<button
+		class="font-size:20 nakedbtn"
+		on:click={setDateMañana}
+		disabled={isloading || $fechaMarcada === hoy}>►</button
+	>
 </div>
