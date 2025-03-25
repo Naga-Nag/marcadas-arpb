@@ -10,6 +10,9 @@ CREATE TABLE WebUsers (
 	departamentosPermitidos NVARCHAR(50),
 );
 
+ALTER TABLE dbo.Dept ADD selloJefe IMAGE;
+ALTER TABLE dbo.Dept ADD leyendaJefe NVARCHAR(100);
+
 -- Informacion extra para la tabla de usuarios
 ALTER TABLE dbo.Userinfo ADD Activo BIT;
 ALTER TABLE dbo.Userinfo ADD Jornada TINYINT;

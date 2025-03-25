@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
+	import { fade, scale } from 'svelte/transition';
 	import {
 		globalStore,
 		toggleEntreFechas as TEF,
@@ -55,11 +55,7 @@
 
 <main on:mouseleave={() => (menuAbierto = false)}>
 	<button class="bg:transparent b:unset mr:10" on:click={toggleMenu}>
-		{#if menuAbierto}
-			<span class="font-size:25 bg:white p:5 r:10">⚙️</span>
-		{:else}
-			<span class="font-size:25">⚙️</span>
-		{/if}
+		<span class="font-size:25 p:5 r:10 {menuAbierto ? 'rotate' : 'rotate-back'}">⚙️</span>
 	</button>
 
 	{#if menuAbierto}
@@ -85,13 +81,42 @@
 				</div>
 			{/if}
 			<div class="flex:row">
-				<input
-					type="checkbox"
-					checked={marcadasIntermedias}
-					disabled={entreFechas}
-					on:change={toggleMarcadasIntermedias}
-				/>Marcadas Intermedias
+				<Tooltip text="Todas las marcadas del día">
+					<input
+						type="checkbox"
+						checked={marcadasIntermedias}
+						disabled={entreFechas}
+						on:change={toggleMarcadasIntermedias}
+					/>Marcadas Intermedias
+				</Tooltip>
 			</div>
 		</div>
 	{/if}
 </main>
+
+<style>
+	.rotate {
+		animation: rotate 0.3s ease-in-out forwards;
+	}
+	.rotate-back {
+		animation: rotate-back 0.3s ease-in-out forwards;
+	}
+
+	@keyframes rotate {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(180deg);
+		}
+	}
+
+	@keyframes rotate-back {
+		from {
+			transform: rotate(180deg);
+		}
+		to {
+			transform: rotate(0deg);
+		}
+	}
+</style>

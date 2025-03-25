@@ -34,7 +34,7 @@
 	{#if departamentos.length > 1}
 		{#each departamentos as departamento}
 			<button
-				class="btn ml:5"
+				class="btn ml:5 font:bold"
 				on:click={() => {
 					selectDepartamento(departamento);
 				}}

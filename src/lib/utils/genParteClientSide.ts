@@ -31,8 +31,8 @@ export async function generateExcelFromTemplate(marcadas: Array<Marcada>) {
      const Departamento = marcadas[0].Departamento;
      const Presentes = marcadas.length - Ausentes;
      const fePermanente = marcadas.length;
-     const selloJefe = 'placeholder';
-     const leyendaJefe = 'placeholder';
+     const selloJefe = 'placeholder sello';
+     const leyendaJefe = 'placeholder leyenda';
 
      // Replace single-value placeholders
      worksheet.eachRow((row) => {

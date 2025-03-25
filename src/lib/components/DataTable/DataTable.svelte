@@ -307,4 +307,13 @@
 		top: 0;
 		z-index: 1;
 	}
+
+	/* Alternate row shading */
+	tbody tr:nth-child(odd) {
+		background-color: #eeeeee;
+	}
+
+	tbody tr:nth-child(even) {
+		background-color: #ffffff;
+	}
 </style>
