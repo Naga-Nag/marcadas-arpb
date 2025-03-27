@@ -1,6 +1,5 @@
 import type { Marcada } from '$lib/types/gen';
 import { writable, derived, get } from 'svelte/store';
-import { getOcultarBajas } from './dataFilter';
 
 export const globalStore = writable({
     loading: false,
