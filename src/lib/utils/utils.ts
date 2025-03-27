@@ -164,6 +164,10 @@ export function filtrarMarcadasFinde(marcadas: Marcada[]): Marcada[] {
   return marcadas
 }
 
+export function filtrarPersonalInactivo(marcadas: Marcada[]): Marcada[] {
+  return marcadas.filter((marcada) => marcada.Activo !== 'NO');
+}
+
 export function reemplazarMarcadas(registros: Marcada[], newItem: Marcada) {
   return registros.map((item) =>
     item.UID === newItem.UID ? { ...item, ...newItem } : item

@@ -179,7 +179,7 @@
 			  ]),
 		table.column({ header: 'Estado', accessor: 'Estado' }),
 		table.column({ header: 'Jornada', accessor: 'Jornada', cell: EditableCellLabel }),
-		table.column({ header: 'En Actividad', accessor: 'Activo', cell: EditableCellLabel })
+		table.column({ header: 'Activo', accessor: 'Activo', cell: EditableCellLabel })
 	]);
 
 	const { flatColumns, headerRows, pageRows, rows, tableAttrs, tableBodyAttrs, pluginStates } =

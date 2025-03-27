@@ -9,6 +9,7 @@ export const globalStore = writable({
     entreFechas: false,
     omitirFinde: false,
     marcadasIntermedias: false,
+    ocultarBajas: true,
 
     selectedDepartamento: '',
     fechaMarcada: '',
@@ -30,9 +31,15 @@ export const ausentes = derived(globalStore, ($store) => {
 // Derived store to filter `marcadas` based on `searchText`
 export const filteredMarcadas = derived(globalStore, ($store) => {
     const search = $store.searchText.trim().toLowerCase();
-    if (!search) return $store.marcadas; // If empty, return all `marcadas`
-    
-    return $store.marcadas.filter(m =>
+    let marcadas = $store.marcadas;
+
+    if ($store.ocultarBajas) {
+        marcadas = marcadas.filter(m => m.Activo !== "NO");
+    }
+
+    if (!search) return marcadas; // If empty, return filtered `marcadas` based on `ocultarBajas`
+
+    return marcadas.filter(m =>
         m.Nombre.toLowerCase().includes(search) ||
         m.Departamento.toLowerCase().includes(search) ||
         m.CUIL.includes(search) || 
@@ -117,6 +124,10 @@ export function toggleEntreFechas() {
  */
 export function toggleOmitirFinde() {
     globalStore.update((state) => ({ ...state, omitirFinde: !state.omitirFinde }));
+}
+
+export function toggleOcultarBajas() {
+    globalStore.update((state) => ({ ...state, ocultarBajas: !state.ocultarBajas }));
 }
 
 

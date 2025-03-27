@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { fade, scale } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import {
 		globalStore,
 		toggleEntreFechas as TEF,
 		toggleMarcadasIntermedias as TMI,
 		toggleOmitirFinde as TOF,
 		toggleMarcadaEstandar as TME,
-		toggleMarcadasIntermedias
+		toggleMarcadasIntermedias,
+		toggleOcultarBajas,
 	} from '$lib/stores/global';
 	import Tooltip from './tooltip.svelte';
 	import { createEventDispatcher } from 'svelte';
@@ -17,6 +18,7 @@
 	let marcadasIntermedias: boolean;
 	let marcadaEstandar: boolean;
 
+	let ocultarBajas: boolean;
 	let omitirFinde: boolean;
 
 	globalStore.subscribe(($value) => {
@@ -24,6 +26,7 @@
 		marcadasIntermedias = $value.marcadasIntermedias;
 		marcadaEstandar = $value.marcadaEstandar;
 		omitirFinde = $value.omitirFinde;
+		ocultarBajas = $value.ocultarBajas;
 	});
 
 	let menuAbierto = false;
@@ -89,6 +92,10 @@
 						on:change={toggleMarcadasIntermedias}
 					/>Marcadas Intermedias
 				</Tooltip>
+			</div>
+
+			<div class="flex:row">
+				<input type="checkbox" bind:checked={ocultarBajas} on:change={toggleOcultarBajas} />Ocultar Personal Inactivo
 			</div>
 		</div>
 	{/if}
