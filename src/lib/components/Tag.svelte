@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     export let label = "Tag"; // The tag text can be passed as a prop
     export let color = "blue"; // Color prop to style the tag
     export let className = "";

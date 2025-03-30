@@ -27,9 +27,14 @@ export async function PUT({ request }: { request: Request }) {
 }
 
 export async function DELETE({ params }: { params: { username: string } }) {
-     const username = params.username;
-     const body = await deleteUsuario(username);
-     return new Response(JSON.stringify(body), {
-          headers: { 'Content-Type': 'application/json' }
+     const { username } = params;
+     const result = await deleteUsuario(username);
+ 
+     if (!result) {
+         return new Response('Failed to delete user', { status: 500 });
+     }
+ 
+     return new Response(JSON.stringify({ success: true }), {
+         headers: { 'Content-Type': 'application/json' }
      });
-}
+ }

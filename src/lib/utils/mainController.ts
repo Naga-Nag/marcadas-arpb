@@ -32,7 +32,7 @@ export async function updateUsuario(usuario: any) {
 }
 
 export async function deleteUsuario(username: string) {
-    const response = await fetch(`/api/deleteUsuario/${username}`, {
+    const response = await fetch(`/api/usuarios/${username}`, {
         method: 'DELETE'
     });
     return await response.json();

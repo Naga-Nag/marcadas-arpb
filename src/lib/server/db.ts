@@ -278,18 +278,25 @@ export async function updateUsuarioFromMarcada(marcadaRow: Marcada) {
   return new Promise(async (resolve, reject) => {
     const request = new sql.Request();
 
-    // Set up the query for detailed data
     const { UID, MR, CUIL, Jornada, Activo, Nombre, Departamento } = marcadaRow;
     let Deptid = await DeptIDfromDepartamento(Departamento);
 
     const query = `USE ${Bun.env.DB}; UPDATE UserInfo SET
-      ${MR ? `UserCode = '${MR}',` : ''}
-      ${CUIL ? `CUIL = '${CUIL}',` : ''}
-      ${Jornada ? `Jornada = '${Jornada}',` : ''}
-      ${Activo ? `Activo = '${Activo}',` : ''}
-      ${Nombre ? `Name = '${Nombre}'` : ''}
-      ${Departamento ? `, Deptid = '${Deptid}'` : ''}
-      WHERE Userid = '${UID}';`;
+      ${MR ? 'UserCode = @MR,' : ''}
+      ${CUIL ? 'CUIL = @CUIL,' : ''}
+      ${Jornada ? 'Jornada = @Jornada,' : ''}
+      ${Activo ? 'Activo = @Activo,' : ''}
+      ${Nombre ? 'Name = @Nombre' : ''}
+      ${Departamento ? `, Deptid = @Deptid` : ''}
+      WHERE Userid = @UID;`;
+
+    request.input('MR', MR || null);
+    request.input('CUIL', CUIL || null);
+    request.input('Jornada', Jornada || null);
+    request.input('Activo', Activo || null);
+    request.input('Nombre', Nombre || null);
+    request.input('Deptid', Deptid || null);
+    request.input('UID', UID);
 
     request.query(query);
 
@@ -522,7 +529,7 @@ export async function loginWebUser(username: string, password: string): Promise<
   }
 }
 
-export async function fetchWebUser(username: string): Promise<shortWebUser> {
+export async function fetchWebUser(username: string): Promise<WebUser> {
   try {
     await sql.connect(sqlConfig);
     console.log("DB :: fetchWebUser:", username);
