@@ -203,37 +203,6 @@ export async function handleLogin(username: string, password: string): Promise<{
     }
 }
 
-/**
- * Handles a registration request by making a POST request to the /api/register endpoint.
- * If the registration is successful, clears the username and password fields and returns
- * a success flag. If the registration fails, returns an error message.
- * @param {string} registerUsername The username of the user attempting to register.
- * @param {string} registerPassword The plaintext password of the user.
- * @param {string} departamento The department name to register the user for.
- * @returns {Promise<{success: boolean, error?: string}>} A promise that resolves
- * to an object containing a success flag and an optional error message.
- */
-export async function handleRegister(registerUsername: string, registerPassword: string, departamento: string): Promise<{ success: boolean, error?: string }> {
-    try {
-        const response = await fetch('/api/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: registerUsername, password: registerPassword, role: 'USER', departamento }),
-        });
-
-        if (!response.ok) {
-            throw new Error('Registration failed');
-        }
-
-        registerUsername = '';
-        registerPassword = '';
-        return { success: true };
-    } catch (err) {
-        return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
-    }
-}
-
-
 export async function logout() {
     clearUser();
     goto('/logout');

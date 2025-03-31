@@ -43,6 +43,7 @@ export const actions: Actions = {
           const formData = await request.formData();
           const username = formData.get('username') as string;
           const newDepartamento = formData.get('departamento') as string;
+          const newDepartamentosPermitidos = formData.get('departamentosPermitidos') as string;
           const newRole = formData.get('role') as string;
 
           if (!username || !newDepartamento || !newRole) {
@@ -59,6 +60,7 @@ export const actions: Actions = {
           user.role = newRole;
 
           // Update user
+          console.log('Updating user:', user);
           const result = await updateUsuario(user);
 
           if (!result) {

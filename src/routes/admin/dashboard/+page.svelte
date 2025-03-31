@@ -1,11 +1,9 @@
 <script lang="ts">
-    import {
-        fetchUsuarios,
-        fetchDepartamentos
-    } from '$lib/utils/mainController';
+    import { fetchUsuarios, fetchDepartamentos } from '$lib/utils/mainController';
     import type { shortWebUser } from '$lib/types/gen';
     import Tag from '$lib/components/Tag.svelte';
     import { onMount } from 'svelte';
+    import { fade, slide } from 'svelte/transition';
 
     let usuarios: shortWebUser[] = [];
     let departamentos: string[] = [];
@@ -20,14 +18,14 @@
 <main>
     <h1>Panel de Administrador</h1>
     <h2>Usuarios</h2>
-    <button on:click={() => (showRegisterForm = !showRegisterForm)} class="btn">
+    <button on:click={() => (showRegisterForm = !showRegisterForm)} class="btn primary-btn">
         Registrar Usuario
     </button>
 
     {#if showRegisterForm}
-        <div class="register-form-overlay">
+        <div class="register-form-overlay" transition:fade>
             <div class="register-form">
-                <button on:click={() => (showRegisterForm = false)} class="close-button">X</button>
+                <button on:click={() => (showRegisterForm = false)} class="close-button">&times;</button>
                 <h3>Registrar Nuevo Usuario</h3>
                 <form method="post" action="?/register">
                     <label>
@@ -47,33 +45,31 @@
                             {/each}
                         </select>
                     </label>
-                    <button type="submit">Registrar</button>
+                    <button class="btn primary-btn" type="submit">Registrar</button>
                 </form>
             </div>
         </div>
     {/if}
 
     <ul class="user-list">
-        {#each usuarios as usuario}
-            <li class="user-item">
+        {#each usuarios as usuario (usuario.username)}
+            <li class="user-item" transition:slide>
                 <details>
                     <summary>
                         <span>{usuario.username}</span>
                         <Tag label={usuario.departamento} color="blue" />
-                        <span>{usuario.role}</span>
+                        <span class="role-badge">{usuario.role}</span>
                     </summary>
                     <div class="user-details">
                         <p><strong>Username:</strong> {usuario.username}</p>
                         <p><strong>Departamento:</strong> {usuario.departamento}</p>
                         <p><strong>Rol:</strong> {usuario.role}</p>
                         <p><strong>Departamentos Permitidos:</strong> {usuario.departamentosPermitidos}</p>
-                        <div>
+                        <div class="user-actions">
                             <form method="post" action="?/deleteUser">
                                 <input type="hidden" name="username" value={usuario.username} />
-                                <button type="submit">Eliminar</button>
+                                <button class="btn danger-btn" type="submit">Eliminar</button>
                             </form>
-                        </div>
-                        <div>
                             <form method="post" action="?/updateUser">
                                 <input type="hidden" name="username" value={usuario.username} />
                                 <label>
@@ -87,13 +83,13 @@
                                     </select>
                                 </label>
                                 <label>
-                                    Role:
+                                    Rol:
                                     <select name="role" required>
                                         <option value="USER" selected={usuario.role === 'USER'}>USER</option>
                                         <option value="ADMIN" selected={usuario.role === 'ADMIN'}>ADMIN</option>
                                     </select>
                                 </label>
-                                <button type="submit">Actualizar</button>
+                                <button class="btn primary-btn" type="submit">Actualizar</button>
                             </form>
                         </div>
                     </div>
@@ -104,93 +100,105 @@
 </main>
 
 <style>
-	.user-list {
-		list-style: none;
-		padding: 0;
-	}
+    h1, h2 {
+        text-align: center;
+        color: #222;
+    }
 
-	.user-item {
-		background-color: #fff;
-		border: 1px solid #ccc;
-		border-radius: 5px;
-		margin-bottom: 10px;
-	}
+    .btn {
+        padding: 12px 18px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.2s;
+        font-weight: bold;
+    }
 
-	.user-item details {
-		padding: 10px;
-	}
+    .btn:hover {
+        transform: scale(1.05);
+    }
 
-	.user-item summary {
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
+    .primary-btn {
+        background-color: #007bff;
+        color: white;
+    }
 
-	.user-item summary:hover {
-		background-color: #fae7e7;
-	}
+    .primary-btn:hover {
+        background-color: #0056b3;
+    }
 
-	.user-details {
-		margin-top: 10px;
-		padding: 10px;
-		background-color: #f5f5f5;
-		border-radius: 5px;
-	}
+    .danger-btn {
+        background-color: #dc3545;
+        color: white;
+    }
 
-	.user-item button {
-		margin-top: 10px;
-		margin-right: 10px;
-	}
+    .danger-btn:hover {
+        background-color: #a71d2a;
+    }
 
-	.register-form-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background-color: rgba(0, 0, 0, 0.5);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 1000;
-	}
+    .user-list {
+        list-style: none;
+        padding: 0;
+        max-width: 800px;
+        margin: auto;
+    }
 
-	.register-form {
-		position: relative;
-		width: 400px;
-		padding: 20px;
-		background-color: #f9f9f9;
-		border: 1px solid #ccc;
-		border-radius: 5px;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-	}
+    .user-item {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        padding: 15px;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
 
-	.register-form form {
-		display: flex;
-		flex-direction: column;
-	}
+    .user-item:hover {
+        transform: scale(1.02);
+    }
 
-	.register-form label {
-		margin-bottom: 10px;
-	}
+    .role-badge {
+        background: #28a745;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+    }
 
-	.register-form button {
-		margin-top: 10px;
-	}
+    .register-form-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-	.close-button {
-		position: absolute;
-		top: 10px;
-		right: 10px;
-		background: none;
-		border: none;
-		color: red;
-		font-size: 18px;
-		cursor: pointer;
-	}
+    .register-form {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        width: 420px;
+        text-align: center;
+        position: relative;
+    }
 
-	.close-button:hover {
-		color: darkred;
-	}
+    .close-button {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 22px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        color: red;
+    }
+
+    .close-button:hover {
+        color: darkred;
+    }
 </style>

@@ -5,6 +5,7 @@ import type { WebUser } from '$lib/types/gen';
 import sql from 'mssql';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { json } from '@sveltejs/kit';
 
 const sqlConfig = {
   user: Bun.env.DB_UID!,
@@ -210,7 +211,7 @@ export async function fetchMarcadaEntreFechas(departamento: string, fechaInicial
     const request = new sql.Request();
     request.stream = true;
 
-    const query =`USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechas('${departamento}', '${fechaInicial}', '${fechaFinal}');`;
+    const query = `USE ${Bun.env.DB}; SELECT * FROM MarcadaEntreFechas('${departamento}', '${fechaInicial}', '${fechaFinal}');`;
 
     console.log('Query fetchMarcadaEntreFechas:', query);
     request.query(query);
@@ -529,7 +530,7 @@ export async function loginWebUser(username: string, password: string): Promise<
   }
 }
 
-export async function fetchWebUser(username: string): Promise<WebUser> {
+export async function fetchWebUser(username: string): Promise<shortWebUser> {
   try {
     await sql.connect(sqlConfig);
     console.log("DB :: fetchWebUser:", username);
@@ -546,7 +547,6 @@ export async function fetchWebUser(username: string): Promise<WebUser> {
         if (row.departamentosPermitidos) {
           row.departamentosPermitidos = JSON.parse(row.departamentosPermitidos);
         }
-
         console.log("DB :: fetchWebUser row:", row);
         resolve(row);
       });
@@ -661,38 +661,32 @@ export async function createUsuario(usuario: WebUser) {
     throw new Error("Error creating usuario");
   }
 }
-export async function updateUsuario(usuario: WebUser) {
-  try {
-    await sql.connect(sqlConfig);
+export async function updateUsuario(usuario: shortWebUser) {
 
-    return new Promise((resolve, reject) => {
-      const request = new sql.Request();
+  await sql.connect(sqlConfig);
 
-      request.input("id", sql.Int, usuario.id);
-      request.input("username", sql.NVarChar, usuario.username);
-      request.input("password", sql.NVarChar, usuario.password);
-      request.input("role", sql.NVarChar, usuario.role);
-      request.input("departamento", sql.NVarChar, usuario.departamento);
-      request.input("departamentosPermitidos", sql.NVarChar, usuario.departamentosPermitidos.join(','));
+  return new Promise((resolve, reject) => {
+    const request = new sql.Request();
 
-      const query = `USE ${Bun.env.DB}; UPDATE WebUsers SET username = @username, password = @password, role = @role, departamento = @departamento, departamentosPermitidos = @departamentosPermitidos WHERE id = @id`;
-      request.query(query);
+    request.input("username", sql.NVarChar, usuario.username);
+    request.input("role", sql.NVarChar, usuario.role);
+    request.input("departamento", sql.NVarChar, usuario.departamento);
+    request.input("departamentosPermitidos", sql.NVarChar, JSON.stringify(usuario.departamentosPermitidos));
 
-      request.on("done", (result) => {
-        console.log("DB :: updateUsuario:", result);
-        resolve(result);
-      });
+    const query = `USE ${Bun.env.DB}; UPDATE WebUsers SET username = @username, role = @role, departamento = @departamento, departamentosPermitidos = @departamentosPermitidos WHERE username = @username;`;
+    request.query(query);
 
-      request.on("error", (err) => {
-        console.error("DB :: updateUsuario: SQL Error:", err);
-        reject(err);
-      });
+    request.on("done", (result) => {
+      console.log("DB :: updateUsuario:", result);
+      resolve(result);
     });
 
-  } catch (err) {
-    console.error("Error in updateUsuario:", err);
-    throw new Error("Error updating usuario");
-  }
+    request.on("error", (err) => {
+      console.error("DB :: updateUsuario: SQL Error:", err);
+      reject(err);
+    });
+  });
+
 }
 
 export async function deleteUsuario(username: string) {
