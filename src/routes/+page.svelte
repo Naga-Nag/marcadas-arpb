@@ -84,11 +84,16 @@
 <body>
 	<main class="main shadow:8|8|3|blue min-h:93vh">
 		<div class="d:flex flex:row justify-content:space-between">
-			<button on:click={logout} class="btn">Salir</button>
+			<div class="d:flex flex:row align-items:center gap:10">
+				{#if isAdmin(user)}
+					<button on:click={logout} class="btn btn-primary">Salir</button>
+					<hr class="separator my:10" />
+					<a href="/admin/dashboard" class="btn-link font-size:20" title="Panel Admin">👑</a>
+				{/if}
+			</div>
 			<h1 class="text:center bg:white r:10 p:10 w:fit-content shadow:4|4|3|gray-70">
 				Marcadas - {user.departamento}
 			</h1>
-
 			<a href="/credits" class="font-size:9">👻</a>
 		</div>
 
@@ -122,7 +127,7 @@
 						fechaListener(fechaMarcada);
 					}}
 				/>
-				
+
 				<span></span>
 
 				{#if entreFechas}

@@ -1,7 +1,8 @@
 import type { Actions, RequestEvent, ActionFailure, Redirect } from '@sveltejs/kit';
-import { registerWebUser, deleteUsuario, updateUsuario, fetchWebUser } from '$lib/server/db';
+import { registerWebUser, deleteUsuario, updateUsuario, fetchWebUser, setWebUserDepaPermitidos } from '$lib/server/db';
 import type { registerFormResponse } from '$lib/types/form';
-import { fail } from '@sveltejs/kit';
+import { fail, json } from '@sveltejs/kit';
+import { setDepartamentos } from '$lib/stores/global';
 
 export const actions: Actions = {
      register: async ({ request }: RequestEvent): Promise<registerFormResponse | ActionFailure<registerFormResponse> | Redirect> => {
@@ -68,5 +69,35 @@ export const actions: Actions = {
           }
 
           return { success: true, message: 'User updated successfully' };
+     },
+
+     setDepartamentosPermitidos: async ({ request }: { request: Request }) => {
+          const formData = await request.formData();
+          const username = formData.get('username') as string;
+          const departamento = formData.get('departamento') as string;
+      
+          if (!username || !departamento) {
+              return json({ error: true, message: 'Usuario y departamento son requeridos' }, { status: 400 });
+          }
+      
+          const user = await fetchWebUser(username);
+          if (!user) {
+              return json({ error: true, message: 'Usuario no encontrado' }, { status: 404 });
+          }
+      
+          const departamentosPermitidos = new Set(user.departamentosPermitidos);
+          if (departamentosPermitidos.has(departamento)) {
+              departamentosPermitidos.delete(departamento);
+          } else {
+              departamentosPermitidos.add(departamento);
+          }
+      
+          const result = await setWebUserDepaPermitidos(username, Array.from(departamentosPermitidos));
+      
+          if (!result) {
+              return json({ error: true, message: 'Failed to update departamentos permitidos' }, { status: 500 });
+          }
+      
+          return json({ success: true, departamentosPermitidos: Array.from(departamentosPermitidos) });
      }
 }

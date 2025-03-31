@@ -566,32 +566,24 @@ export async function fetchWebUser(username: string): Promise<shortWebUser> {
 export async function setWebUserDepaPermitidos(username: string, depaPermitidos: string[]) {
   try {
     await sql.connect(sqlConfig);
-    console.log("DB :: setWebUserDepaPermitidos:", username, depaPermitidos);
 
     const depaPermitidosJSON = JSON.stringify(depaPermitidos);
 
-    return new Promise((resolve, reject) => {
-      const request = new sql.Request();
+    const query = `
+        UPDATE dbo.WebUsers
+        SET departamentosPermitidos = @depaPermitidos
+        WHERE username = @username;
+    `;
 
-      request.input("username", sql.VarChar, username);
-      request.input("depaPermitidos", sql.VarChar, depaPermitidosJSON);
-      const query = `USE ${Bun.env.DB}; UPDATE dbo.WebUsers SET departamentosPermitidos = @depaPermitidos WHERE username = @username;`;
+    const request = new sql.Request();
+    request.input('username', sql.VarChar, username);
+    request.input('depaPermitidos', sql.VarChar, depaPermitidosJSON);
 
-      request.query(query);
-
-      request.on("done", () => {
-        resolve(true);
-      });
-
-      request.on("error", (err) => {
-        console.error("DB :: setWebUserDepaPermitidos: SQL Error:", err);
-        reject(err);
-      });
-    });
-
+    await request.query(query);
+    return true;
   } catch (err) {
-    console.error("Error in setWebUserDepaPermitidos:", err);
-    throw new Error("Error updating user");
+    console.error('Error updating departamentos permitidos:', err);
+    return false;
   }
 }
 

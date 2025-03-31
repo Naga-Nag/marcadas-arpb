@@ -3,7 +3,7 @@
     import type { shortWebUser } from '$lib/types/gen';
     import Tag from '$lib/components/Tag.svelte';
     import { onMount } from 'svelte';
-    import { fade, slide } from 'svelte/transition';
+	import { fade, slide } from 'svelte/transition';
 
     let usuarios: shortWebUser[] = [];
     let departamentos: string[] = [];
@@ -13,6 +13,35 @@
         usuarios = await fetchUsuarios();
         departamentos = await fetchDepartamentos();
     });
+
+    async function toggleDepartamento(username: string, departamento: string) {
+    const formData = new URLSearchParams({ username, departamento });
+
+    const response = await fetch('?/setDepartamentosPermitidos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData
+    });
+
+    if (!response.ok) {
+        console.error('Failed to update departamentos permitidos');
+        usuarios = await fetchUsuarios(); // Revert on failure
+        return;
+    }
+
+    const data = await response.json();
+    if (data.success) {
+        usuarios = usuarios.map((user) =>
+            user.username === username
+                ? { ...user, departamentosPermitidos: data.departamentosPermitidos }
+                : user
+        );
+    } else {
+        console.error('Error updating:', data.message);
+        usuarios = await fetchUsuarios();
+    }
+}
+
 </script>
 
 <main>
@@ -91,6 +120,21 @@
                                 </label>
                                 <button class="btn primary-btn" type="submit">Actualizar</button>
                             </form>
+                            <form method="post" action="?/setDepartamentosPermitidos">
+                                <input type="hidden" name="username" value={usuario.username} />
+                                <label for="departamentos-permitidos-{usuario.username}">Departamentos Permitidos:</label>
+                                <div id="departamentos-permitidos-{usuario.username}" class="departamentos-buttons">
+                                    {#each departamentos as departamento}
+                                        <button
+                                            type="button"
+                                            class="btn departamento-btn {usuario.departamentosPermitidos.includes(departamento) ? 'active' : ''}"
+                                            on:click={() => toggleDepartamento(usuario.username, departamento)}
+                                        >
+                                            {departamento}
+                                        </button>
+                                    {/each}
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </details>
@@ -106,12 +150,12 @@
     }
 
     .btn {
-        padding: 12px 18px;
+        padding: 10px 16px;
         border: none;
-        border-radius: 8px;
+        border-radius: 6px;
         cursor: pointer;
-        transition: background 0.3s, transform 0.2s;
         font-weight: bold;
+        transition: background 0.3s, transform 0.2s;
     }
 
     .btn:hover {
@@ -200,5 +244,68 @@
 
     .close-button:hover {
         color: darkred;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #555;
+    }
+
+    .user-actions {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    form {
+        margin-bottom: 15px;
+    }
+
+    .user-details {
+        margin-top: 10px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-details p {
+        margin: 5px 0;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .departamentos-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .departamento-btn {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background-color: #f9f9f9;
+        color: #333;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .departamento-btn:hover {
+        background-color: #e0e0e0;
+    }
+
+    .departamento-btn.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #0056b3;
+    }
+
+    .departamento-btn.active:hover {
+        background-color: #0056b3;
     }
 </style>
